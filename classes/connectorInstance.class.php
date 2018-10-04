@@ -23,6 +23,7 @@ class connectorInstance {
     private $basepath;
     private $openapidefinitionurl;
     private $timecreated;
+    private $timemodified;
     private $dbtable;
 
     /**
@@ -131,7 +132,4 @@ class connectorInstance {
     public function setTimemodified($timemodified) {
         $this->timemodified = $timemodified;
     }
-
-    private $timemodified;
-
 }
