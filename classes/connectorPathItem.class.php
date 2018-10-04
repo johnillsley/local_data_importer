@@ -54,6 +54,16 @@ class connectorPathItem {
      * @var
      */
     private $timecreated;
+    private $dbtable;
+
+    /**
+     * connectorPathItem constructor.
+     * @param $dbtable
+     */
+    public function __construct()
+    {
+        $this->dbtable = 'connector_pathitem';
+    }
 
     /**
      * @return mixed

@@ -23,6 +23,16 @@ class connectorInstance {
     private $basepath;
     private $openapidefinitionurl;
     private $timecreated;
+    private $dbtable;
+
+    /**
+     * connectorInstance constructor.
+     * @param $dbtable
+     */
+    public function __construct()
+    {
+        $this->dbtable = 'connector_instance';
+    }
 
     /**
      * @return mixed
