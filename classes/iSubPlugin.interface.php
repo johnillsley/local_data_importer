@@ -17,6 +17,6 @@ interface iSubPlugin{
     public function params();
     public function isAvailable();
     public function getPluginName(); //used to identify the component name to be used in drop-down for example
-
+    public function pluginDescription(); //method used to describe the functionality of the plugin
 
 }
