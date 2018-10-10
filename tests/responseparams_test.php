@@ -13,15 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/**
- * contains the version information for Data Importer Plugin
- *
- * @package local_moodle_data_importer
- * @copyright  2018 University of Bath
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+global $CFG;
+class local_data_importer_responseparams_testcase extends advanced_testcase {
+    public function setUp(){
 
-defined('MOODLE_INTERNAL') || die();
-$plugin->version   = 2018100202;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2017110800;        // Requires this Moodle version
-$plugin->component = 'local_data_importer'; // Full name of the plugin (used for diagnostics)
+    }
+    public function test_update_responseparam(){}
+    public function test_delete_responseparam(){}
+}

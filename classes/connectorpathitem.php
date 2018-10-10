@@ -13,15 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-namespace local\moodle_data_importer;
-
-
 /**
  * Class connectorPathItem
  * @package local\moodle_data_importer
  */
-class connectorPathItem {
+class local_data_importer_connectorpathitem {
     /**
      * @var
      */
@@ -70,6 +66,9 @@ class connectorPathItem {
      */
     public function getId() {
         return $this->id;
+    }
+    public function getdbtable(){
+        return $this->dbtable;
     }
 
     /**
@@ -176,6 +175,67 @@ class connectorPathItem {
     public function setTimecreated($timecreated) {
         $this->timecreated = $timecreated;
     }
+    public function getbyid($id){
+        global $DB;
+        try{
+            $recordobject = $DB->get_record($this->dbtable,['id'=>$id]);
+            //take the db object and turn it into this class object
+            $pathitem = new self();
+            $pathitem->setid($recordobject->id);
+            $pathitem->setname($recordobject->name);
+            $pathitem->setConnectorid($recordobject->connectorid);
+            $pathitem->setActive($recordobject->active);
+            $pathitem->setPlugincomponent($recordobject->plugincomponent);
+            $pathitem->setHttpmethod($recordobject->httpmethod);
+            $pathitem->setPathitem($recordobject->pathitem);
+            return $pathitem;
+        }
+        catch (\dml_exception $e){
+            echo $e->getmessage();
+        }
+    }
+    public function delete(){
+        global $DB;
+        $deleted = false;
+        try {
+            if ($DB->record_exists($this->dbtable, ['id' => $this->id])) {
+                $deleted = $DB->delete_records($this->dbtable, ['id' => $this->id]);
+            }
+        } catch (\dml_exception $e) {
+            echo $e->getMessage();
+        }
+        return $deleted;
+    }
+    public function save($returnid = false) {
+        global $DB;
+        $data = new \stdclass();
+        $data->name = $this->name;
+        $data->connectorid = $this->connectorid;
+        $data->pathitem = $this->pathitem;
+        $data->httpmethod = $this->httpmethod;
+        $data->plugincomponent = $this->plugincomponent;
+        $data->active = $this->active;
+        $data->timemodified = time();
+        if ($this->id) {
+            //its an update
+            $data->id = $this->id;
+            try {
+                return $DB->update_record($this->dbtable, $data);
+                //log it.
+            } catch (\exception $e) {
+                //log it.
+                var_dump($e->getmessage());
+            }
+        } else {
+            $data->timecreated = $data->timemodified = time();
+            try {
+                return $DB->insert_record($this->dbtable, $data, $returnid);
+                //log it.
+            } catch (\exception $e) {
+                //log it.
+                var_dump($e->getmessage());
+            }
+        }
 
-
+    }
 }
