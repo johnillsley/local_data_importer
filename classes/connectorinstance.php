@@ -13,10 +13,7 @@
 //
 // you should have received a copy of the gnu general public license
 // along with moodle.  if not, see <http://www.gnu.org/licenses/>.
-
-#namespace local\moodle_data_importer;
-
-class local_moodle_data_importer_connectorinstance {
+class local_data_importer_connectorinstance {
     public $id;
     private $description;
     private $host;
@@ -69,6 +66,9 @@ class local_moodle_data_importer_connectorinstance {
      */
     public function getname() {
         return $this->name;
+    }
+    public function getdbtable(){
+        return $this->dbtable;
     }
 
     /**
@@ -161,13 +161,13 @@ class local_moodle_data_importer_connectorinstance {
         $this->timemodified = $timemodified;
     }
 
-    public function getconnectorinstancebyid($id){
+    public function getbyid($id){
 
-        global $db;
+        global $DB;
         try{
-            $recordobject = $db->get_record($this->dbtable,['id'=>$id]);
+            $recordobject = $DB->get_record($this->dbtable,['id'=>$id]);
             //take the db object and turn it into this class object
-            $connectorinstance = new local_moodle_data_importer_connectorinstance();
+            $connectorinstance = new self();
             $connectorinstance->setid($recordobject->id);
             $connectorinstance->setname($recordobject->name);
             $connectorinstance->setdescription($recordobject->description);
@@ -182,7 +182,7 @@ class local_moodle_data_importer_connectorinstance {
 
     }
     public function save($returnid = false){
-        global $db;
+        global $DB;
         $data = new \stdclass();
         $data->host = $this->host;
         $data->basepath = $this->basepath;
@@ -194,7 +194,7 @@ class local_moodle_data_importer_connectorinstance {
             //its an update
             $data->id = $this->id;
             try{
-                return $db->update_record($this->dbtable, $data);
+                return $DB->update_record($this->dbtable, $data);
                 //log it.
             }
             catch (\exception $e){
@@ -205,7 +205,7 @@ class local_moodle_data_importer_connectorinstance {
         else{
             $data->timecreated = $data->timemodified = time();
             try{
-                return $db->insert_record($this->dbtable, $data,$returnid);
+                return $DB->insert_record($this->dbtable, $data,$returnid);
                 //log it.
             }
             catch (\exception $e){
@@ -214,5 +214,17 @@ class local_moodle_data_importer_connectorinstance {
             }
         }
 
+    }
+    public function delete(){
+        global $DB;
+        $deleted = false;
+        try {
+            if ($DB->record_exists($this->dbtable, ['id' => $this->id])) {
+                $deleted = $DB->delete_records($this->dbtable, ['id' => $this->id]);
+            }
+        } catch (\dml_exception $e) {
+            echo $e->getMessage();
+        }
+        return $deleted;
     }
 }
