@@ -25,15 +25,8 @@ class local_data_importer_connectorresponseparams {
     /**
      * @return string
      */
-    public function getDbtable() {
+    public function get_dbtable() {
         return $this->dbtable;
-    }
-
-    /**
-     * @param string $dbtable
-     */
-    public function setDbtable($dbtable) {
-        $this->dbtable = $dbtable;
     }
 
     /**
@@ -46,87 +39,112 @@ class local_data_importer_connectorresponseparams {
     /**
      * @return mixed
      */
-    public function getId() {
+    public function get_id() {
         return $this->id;
     }
 
     /**
      * @param mixed $id
      */
-    public function setId($id) {
+    public function set_id($id) {
         $this->id = $id;
     }
 
     /**
      * @return mixed
      */
-    public function getPathitemid() {
+    public function get_pathitemid(): int {
         return $this->pathitemid;
     }
 
+
     /**
-     * @param mixed $pathitemid
+     * @param $pathitemid
+     * @return int
      */
-    public function setPathitemid($pathitemid) {
+    public function set_pathitemid(int $pathitemid) {
         $this->pathitemid = $pathitemid;
     }
 
     /**
      * @return mixed
      */
-    public function getTimecreated() {
+    public function get_timecreated() {
         return $this->timecreated;
     }
 
     /**
      * @param mixed $timecreated
      */
-    public function setTimecreated($timecreated) {
+    public function set_timecreated($timecreated) {
         $this->timecreated = $timecreated;
     }
 
     /**
      * @return mixed
      */
-    public function getTimemodified() {
+    public function get_timemodified() {
         return $this->timemodified;
     }
 
     /**
      * @param mixed $timemodified
      */
-    public function setTimemodified($timemodified) {
+    public function set_timemodified($timemodified) {
         $this->timemodified = $timemodified;
     }
 
     /**
      * @return mixed
      */
-    public function getPathparam() {
+    public function get_pathparam(): string {
         return $this->pathparam;
     }
 
     /**
-     * @param mixed $pathparam
+     * @param string $pathparam
      */
-    public function setPathparam($pathparam) {
+    public function set_pathparam(string $pathparam) {
         $this->pathparam = $pathparam;
     }
 
     /**
      * @return mixed
      */
-    public function getComponentparam() {
+    public function get_componentparam(): string {
         return $this->componentparam;
     }
 
     /**
      * @param mixed $componentparam
      */
-    public function setComponentparam($componentparam) {
+    public function set_componentparam($componentparam) {
         $this->componentparam = $componentparam;
     }
 
+    /**
+     * @param int $id
+     * @return local_data_importer_connectorresponseparams
+     */
+    public function get_by_id($id): local_data_importer_connectorresponseparams {
+        global $DB;
+        try {
+            $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
+            $responseparaminstance = new self();
+            $responseparaminstance->set_id($recordobject->id);
+            $responseparaminstance->set_pathitemid($recordobject->pathitemid);
+            $responseparaminstance->set_pathparam($recordobject->pathparam);
+            $responseparaminstance->set_componentparam($recordobject->componentparam);
+            return $responseparaminstance;
+        } catch (\dml_exception $e) {
+            echo $e->getmessage();
+        }
+    }
+
+    /**
+     * @param bool $returnid
+     * @return bool|int
+     */
     public function save($returnid = false) {
         global $DB;
         $data = new \stdclass();
@@ -157,6 +175,10 @@ class local_data_importer_connectorresponseparams {
 
     }
 
+    /**
+     * Delete a connector response param test
+     * @return bool
+     */
     public function delete() {
         global $DB;
         $deleted = false;
