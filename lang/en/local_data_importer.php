@@ -13,3 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+$string['connector_name'] = 'Connector Name';
+$string['connector_description'] = 'Connector Description';
+$string['openapidefinitionurl_label'] = 'Open API URL';
