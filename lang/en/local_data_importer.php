@@ -16,3 +16,5 @@
 $string['connector_name'] = 'Connector Name';
 $string['connector_description'] = 'Connector Description';
 $string['openapidefinitionurl_label'] = 'Open API URL';
+$string['apikey_label'] = 'API Key';
+$string['server_label'] = 'Server ( retrieved automatically)';
