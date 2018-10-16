@@ -35,9 +35,15 @@ class local_data_importer_form extends moodleform {
         $mform->addRule('openapidefinitionurl', get_string('required'), 'required', null, 'client');
         $mform->setType('openapidefinitionurl', PARAM_TEXT);
 
+        //API key
+        $mform->addElement('text', 'apikey', get_string('apikey_label', 'local_data_importer'));
+        $mform->setType('apikey', PARAM_TEXT);
+
         // Fetch Definition button
         $mform->addElement('button', 'fetchapidef', 'Fetch');
 
+        $mform->addElement('text', 'server', get_string('server_label', 'local_data_importer'), ['disabled']);
+        $mform->setType('server', PARAM_TEXT);
         $this->add_action_buttons();
     }
 }
