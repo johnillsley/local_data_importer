@@ -13,24 +13,54 @@
 //
 // you should have received a copy of the gnu general public license
 // along with moodle.  if not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Class local_data_importer_connectorinstance
+ */
 class local_data_importer_connectorinstance {
+    /**
+     * @var
+     */
     public $id;
+    /**
+     * @var
+     */
     private $description;
-    private $host;
+    /**
+     * @var
+     */
+    private $server;
+    /**
+     * @var
+     */
     private $apikey;
+    /**
+     * @var
+     */
     private $name;
-    private $basepath;
+
+    /**
+     * @var
+     */
     private $openapidefinitionurl;
+    /**
+     * @var
+     */
     private $timecreated;
+    /**
+     * @var
+     */
     private $timemodified;
+    /**
+     * @var string
+     */
     private $dbtable;
 
     /**
      * connectorinstance constructor.
      * @param $dbtable
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->dbtable = 'connector_instance';
     }
 
@@ -61,13 +91,18 @@ class local_data_importer_connectorinstance {
     public function setapikey($apikey) {
         $this->apikey = $apikey;
     }
+
     /**
      * @return mixed
      */
-    public function getname() {
+    public function get_name() {
         return $this->name;
     }
-    public function getdbtable(){
+
+    /**
+     * @return string
+     */
+    public function getdbtable() {
         return $this->dbtable;
     }
 
@@ -95,127 +130,148 @@ class local_data_importer_connectorinstance {
     /**
      * @return mixed
      */
-    public function gethost() {
-        return $this->host;
+    public function getserver() {
+        return $this->server;
     }
 
     /**
      * @param mixed $host
      */
-    public function sethost($host) {
-        $this->host = $host;
+    public function setserver($server) {
+        $this->server = $server;
     }
 
     /**
      * @return mixed
      */
-    public function getbasepath() {
-        return $this->basepath;
-    }
-
-    /**
-     * @param mixed $basepath
-     */
-    public function setbasepath($basepath) {
-        $this->basepath = $basepath;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getopenapidefinitionurl() {
+    public function get_openapidefinitionurl() {
         return $this->openapidefinitionurl;
     }
 
     /**
      * @param mixed $openapidefinitionurl
      */
-    public function setopenapidefinitionurl($openapidefinitionurl) {
+    public function set_openapidefinitionurl($openapidefinitionurl) {
         $this->openapidefinitionurl = $openapidefinitionurl;
     }
-     /**
+
+    /**
      * @return mixed
      */
-    public function gettimecreated() {
+    public function get_timecreated() {
         return $this->timecreated;
     }
 
     /**
      * @param mixed $timecreated
      */
-    public function settimecreated($timecreated) {
+    public function set_timecreated($timecreated) {
         $this->timecreated = $timecreated;
     }
 
     /**
      * @return mixed
      */
-    public function gettimemodified() {
+    public function get_timemodified() {
         return $this->timemodified;
     }
 
     /**
      * @param mixed $timemodified
      */
-    public function settimemodified($timemodified) {
+    public function set_timemodified($timemodified) {
         $this->timemodified = $timemodified;
     }
 
-    public function getbyid($id){
+    /**
+     * @param $id
+     * @return local_data_importer_connectorinstance
+     */
+    public function get_by_id($id) {
 
         global $DB;
-        try{
-            $recordobject = $DB->get_record($this->dbtable,['id'=>$id]);
+        try {
+            $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
             //take the db object and turn it into this class object
             $connectorinstance = new self();
             $connectorinstance->setid($recordobject->id);
             $connectorinstance->setname($recordobject->name);
             $connectorinstance->setdescription($recordobject->description);
-            $connectorinstance->sethost($recordobject->host);
-            $connectorinstance->setbasepath($recordobject->basepath);
-            $connectorinstance->setopenapidefinitionurl($recordobject->openapidefinitionurl);
+            $connectorinstance->setserver($recordobject->server);
+            $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
+            $connectorinstance->setapikey($recordobject->apikey);
             return $connectorinstance;
-        }
-        catch (\dml_exception $e){
+        } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
 
     }
-    public function save($returnid = false){
+
+    public function getAll() {
+        global $DB;
+        $connectors = null;
+        try {
+            $connectorrecords = $DB->get_records($this->dbtable);
+            if ($connectorrecords && is_array($connectorrecords)) {
+                foreach ($connectorrecords as $recordobject) {
+                    $connectorinstance = new self();
+                    $connectorinstance->setid($recordobject->id);
+                    $connectorinstance->setname($recordobject->name);
+                    $connectorinstance->setdescription($recordobject->description);
+                    $connectorinstance->setserver($recordobject->server);
+                    $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
+                    $connectorinstance->setapikey($recordobject->apikey);
+                    $connectorinstance->set_timemodified($recordobject->timemodified);
+                    $connectors[] = $connectorinstance;
+                }
+            }
+        } catch (\dml_exception $e) {
+            echo $e->getmessage();
+        }
+        return $connectors;
+    }
+
+    /**
+     * @param bool $returnid
+     * @return bool|int
+     */
+    public function save($returnid = false) {
         global $DB;
         $data = new \stdclass();
-        $data->host = $this->host;
-        $data->basepath = $this->basepath;
+        $data->server = $this->server;
         $data->name = $this->name;
         $data->description = $this->description;
         $data->openapidefinitionurl = $this->openapidefinitionurl;
         $data->timecreated = $data->timemodified = time();
-        if($this->id){
+        if ($this->id) {
             //its an update
             $data->id = $this->id;
-            try{
+            try {
                 return $DB->update_record($this->dbtable, $data);
                 //log it.
-            }
-            catch (\exception $e){
+            } catch (\exception $e) {
                 //log it.
+                return $e;
                 var_dump($e->getmessage());
             }
-        }
-        else{
+        } else {
             $data->timecreated = $data->timemodified = time();
-            try{
-                return $DB->insert_record($this->dbtable, $data,$returnid);
+            try {
+                return $DB->insert_record($this->dbtable, $data, $returnid);
                 //log it.
-            }
-            catch (\exception $e){
+            } catch (\exception $e) {
                 //log it.
+                return $e;
                 var_dump($e->getmessage());
             }
         }
 
     }
-    public function delete(){
+
+    /**
+     * @return bool
+     */
+    public function delete() {
         global $DB;
         $deleted = false;
         try {
