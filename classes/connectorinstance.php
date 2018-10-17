@@ -33,7 +33,11 @@ class local_data_importer_connectorinstance {
     /**
      * @var
      */
-    private $apikey;
+    private $openapikey;
+    /**
+     * @var
+     */
+    private $serverapikey;
     /**
      * @var
      */
@@ -81,15 +85,15 @@ class local_data_importer_connectorinstance {
     /**
      * @return mixed
      */
-    public function getapikey() {
-        return $this->apikey;
+    public function get_openapi_key() {
+        return $this->openapikey;
     }
 
     /**
-     * @param mixed $apikey
+     * @param mixed $openapikey
      */
-    public function setapikey($apikey) {
-        $this->apikey = $apikey;
+    public function setopenapikey($openapikey) {
+        $this->openapikey = $openapikey;
     }
 
     /**
@@ -184,6 +188,20 @@ class local_data_importer_connectorinstance {
     }
 
     /**
+     * @return mixed
+     */
+    public function get_server_apikey() {
+        return $this->serverapikey;
+    }
+
+    /**
+     * @param mixed $serverapikey
+     */
+    public function set_server_apikey($serverapikey): void {
+        $this->serverapikey = $serverapikey;
+    }
+
+    /**
      * @param $id
      * @return local_data_importer_connectorinstance
      */
@@ -199,7 +217,8 @@ class local_data_importer_connectorinstance {
             $connectorinstance->setdescription($recordobject->description);
             $connectorinstance->setserver($recordobject->server);
             $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
-            $connectorinstance->setapikey($recordobject->apikey);
+            $connectorinstance->setopenapikey($recordobject->openapikey);
+            $connectorinstance->set_server_apikey($recordobject->serverapikey);
             return $connectorinstance;
         } catch (\dml_exception $e) {
             echo $e->getmessage();
@@ -220,7 +239,8 @@ class local_data_importer_connectorinstance {
                     $connectorinstance->setdescription($recordobject->description);
                     $connectorinstance->setserver($recordobject->server);
                     $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
-                    $connectorinstance->setapikey($recordobject->apikey);
+                    $connectorinstance->setopenapikey($recordobject->openapikey);
+                    $connectorinstance->set_server_apikey($recordobject->serverapikey);
                     $connectorinstance->set_timemodified($recordobject->timemodified);
                     $connectors[] = $connectorinstance;
                 }
@@ -242,6 +262,8 @@ class local_data_importer_connectorinstance {
         $data->name = $this->name;
         $data->description = $this->description;
         $data->openapidefinitionurl = $this->openapidefinitionurl;
+        $data->openapikey = $this->openapikey;
+        $data->serverapikey = $this->serverapikey;
         $data->timecreated = $data->timemodified = time();
         if ($this->id) {
             //its an update
