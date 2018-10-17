@@ -4,8 +4,9 @@
         <tr>
             <th>Name</th>
             <th>Description</th>
-            <th>API Key</th>
+            <th>OpenAPI Key</th>
             <th>Server</th>
+            <th>Server API Key</th>
             <th>Open API Definition URL</th>
             <th>Last Modified</th>
             <th>Actions</th>
@@ -17,11 +18,12 @@
                 <!--Loopable-->
                 <td>{{name}}</td>
                 <td> {{description}} </td>
-                <td> {{apikey}} </td>
+                <td> {{openapikey}} </td>
                 <td> {{server}} </td>
+                <td> {{serverapikey}} </td>
                 <td> {{openapidefinitionurl}} </td>
                 <td> {{lastmodified}} </td>
-                <td> Edit | Delete </td>
+                <td> <a href="index.php?action=edit_connector&connectorid={{id}}">Edit</a> | <a href="">Delete</a> </td>
 
             </tr>
         {{/connectoritems}}
