@@ -1,0 +1,29 @@
+    <a href="index.php?action=add_connector" class="btn btn-success">Add new connector</a><br/><br/>
+    <table class="generaltable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>API Key</th>
+            <th>Server</th>
+            <th>Open API Definition URL</th>
+            <th>Last Modified</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#connectoritems}}
+            <tr>
+                <!--Loopable-->
+                <td>{{name}}</td>
+                <td> {{description}} </td>
+                <td> {{apikey}} </td>
+                <td> {{server}} </td>
+                <td> {{openapidefinitionurl}} </td>
+                <td> {{lastmodified}} </td>
+                <td> Edit | Delete </td>
+
+            </tr>
+        {{/connectoritems}}
+        </tbody>
+    </table>
