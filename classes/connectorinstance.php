@@ -197,7 +197,7 @@ class local_data_importer_connectorinstance {
     /**
      * @param mixed $serverapikey
      */
-    public function set_server_apikey($serverapikey): void {
+    public function set_server_apikey($serverapikey) {
         $this->serverapikey = $serverapikey;
     }
 
