@@ -1,0 +1,127 @@
+<h2>Web service details</h2>
+OpenAPI version: 2.0
+<br/>Title: Grades Transfer Web Services
+<br/>Description: Grades Transfer Web Services
+<br/>Version: 1.0.0
+<br/>Servers:
+<pre>array (
+  0 => 'virtserver.swaggerhub.com/UniversityofBath/GT20/1.0.0',
+)</pre>
+<h2>Path item list</h2>
+<pre>array (
+  '/MABS/MOD_CODE/{modcode}' => 
+  stdClass::__set_state(array(
+     'summary' => 'Get MABS details based on module code',
+     'description' => 'Get MABS details based on module code',
+     'operationId' => 'getMABS',
+     'produces' => 
+    array (
+      0 => 'application/xml',
+    ),
+     'method' => 'get',
+     'path' => '/MABS/MOD_CODE/{modcode}',
+  )),
+  '/USERS/STU_UDF1/{username}' => 
+  stdClass::__set_state(array(
+     'operationId' => 'getUser',
+     'summary' => 'Get user details details based on username',
+     'description' => 'Get user details details based on username',
+     'method' => 'get',
+     'path' => '/USERS/STU_UDF1/{username}',
+  )),
+  '/ASSESSMENTS/' => 
+  stdClass::__set_state(array(
+     'method' => 'get',
+     'path' => '/ASSESSMENTS/',
+  )),
+)</pre>
+<h2>Path item parameter list for /USERS/STU_UDF1/{username}</h2>
+<pre>array (
+  'username' => 
+  stdClass::__set_state(array(
+     'name' => 'username',
+     'in' => 'path',
+     'description' => 'Computing Services username',
+     'required' => true,
+     'type' => 'string',
+  )),
+)</pre>
+<h2>Path item response list for /USERS/STU_UDF1/{username}</h2>
+<pre>array (
+  200 => 
+  array (
+    'EXCHANGE' => 
+    array (
+      'STU' => 
+      array (
+        'STU.SRS' => 
+        array (
+          'STU_CODE' => 
+          array (
+            'type' => 'string',
+          ),
+          'SCJ' => 
+          array (
+            'SCJ.SRS' => 
+            array (
+              'SCJ_CODE' => 
+              array (
+                'type' => 'string',
+                'example' => '149240600/1',
+              ),
+              'SCJ_STUC' => 
+              array (
+                'type' => 'string',
+                'example' => 149240600,
+              ),
+              'SCJ_SPRC' => 
+              array (
+                'type' => 'string',
+                'example' => 149240600,
+              ),
+              'SCJ_CRSC' => 
+              array (
+                'type' => 'string',
+                'example' => 'UEAM-AKM04',
+              ),
+              'SCJ_STAC' => 
+              array (
+                'type' => 'string',
+              ),
+            ),
+          ),
+          'SCN' => 
+          array (
+            'SCN.CAMS' => 
+            array (
+              'SCN_STUC' => 
+              array (
+                'type' => 'string',
+              ),
+              'SCN_AYRC' => 
+              array (
+                'type' => 'string',
+              ),
+              'SCN_CODE' => 
+              array (
+                'type' => 'string',
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  ),
+)</pre>
+<h2>Serialised path item response list for /USERS/STU_UDF1/{username}</h2>
+<pre>array (
+  'STU_CODE' => '["EXCHANGE"]["STU"]["STU.SRS"]["STU_CODE"]',
+  'SCJ_CODE' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCJ"]["SCJ.SRS"]["SCJ_CODE"]',
+  'SCJ_STUC' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCJ"]["SCJ.SRS"]["SCJ_STUC"]',
+  'SCJ_SPRC' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCJ"]["SCJ.SRS"]["SCJ_SPRC"]',
+  'SCJ_CRSC' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCJ"]["SCJ.SRS"]["SCJ_CRSC"]',
+  'SCJ_STAC' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCJ"]["SCJ.SRS"]["SCJ_STAC"]',
+  'SCN_STUC' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCN"]["SCN.CAMS"]["SCN_STUC"]',
+  'SCN_AYRC' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCN"]["SCN.CAMS"]["SCN_AYRC"]',
+  'SCN_CODE' => '["EXCHANGE"]["STU"]["STU.SRS"]["SCN"]["SCN.CAMS"]["SCN_CODE"]',
+)</pre>
