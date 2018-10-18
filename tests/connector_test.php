@@ -64,6 +64,8 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         $this->connectorInstance = new local_data_importer_connectorinstance();
         $this->connectorInstance->setdescription("Connector Instance Description");
         $this->connectorInstance->setname("Connector Instance Name");
+        $this->connectorInstance->set_server_apikey('serverapikey');
+        $this->connectorInstance->setopenapikey('openapikey');
         $host = $data->host;
         $basepath = $data->basePath;
         $this->connectorInstance->sethost($host);
@@ -79,6 +81,7 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         $object = $this->connectorInstance->getbyid($this->connectorinstanceid);
         $object->setname('Connector Name2');
         $object->setdescription('New Description');
+        $object->settimemodified(time());
         $object->save();
         $object2 = $this->connectorInstance->getbyid($this->connectorinstanceid);
         $this->assertEquals("Connector Name2",$object2->getname());
@@ -110,11 +113,7 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         catch (\dml_exception $e){
             echo $e->getMessage();
         }
-
-
     }
-
-
     /**
      *
      */
