@@ -29,5 +29,3 @@ if ($openapidefinitionurl) {
 }
 
 echo json_encode(['server1', 'server2']);
-
-//$openapiinspector = new local_bath_data_importer_openapi_inspector();
