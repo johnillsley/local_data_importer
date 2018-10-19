@@ -13,6 +13,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+defined('MOODLE_INTERNAL') || die();
+
 class local_data_importer_connectorresponseparams {
     private $id;
     private $pathitemid;
@@ -153,22 +155,22 @@ class local_data_importer_connectorresponseparams {
         $data->componentparam = $this->componentparam;
         $data->timemodified = time();
         if ($this->id) {
-            //its an update
+            // Its an update.
             $data->id = $this->id;
             try {
                 return $DB->update_record($this->dbtable, $data);
-                //log it.
+                // Log it.
             } catch (\exception $e) {
-                //log it.
+                // Log it.
                 var_dump($e->getmessage());
             }
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
                 return $DB->insert_record($this->dbtable, $data, $returnid);
-                //log it.
+                // Log it.
             } catch (\exception $e) {
-                //log it.
+                // Log it.
                 var_dump($e->getmessage());
             }
         }
