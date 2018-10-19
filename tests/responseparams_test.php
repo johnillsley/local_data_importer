@@ -15,10 +15,51 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 global $CFG;
+
+/**
+ * Class local_data_importer_responseparams_testcase
+ */
 class local_data_importer_responseparams_testcase extends advanced_testcase {
-    public function setUp(){
+    /**
+     * @var
+     */
+    public $responseparams;
+    /**
+     * @var
+     */
+    public $responseparamid;
+
+    /**
+     *
+     */
+    public function setUp() {
+        $this->resetAfterTest(false);
+        $this->responseparams = new local_data_importer_connectorresponseparams();
+        $this->responseparams->set_pathitemid(1);
+        $this->responseparams->set_pathparam('fullname');
+        $this->responseparams->set_componentparam('c.fullname');
+        $this->responseparamid = $this->responseparams->save(true);
 
     }
-    public function test_update_responseparam(){}
-    public function test_delete_responseparam(){}
+
+    /**
+     * Test Update Responseparam Mapping
+     */
+    public function test_update_responseparam_mapping() {
+        $this->resetAfterTest();
+        $object = $this->responseparams->get_by_id($this->responseparamid);
+        if ($object instanceof local_data_importer_connectorresponseparams) {
+            $object->set_componentparam('c1.fullname');
+            $object->save();
+            $object2 = $this->responseparams->get_by_id($this->responseparamid);
+            $this->assertEquals("c1.fullname", $object2->get_componentparam());
+        }
+    }
+
+    /**
+     *
+     */
+    public function test_delete_responseparam() {
+
+    }
 }
