@@ -74,6 +74,7 @@ class connectors_page implements templatable, renderable {
         $connector = $this->connectorInstance->get_by_id($id);
         $data = array();
         if ($connector instanceof \local_data_importer_connectorinstance) {
+            $data['id'] = $connector->getid();
             $data['name'] = $connector->get_name();
             $data['description'] = $connector->getdescription();
             $data['openapikey'] = $connector->get_openapi_key();
