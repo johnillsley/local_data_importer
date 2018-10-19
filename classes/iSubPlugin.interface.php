@@ -13,12 +13,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+
 interface iSubPlugin {
     public function params();
 
     public function is_available(): bool;
 
-    public function get_plugin_name(): string; //used to identify the component name to be used in drop-down for example
+    public function get_plugin_name(): string; // Used to identify the component name to be used in drop-down for example.
 
-    public function plugin_description(): string; //method used to describe the functionality of the plugin
+    public function plugin_description(): string; // Method used to describe the functionality of the plugin.
 }
