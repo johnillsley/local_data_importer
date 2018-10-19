@@ -47,8 +47,19 @@ class local_data_importer_renderer extends plugin_renderer_base {
         $PAGE->requires->js_call_amd('local_data_importer/fetch_api_definition', 'init', []);
         $renderable = new local_data_importer\output\connectors_page();
         $connectordata = $renderable->get_single_connector_instance($id);
-        $importer_edit_form = new local_data_importer_form(null, $connectordata);
-        return $importer_edit_form->display();
+        $importereditform = new local_data_importer_form(null, $connectordata);
+        return $importereditform->display();
+    }
+
+    /**
+     * @param $id
+     */
+    public function delete_connector_page($id) {
+        global  $OUTPUT;
+        $continuebutton = new single_button(new moodle_url('index.php', ['confirmdelete' => 1,
+            'connectorid' => $id]), 'Yes', 'get', true);
+        $cancelbutton = new single_button(new moodle_url('index.php', ['confirmdelete' => 0]), 'No', 'get', false);
+        return $OUTPUT->confirm('Are you sure you want to delete this connector', $continuebutton, $cancelbutton);
     }
 
 

@@ -21,52 +21,64 @@ require_login();
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_pagelayout('incourse');
 
-/// Print the header
+// Print the header.
 $PAGE->navbar->add('Data Importer');
 $PAGE->set_title("Connectors");
 $PAGE->set_heading("Connectors");
 $action = optional_param('action', 'list_connectors', PARAM_RAW);
 $connectorid = optional_param('connectorid', null, PARAM_INT);
-$importer_form = new local_data_importer_form();
-if ($importer_form->is_submitted()) {
-    // process the data
-    $formdata = $importer_form->get_data();
+$confirmdelete = optional_param('confirmdelete', null, PARAM_INT);
+$connectorinstance = new local_data_importer_connectorinstance();
+
+if ($confirmdelete == 1) {
+    if (isset($connectorid)) {
+        $connectorinstance->setid($connectorid);
+        $connectorinstance->delete();
+    }
+}
+$importerform = new local_data_importerform();
+if ($importerform->is_submitted()) {
+    // Process the data.
+    $formdata = $importerform->get_data();
     $server = '';
-    //Additionally get the servers
+    // Additionally get the servers.
     if (isset($_POST['apiserver'])) {
         $server = $_POST['apiserver'];
     }
-    $connectorInstance = new local_data_importer_connectorinstance();
+
     if (!empty($formdata)) {
-        $connectorInstance->setdescription($formdata->connector_description);
-        $connectorInstance->setname($formdata->connector_name);
-        $connectorInstance->set_openapidefinitionurl($formdata->openapidefinitionurl);
-        $connectorInstance->setopenapikey($formdata->openapikey);
-        $connectorInstance->set_server_apikey($formdata->serverapikey);
-        $connectorInstance->setserver($server);
+        if (isset($_POST['connectorid'])) {
+            $connectorinstance->setid($_POST['connectorid']);
+        }
+        $connectorinstance->setdescription($formdata->connector_description);
+        $connectorinstance->setname($formdata->connector_name);
+        $connectorinstance->set_openapidefinitionurl($formdata->openapidefinitionurl);
+        $connectorinstance->setopenapikey($formdata->openapikey);
+        $connectorinstance->set_server_apikey($formdata->serverapikey);
+        $connectorinstance->setserver($server);
         try {
-            $retid = $connectorInstance->save(true);
+            $retid = $connectorinstance->save(true);
             $displaynoticegood = "New connector added with id: $retid";
         } catch (\Exception $e) {
             $displaynoticebad = $e->getMessage();
         }
 
     }
-    // pass it on
+    // Pass it on.
 }
 if (!empty($displaynoticegood)) {
-    echo $OUTPUT->notification($displaynoticegood, 'notifysuccess');    // good (usually green)
+    echo $OUTPUT->notification($displaynoticegood, 'notifysuccess');    // Good (usually green).
 } else if (!empty($displaynoticebad)) {
-    echo $OUTPUT->notification($displaynoticebad);                     // bad (usuually red)
+    echo $OUTPUT->notification($displaynoticebad);                     // Bad (usuually red).
 }
 switch ($action) {
     case 'add_connector':
         $PAGE->set_heading("Add a new connector");
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
-        // ******* ADD / EDIT CONNECTOR ********
+        // ADD / EDIT CONNECTOR .
         $PAGE->requires->js_call_amd('local_data_importer/fetch_api_definition', 'init', []);
-        echo $importer_form->display();
+        echo $importerform->display();
         break;
     case 'edit_connector':
         $PAGE->set_heading("Edit connector");
@@ -78,10 +90,10 @@ switch ($action) {
         $PAGE->set_heading("Delete connector");
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
-        echo $renderer->edit_connector_page($connectorid);
+        echo $renderer->delete_connector_page($connectorid);
         break;
     default:
-        // ******* LIST ALL ********
+        // LIST ALL.
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->connectors_page();
