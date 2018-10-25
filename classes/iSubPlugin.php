@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
-interface iSubPlugin {
+interface local_data_importer_iSubPlugin {
     public function params();
 
     public function is_available(): bool;
