@@ -1,0 +1,17 @@
+<div class="form-group row">
+    <div class="col-md-3">
+        <label class="col-form-label d-inline " for="id_subplugin">
+            Select Sub-plugin
+        </label>
+    </div>
+    <div class="col-md-9 form-inline felement" data-fieldtype="select">
+        <select name="subplugin" required data-fieldtype="select" class="custom-select" id="id_subplugin">
+            <option value="0">Select a sub-plugin</option>
+            {{#subplugins}}
+                <!--Loopable-->
+                <option value="{{name}}">{{name}}</option>
+            {{/subplugins}}
+        </select>
+    </div>
+
+</div>
