@@ -15,28 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once("../../config.php");
-require_once($CFG->dirroot . "/local/data_importer/dataimporterform.php");
-$PAGE->set_url('/local/data_importer/index.php');
+require_once($CFG->dirroot . "/local/data_importer/connector_form.php");
+require_once($CFG->dirroot . "/local/data_importer/importer_form.php");
+$url = new moodle_url('/local/data_importer/index.php');
+$PAGE->set_url($url);
 require_login();
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_pagelayout('incourse');
 
 // Print the header.
 $PAGE->navbar->add('Data Importer');
-$PAGE->set_title("Connectors");
-$PAGE->set_heading("Connectors");
+$PAGE->set_title("Data Importer");
+$PAGE->set_heading("Data Importer");
 $action = optional_param('action', 'list_connectors', PARAM_RAW);
 $connectorid = optional_param('connectorid', null, PARAM_INT);
+$subplugin = optional_param('subplugin', null, PARAM_RAW);
+$pathitem = optional_param('pathitem', null, PARAM_RAW);
 $confirmdelete = optional_param('confirmdelete', null, PARAM_INT);
 $connectorinstance = new local_data_importer_connectorinstance();
-
 if ($confirmdelete == 1) {
     if (isset($connectorid)) {
         $connectorinstance->setid($connectorid);
         $connectorinstance->delete();
     }
 }
-$importerform = new local_data_importerform();
+$importerform = new local_data_importer_connector_form();
+$impform = new local_data_importer_form(); // TODO Need to give it a unique ID
 if ($importerform->is_submitted()) {
     // Process the data.
     $formdata = $importerform->get_data();
@@ -92,11 +96,20 @@ switch ($action) {
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->delete_connector_page($connectorid);
         break;
+    case 'add_importer':
+        $PAGE->set_heading("Add Importer");
+        echo $OUTPUT->header();
+        $renderer = $PAGE->get_renderer('local_data_importer');
+        //$PAGE->requires->js_call_amd('local_data_importer/importer_builder', 'init', []);
+        echo $renderer->importer_form_builder();
+        break;
     default:
         // LIST ALL.
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
-        echo $renderer->connectors_page();
+        echo $renderer->importers_page();
         break;
 }
+
+// https://docs.moodle.org/dev/Subplugins
 echo $OUTPUT->footer();
