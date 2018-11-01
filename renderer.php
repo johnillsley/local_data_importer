@@ -33,10 +33,10 @@ class local_data_importer_renderer extends plugin_renderer_base {
      * @return bool|string
      * @throws moodle_exception
      */
-    public function connectors_page() {
-        $renderable = new local_data_importer\output\connectors_page();
-        $connectors = $renderable->export_for_template($this->output);
-        return parent::render_from_template('local_data_importer/connectors', $connectors);
+    public function importers_page() {
+        $renderable = new local_data_importer\output\importers_page();
+        $connectorspathitems = $renderable->export_for_template($this->output);
+        return parent::render_from_template('local_data_importer/connectors', $connectorspathitems);
     }
 
     /**
@@ -45,22 +45,63 @@ class local_data_importer_renderer extends plugin_renderer_base {
     public function edit_connector_page($id) {
         global $PAGE;
         $PAGE->requires->js_call_amd('local_data_importer/fetch_api_definition', 'init', []);
-        $renderable = new local_data_importer\output\connectors_page();
+        $renderable = new local_data_importer\output\importers_page();
         $connectordata = $renderable->get_single_connector_instance($id);
-        $importereditform = new local_data_importer_form(null, $connectordata);
+        $importereditform = new local_data_importer_connector_form(null, $connectordata);
         return $importereditform->display();
     }
 
+
     /**
      * @param $id
+     * @return mixed
      */
     public function delete_connector_page($id) {
-        global  $OUTPUT;
+        global $OUTPUT;
         $continuebutton = new single_button(new moodle_url('index.php', ['confirmdelete' => 1,
             'connectorid' => $id]), 'Yes', 'get', true);
         $cancelbutton = new single_button(new moodle_url('index.php', ['confirmdelete' => 0]), 'No', 'get', false);
         return $OUTPUT->confirm('Are you sure you want to delete this connector', $continuebutton, $cancelbutton);
     }
+
+    /**
+     * @return mixed
+     */
+    public function importer_form_builder() {
+        $renderable = new local_data_importer\output\importers_page();
+        $connectorspathitems = $renderable->export_for_template($this->output);
+        return $this->render_from_template('local_data_importer/importer_form', $connectorspathitems);
+    }
+
+    /**
+     * @param $items
+     * @param $connectordata
+     * @param $pluginlist
+     * @return mixed
+     */
+    public function select_path_item_subplugin($items, $connectordata, $pluginlist) {
+        return $this->render_from_template('local_data_importer/select_path_item', ['pathitems' => $items, 'connectordata' => $connectordata, 'subplugins' => $pluginlist]);
+
+    }
+
+    /**
+     * @param $selectedconnector
+     * @param $selectedplugin
+     * @param $subpluginparams
+     * @param $selectedpathitem
+     * @return mixed
+     */
+    public function select_response_params($selectedconnector, $selectedplugin, $subpluginparams, $selectedpathitem) {
+        return $this->render_from_template('local_data_importer/select_response_params',
+            [
+                'connectordata' => $selectedconnector,
+                'subpluginparams' => $subpluginparams,
+                'selectedsubplugin' => $selectedplugin,
+                'selectedpathitem' => $selectedpathitem
+            ]);
+
+    }
+
 
 
 }
