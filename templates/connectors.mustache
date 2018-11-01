@@ -28,10 +28,9 @@
     </table>
 <form id="add_importer" method="post" action="add_importer.php">
 <input type="submit" class="btn btn-success" value="Add new importer"/>
-<input type="hidden" name="action" value="add"/>
 </form>
+<br/>
 {{^pathitems}}<p class="alert alert-info">No path items available</p>{{/pathitems}}
-{{#pathitems.length}}
     <table class="generaltable">
             <thead>
             <tr>
@@ -58,4 +57,3 @@
             {{/pathitems}}
             </tbody>
      </table>
-{{/pathitems.length}}
