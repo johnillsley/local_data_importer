@@ -16,7 +16,7 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
-class local_data_importer_form extends moodleform {
+class local_data_importer_connector_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
         // Connector Name.
