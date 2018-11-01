@@ -13,15 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-$string['connector_name'] = 'Connector Name';
-$string['connector_description'] = 'Connector Description';
-$string['openapidefinitionurl_label'] = 'Open API URL';
-$string['apikey_label'] = 'API Key';
-$string['serverapikey_label'] = ' Server API Key';
-$string['server_label'] = 'Server ( retrieved automatically)';
-$string['pluginname'] = 'Data Importer';
-$string['connectorlist'] = 'Available Connectors';
-$string['componentlist'] = 'Available Plugins';
-
-// Sub-plugin strings.
-$string['subplugintype_importers'] = 'Importer Plugin';
+defined('MOODLE_INTERNAL') || die();
+$subplugins = array(
+    'importers' => 'local/data_importer/importers');

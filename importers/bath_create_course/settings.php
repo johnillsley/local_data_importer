@@ -13,3 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+defined('MOODLE_INTERNAL') || die;
+if ($hassiteconfig) {
+    $ADMIN->add('root', new admin_category('importers_bath_create_course',
+        get_string('pluginname', 'importers_bath_create_course')
+    ));
+    $settings = new admin_settingpage('importers_bath_create_course', get_string('pluginname', 'importers_bath_create_course'));
+    $ADMIN->add('local_data_importer', $settings);
+
+}
