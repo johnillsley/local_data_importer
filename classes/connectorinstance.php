@@ -1,18 +1,19 @@
 <?php
-// this file is part of moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
-// moodle is free software: you can redistribute it and/or modify
-// it under the terms of the gnu general public license as published by
-// the free software foundation, either version 3 of the license, or
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// moodle is distributed in the hope that it will be useful,
-// but without any warranty; without even the implied warranty of
-// merchantability or fitness for a particular purpose.  see the
-// gnu general public license for more details.
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-// you should have received a copy of the gnu general public license
-// along with moodle.  if not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class local_data_importer_connectorinstance
@@ -210,23 +211,32 @@ class local_data_importer_connectorinstance {
         global $DB;
         try {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
-            //take the db object and turn it into this class object
-            $connectorinstance = new self();
-            $connectorinstance->setid($recordobject->id);
-            $connectorinstance->setname($recordobject->name);
-            $connectorinstance->setdescription($recordobject->description);
-            $connectorinstance->setserver($recordobject->server);
-            $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
-            $connectorinstance->setopenapikey($recordobject->openapikey);
-            $connectorinstance->set_server_apikey($recordobject->serverapikey);
+            if ($recordobject) {
+                // Take the db object and turn it into this class object.
+                $connectorinstance = new self();
+                $connectorinstance->setid($recordobject->id);
+                $connectorinstance->setname($recordobject->name);
+                $connectorinstance->setdescription($recordobject->description);
+                $connectorinstance->setserver($recordobject->server);
+                $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
+                $connectorinstance->setopenapikey($recordobject->openapikey);
+                $connectorinstance->set_server_apikey($recordobject->serverapikey);
+            } else {
+                $connectorinstance = false;
+            }
+
             return $connectorinstance;
         } catch (\dml_exception $e) {
-            echo $e->getmessage();
+            echo "catch error";
+            throw new \Exception($e);
         }
 
     }
 
-    public function getAll() {
+    /** Return all connectors from the database
+     * @return array|null
+     */
+    public function get_all() {
         global $DB;
         $connectors = null;
         try {
@@ -266,13 +276,13 @@ class local_data_importer_connectorinstance {
         $data->serverapikey = $this->serverapikey;
         $data->timecreated = $data->timemodified = time();
         if ($this->id) {
-            //its an update
+            // Its an update.
             $data->id = $this->id;
             try {
                 return $DB->update_record($this->dbtable, $data);
-                //log it.
+                // Log it.
             } catch (\exception $e) {
-                //log it.
+                // Log it.
                 return $e;
                 var_dump($e->getmessage());
             }
@@ -280,9 +290,9 @@ class local_data_importer_connectorinstance {
             $data->timecreated = $data->timemodified = time();
             try {
                 return $DB->insert_record($this->dbtable, $data, $returnid);
-                //log it.
+                // Log it.
             } catch (\exception $e) {
-                //log it.
+                // Log it.
                 return $e;
                 var_dump($e->getmessage());
             }
