@@ -52,6 +52,9 @@ class local_data_importer_connectorpathitem {
      * @var
      */
     private $timecreated;
+    /**
+     * @var string
+     */
     private $dbtable;
 
     /**
@@ -69,6 +72,9 @@ class local_data_importer_connectorpathitem {
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function get_dbtable() {
         return $this->dbtable;
     }
@@ -178,6 +184,41 @@ class local_data_importer_connectorpathitem {
         $this->timecreated = $timecreated;
     }
 
+    /**
+     * @return array|null
+     */
+    public function get_all(){
+        global $DB;
+        $pathitems = null;
+        try {
+            $pathitemrecords = $DB->get_records($this->dbtable);
+            if ($pathitemrecords && is_array($pathitemrecords)) {
+                foreach ($pathitemrecords as $recordobject) {
+                    $pathiteminstance = new self();
+                    $pathiteminstance->set_id($recordobject->id);
+                    $pathiteminstance->set_name($recordobject->name);
+                    $pathiteminstance->set_plugin_component($recordobject->plugincomponent);
+                    $pathiteminstance->set_active($recordobject->active);
+                    $pathiteminstance->set_http_method($recordobject->httpmethod);
+                    $pathiteminstance->set_path_item($recordobject->pathitem);
+                    $pathiteminstance->set_connector_id($recordobject->connectorid);
+                    $pathiteminstance->set_time_created($recordobject->timecreated);
+                    $pathitems[] = $pathiteminstance;
+                }
+
+            }
+        }
+        catch(\dml_exception $e){
+            echo $e->getmessage();
+        }
+        return $pathitems;
+    }
+
+    /**
+     * Return a path item instance by id
+     * @param $id
+     * @return local_data_importer_connectorpathitem
+     */
     public function get_by_id($id) {
         global $DB;
         try {
@@ -197,6 +238,10 @@ class local_data_importer_connectorpathitem {
         }
     }
 
+    /**
+     * Delete a path item instance
+     * @return bool
+     */
     public function delete() {
         global $DB;
         $deleted = false;
@@ -210,6 +255,11 @@ class local_data_importer_connectorpathitem {
         return $deleted;
     }
 
+    /**
+     * Save a new connector path item instance
+     * @param bool $returnid
+     * @return mixed
+     */
     public function save($returnid = false) {
         global $DB;
         $data = new \stdclass();
