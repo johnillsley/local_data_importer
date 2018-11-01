@@ -15,12 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
+/**
+ * Interface local_data_importer_iSubPlugin
+ */
 interface local_data_importer_iSubPlugin {
-    public function params();
+    /**
+     * @return mixed
+     */
+    public function set_responses();
 
+    /**
+     * @return bool
+     */
     public function is_available(): bool;
 
+    /**
+     * @return string
+     */
     public function get_plugin_name(): string; // Used to identify the component name to be used in drop-down for example.
 
+    /**
+     * @return string
+     */
     public function plugin_description(): string; // Method used to describe the functionality of the plugin.
 }
