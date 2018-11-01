@@ -1,14 +1,14 @@
-    <a href="index.php?action=add_connector" class="btn btn-success">Add new connector</a><br/><br/>
+    <a href="index.php?action=add_connector" class="btn btn-success">Add new connector</a>
+
+<br/><br/>
+{{^connectoritems}}<p class="alert alert-info">No connectors available</p>{{/connectoritems}}
     <table class="generaltable">
         <thead>
         <tr>
             <th>Name</th>
             <th>Description</th>
-            <th>OpenAPI Key</th>
             <th>Server</th>
-            <th>Server API Key</th>
             <th>Open API Definition URL</th>
-            <th>Last Modified</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -18,14 +18,44 @@
                 <!--Loopable-->
                 <td>{{name}}</td>
                 <td> {{description}} </td>
-                <td> {{openapikey}} </td>
                 <td> {{server}} </td>
-                <td> {{serverapikey}} </td>
                 <td> {{openapidefinitionurl}} </td>
-                <td> {{lastmodified}} </td>
                 <td> <a href="index.php?action=edit_connector&connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
 
             </tr>
         {{/connectoritems}}
         </tbody>
     </table>
+<form id="add_importer" method="post" action="add_importer.php">
+<input type="submit" class="btn btn-success" value="Add new importer"/>
+<input type="hidden" name="action" value="add"/>
+</form>
+{{^pathitems}}<p class="alert alert-info">No path items available</p>{{/pathitems}}
+{{#pathitems.length}}
+    <table class="generaltable">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Connector</th>
+                <th>Path Item</th>
+                <th>HTTP Method</th>
+                <th>Plugin Component</th>
+                <th>Active ? </th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#pathitems}}
+            <tr>
+            <td>{{name}}</td>
+            <td>{{connector}}</td>
+            <td>{{pathitem}}</td>
+            <td>{{http_method}}</td>
+            <td>{{plugin_component}}</td>
+            <td>{{active}}</td>
+            <td> <a href="index.php?action=edit_importer&connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+            </tr>
+            {{/pathitems}}
+            </tbody>
+     </table>
+{{/pathitems.length}}
