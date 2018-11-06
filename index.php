@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once("../../config.php");
-require_once($CFG->dirroot . "/local/data_importer/connector_form.php");
+require_once($CFG->dirroot . "/local/data_importer/forms/connector_form.php");
 require_once($CFG->dirroot . "/local/data_importer/importer_form.php");
+require_once($CFG->dirroot . "/local/data_importer/forms/importer/edit_importer.php");
 $url = new moodle_url('/local/data_importer/index.php');
 $PAGE->set_url($url);
 require_login();
@@ -30,20 +31,13 @@ $PAGE->set_heading("Data Importer");
 $action = optional_param('action', 'list_connectors', PARAM_RAW);
 $connectorid = optional_param('connectorid', null, PARAM_INT);
 $subplugin = optional_param('subplugin', null, PARAM_RAW);
-$pathitem = optional_param('pathitem', null, PARAM_RAW);
+$pathitemid = optional_param('pathitemid', null, PARAM_INT);
 $confirmdelete = optional_param('confirmdelete', null, PARAM_INT);
 $connectorinstance = new local_data_importer_connectorinstance();
-if ($confirmdelete == 1) {
-    if (isset($connectorid)) {
-        $connectorinstance->setid($connectorid);
-        $connectorinstance->delete();
-    }
-}
 $importerform = new local_data_importer_connector_form();
-$impform = new local_data_importer_form(); // TODO Need to give it a unique ID
-if ($importerform->is_submitted()) {
+if ($formdata = $importerform->get_data()) {
     // Process the data.
-    $formdata = $importerform->get_data();
+    //$formdata = $importerform->get_data();
     $server = '';
     // Additionally get the servers.
     if (isset($_POST['apiserver'])) {
@@ -96,20 +90,36 @@ switch ($action) {
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->delete_connector_page($connectorid);
         break;
-    case 'add_importer':
-        $PAGE->set_heading("Add Importer");
+    case 'edit_importer':
+        $PAGE->set_heading("Edit Importer");
         echo $OUTPUT->header();
-        $renderer = $PAGE->get_renderer('local_data_importer');
-        //$PAGE->requires->js_call_amd('local_data_importer/importer_builder', 'init', []);
-        echo $renderer->importer_form_builder();
+        if (isset($pathitemid)) {
+            $renderable = new local_data_importer\output\importers_page();
+            $pathitemdata = $renderable->get_single_path_item_instance($pathitemid);
+            $importereditform = new local_data_importer_edit_importer_form(null, $pathitemdata);
+            echo $importereditform->display();
+
+
+        }
+
         break;
     default:
         // LIST ALL.
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
+        if ($confirmdelete == 1) {
+            if (isset($connectorid)) {
+                $connectorinstance->setid($connectorid);
+                try {
+                    $connectorinstance->delete();
+                } catch (\Exception $e) {
+                    echo $OUTPUT->notification($e->getMessage());    // Good (usually green).
+                }
+
+            }
+        }
         echo $renderer->importers_page();
         break;
 }
-
 // https://docs.moodle.org/dev/Subplugins
 echo $OUTPUT->footer();

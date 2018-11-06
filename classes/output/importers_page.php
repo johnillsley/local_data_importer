@@ -151,5 +151,19 @@ class importers_page implements templatable, renderable {
         }
         return array('connectoritems' => $connectoritems);
     }
+    public function get_single_path_item_instance($id){
+        $pathiteminstance = $this->pathiteminstance->get_by_id($id);
+        $data = array();
+        if ($pathiteminstance instanceof \local_data_importer_connectorpathitem) {
+            $data['id'] = $pathiteminstance->get_id();
+            $data['name'] = $pathiteminstance->get_name();
+            $data['connnectorid'] = $pathiteminstance->get_connector_id();
+            $data['http_method'] = $pathiteminstance->get_http_method();
+            $data['plugin_component'] = $pathiteminstance->get_plugin_component();
+            $data['active'] = ($pathiteminstance->get_active() == 1 ? 'Yes' : 'No');
+            $data['pathitem'] = $pathiteminstance->get_path_item();
+        }
+        return $data;
+    }
 
 }

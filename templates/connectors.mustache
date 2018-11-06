@@ -1,4 +1,4 @@
-    <a href="index.php?action=add_connector" class="btn btn-success">Add new connector</a>
+    <a href="add_connector.php" class="btn btn-success">Add new connector</a>
 
 <br/><br/>
 {{^connectoritems}}<p class="alert alert-info">No connectors available</p>{{/connectoritems}}
@@ -52,7 +52,7 @@
             <td>{{http_method}}</td>
             <td>{{plugin_component}}</td>
             <td>{{active}}</td>
-            <td> <a href="index.php?action=edit_importer&connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+            <td> <a href="edit_importer.php?action=edit&pathitemid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
             </tr>
             {{/pathitems}}
             </tbody>

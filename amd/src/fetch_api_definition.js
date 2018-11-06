@@ -1,4 +1,5 @@
 define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
+    var URL = config.wwwroot + '/local/data_importer/ajax.php';
     return {
         init: function () {
             var URL = config.wwwroot + '/local/data_importer/ajax.php';
@@ -15,7 +16,6 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                 }
                 console.log(apikey);
                 console.log(apiurl);
-
                 $.ajax({
                     type: 'GET',
                     dataType: 'json',
@@ -33,12 +33,10 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                         server_control.append(option);
                     });
 
-                    //disable the control
+                    //enable the control
                     server_control.prop('disabled', false);
                 });
-
             });
-
         }
     };
 });

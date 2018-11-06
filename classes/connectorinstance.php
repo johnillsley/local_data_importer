@@ -306,9 +306,16 @@ class local_data_importer_connectorinstance {
     public function delete() {
         global $DB;
         $deleted = false;
+        $pathitem = new local_data_importer_connectorpathitem();
         try {
-            if ($DB->record_exists($this->dbtable, ['id' => $this->id])) {
-                $deleted = $DB->delete_records($this->dbtable, ['id' => $this->id]);
+            if ($DB->record_exists($pathitem->get_dbtable(), ['connectorid' => $this->id])) {
+                // It is already used by a connnector , cannot delete.
+                throw new \Exception("Cannot delete connector as it has Pathitems using it");
+            } else {
+                // Ok to delete connector.
+                if ($DB->record_exists($this->dbtable, ['id' => $this->id])) {
+                    $deleted = $DB->delete_records($this->dbtable, ['id' => $this->id]);
+                }
             }
         } catch (\dml_exception $e) {
             echo $e->getMessage();

@@ -64,6 +64,13 @@ class local_data_importer_renderer extends plugin_renderer_base {
         return $OUTPUT->confirm('Are you sure you want to delete this connector', $continuebutton, $cancelbutton);
     }
 
+    public function edit_importer_page($id) {
+        $renderable = new local_data_importer\output\importers_page();
+        $pathitemdata = $renderable->get_single_path_item_instance($id);
+        $importereditform = new local_data_importer_edit_importer_form(null, $pathitemdata);
+        return $importereditform->display();
+    }
+
     /**
      * @return mixed
      */
@@ -101,7 +108,6 @@ class local_data_importer_renderer extends plugin_renderer_base {
             ]);
 
     }
-
 
 
 }
