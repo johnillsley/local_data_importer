@@ -18,6 +18,7 @@
  * Unit tests for the local/data_importer/classes/openapi_inspector.php.
  * Moodle code checker does not like some lines of code with spaces at the end.
  * Do not remove these spaces or the phpunit tests will fail.
+ * Also be careful that your text/code editor does not automatically strip these trailing spaces when saving.
  *
  * @group      local_data_importer
  * @group      bath
@@ -33,10 +34,11 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
 
     public function test_instantiate() {
         global $CFG;
+        $this->resetAfterTest(true);
 
-        $openapiinspector = new local_data_importer_openapi_inspector(
-                file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_response.json'));
-
+        $openapiarray = json_decode(file_get_contents($CFG->dirroot .
+                '/local/data_importer/tests/fixtures/openapi_response.json'), true);
+        $openapiinspector = new local_data_importer_openapi_inspector($openapiarray);
         $this->assertTrue($openapiinspector->openapiversion == "2.0"
                 && $openapiinspector->version == "1.0.0"
                 && $openapiinspector->title == "Grades Transfer Web Services"
@@ -47,37 +49,39 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
 
     public function test_get_pathitems() {
         global $CFG;
+        $this->resetAfterTest(true);
 
-        $openapiinspector = new local_data_importer_openapi_inspector(
-                file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_response.json'));
+        $openapiarray = json_decode(file_get_contents($CFG->dirroot .
+                '/local/data_importer/tests/fixtures/openapi_response.json'), true);
+        $openapiinspector = new local_data_importer_openapi_inspector($openapiarray);
         $pathitems = $openapiinspector->get_pathitems();
 
         $expected = "array (
   '/MABS/MOD_CODE/{modcode}' => 
-  stdClass::__set_state(array(
-     'summary' => 'Get MABS details based on module code',
-     'description' => 'Get MABS details based on module code',
-     'operationId' => 'getMABS',
-     'produces' => 
+  array (
+    'summary' => 'Get MABS details based on module code',
+    'description' => 'Get MABS details based on module code',
+    'operationId' => 'getMABS',
+    'produces' => 
     array (
       0 => 'application/xml',
     ),
-     'method' => 'get',
-     'path' => '/MABS/MOD_CODE/{modcode}',
-  )),
+    'method' => 'get',
+    'path' => '/MABS/MOD_CODE/{modcode}',
+  ),
   '/USERS/STU_UDF1/{username}' => 
-  stdClass::__set_state(array(
-     'operationId' => 'getUser',
-     'summary' => 'Get user details details based on username',
-     'description' => 'Get user details details based on username',
-     'method' => 'get',
-     'path' => '/USERS/STU_UDF1/{username}',
-  )),
+  array (
+    'operationId' => 'getUser',
+    'summary' => 'Get user details details based on username',
+    'description' => 'Get user details details based on username',
+    'method' => 'get',
+    'path' => '/USERS/STU_UDF1/{username}',
+  ),
   '/ASSESSMENTS/' => 
-  stdClass::__set_state(array(
-     'method' => 'get',
-     'path' => '/ASSESSMENTS/',
-  )),
+  array (
+    'method' => 'get',
+    'path' => '/ASSESSMENTS/',
+  ),
 )";
 
         $this->assertSame($expected, var_export($pathitems, true));
@@ -85,20 +89,22 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
 
     public function test_get_pathitem_parameters() {
         global $CFG;
+        $this->resetAfterTest(true);
 
-        $openapiinspector = new local_data_importer_openapi_inspector(
-                file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_response.json'));
+        $openapiarray = json_decode(file_get_contents($CFG->dirroot .
+                '/local/data_importer/tests/fixtures/openapi_response.json'), true);
+        $openapiinspector = new local_data_importer_openapi_inspector($openapiarray);
         $parameters = $openapiinspector->get_pathitem_parameters('/USERS/STU_UDF1/{username}');
 
         $expected = "array (
-  'username' => 
-  stdClass::__set_state(array(
-     'name' => 'username',
-     'in' => 'path',
-     'description' => 'Computing Services username',
-     'required' => true,
-     'type' => 'string',
-  )),
+  0 => 
+  array (
+    'name' => 'username',
+    'in' => 'path',
+    'description' => 'Computing Services username',
+    'required' => true,
+    'type' => 'string',
+  ),
 )";
 
         $this->assertSame($expected, var_export($parameters, true));
@@ -106,70 +112,69 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
 
     public function test_get_pathitem_responses() {
         global $CFG;
+        $this->resetAfterTest(true);
 
-        $openapiinspector = new local_data_importer_openapi_inspector(
-                file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_response.json'));
+        $openapiarray = json_decode(file_get_contents($CFG->dirroot .
+                '/local/data_importer/tests/fixtures/openapi_response.json'), true);
+        $openapiinspector = new local_data_importer_openapi_inspector($openapiarray);
         $responses = $openapiinspector->get_pathitem_responses('/USERS/STU_UDF1/{username}');
 
         $expected = "array (
   200 => 
   array (
-    'EXCHANGE' => 
+    'STU' => 
     array (
-      'STU' => 
+      'STU.SRS' => 
       array (
-        'STU.SRS' => 
+        'STU_CODE' => 
         array (
-          'STU_CODE' => 
+          'type' => 'string',
+        ),
+        'SCJ' => 
+        array (
+          'SCJ.SRS' => 
           array (
-            'type' => 'string',
-          ),
-          'SCJ' => 
-          array (
-            'SCJ.SRS' => 
+            'SCJ_CODE' => 
             array (
-              'SCJ_CODE' => 
-              array (
-                'type' => 'string',
-                'example' => '149240600/1',
-              ),
-              'SCJ_STUC' => 
-              array (
-                'type' => 'string',
-                'example' => 149240600,
-              ),
-              'SCJ_SPRC' => 
-              array (
-                'type' => 'string',
-                'example' => 149240600,
-              ),
-              'SCJ_CRSC' => 
-              array (
-                'type' => 'string',
-                'example' => 'UEAM-AKM04',
-              ),
-              'SCJ_STAC' => 
-              array (
-                'type' => 'string',
-              ),
+              'type' => 'string',
+              'example' => '149240600/1',
+            ),
+            'SCJ_STUC' => 
+            array (
+              'type' => 'string',
+              'example' => 149240600,
+            ),
+            'SCJ_SPRC' => 
+            array (
+              'type' => 'string',
+              'example' => 149240600,
+            ),
+            'SCJ_CRSC' => 
+            array (
+              'type' => 'string',
+              'example' => 'UEAM-AKM04',
+            ),
+            'SCJ_STAC' => 
+            array (
+              'type' => 'string',
             ),
           ),
-          'SCN' => 
+        ),
+        'SCN' => 
+        array (
+          'SCN.CAMS' => 
           array (
-            'SCN.CAMS' => 
+            'SCN_STUC' => 
             array (
-              'SCN_STUC' => 
-              array (
-                'type' => 'string',
-              ),
-              'SCN_AYRC' => 
-              array (
-                'type' => 'string',
-              ),
-              'SCN_CODE' => 
-              array (
-                'type' => 'string',
-              ),
+              'type' => 'string',
+            ),
+            'SCN_AYRC' => 
+            array (
+              'type' => 'string',
+            ),
+            'SCN_CODE' => 
+            array (
+              'type' => 'string',
             ),
           ),
         ),
@@ -183,30 +188,34 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
 
     public function test_get_pathitem_responses_selectable() {
         global $CFG;
+        $this->resetAfterTest(true);
 
-        $openapiinspector = new local_data_importer_openapi_inspector(
-                file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_response.json'));
+        $openapiarray = json_decode(file_get_contents($CFG->dirroot .
+                '/local/data_importer/tests/fixtures/openapi_response.json'), true);
+        $openapiinspector = new local_data_importer_openapi_inspector($openapiarray);
         $responses = $openapiinspector->get_pathitem_responses_selectable('/USERS/STU_UDF1/{username}');
 
         $expected = "array (
-  'STU_CODE' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"STU_CODE\"]',
-  'SCJ_CODE' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_CODE\"]',
-  'SCJ_STUC' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_STUC\"]',
-  'SCJ_SPRC' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_SPRC\"]',
-  'SCJ_CRSC' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_CRSC\"]',
-  'SCJ_STAC' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_STAC\"]',
-  'SCN_STUC' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCN\"][\"SCN.CAMS\"][\"SCN_STUC\"]',
-  'SCN_AYRC' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCN\"][\"SCN.CAMS\"][\"SCN_AYRC\"]',
-  'SCN_CODE' => '[\"EXCHANGE\"][\"STU\"][\"STU.SRS\"][\"SCN\"][\"SCN.CAMS\"][\"SCN_CODE\"]',
+  'STU_CODE' => '[\"STU\"][\"STU.SRS\"][\"STU_CODE\"]',
+  'SCJ_CODE' => '[\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_CODE\"]',
+  'SCJ_STUC' => '[\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_STUC\"]',
+  'SCJ_SPRC' => '[\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_SPRC\"]',
+  'SCJ_CRSC' => '[\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_CRSC\"]',
+  'SCJ_STAC' => '[\"STU\"][\"STU.SRS\"][\"SCJ\"][\"SCJ.SRS\"][\"SCJ_STAC\"]',
+  'SCN_STUC' => '[\"STU\"][\"STU.SRS\"][\"SCN\"][\"SCN.CAMS\"][\"SCN_STUC\"]',
+  'SCN_AYRC' => '[\"STU\"][\"STU.SRS\"][\"SCN\"][\"SCN.CAMS\"][\"SCN_AYRC\"]',
+  'SCN_CODE' => '[\"STU\"][\"STU.SRS\"][\"SCN\"][\"SCN.CAMS\"][\"SCN_CODE\"]',
 )";
         $this->assertSame($expected, var_export($responses, true));
     }
 
     public function test_debug() {
         global $CFG;
+        $this->resetAfterTest(true);
 
-        $openapiinspector = new local_data_importer_openapi_inspector(
-                file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_response.json'));
+        $openapiarray = json_decode(file_get_contents($CFG->dirroot .
+                '/local/data_importer/tests/fixtures/openapi_response.json'), true);
+        $openapiinspector = new local_data_importer_openapi_inspector($openapiarray);
         $debug = $openapiinspector->debug('/USERS/STU_UDF1/{username}');
 
         $expected = file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/openapi_inspector_debug_output.html');

@@ -1,0 +1,89 @@
+{
+  "EXCHANGE": {
+    "SMO": {
+      "SMO.CAMS": [
+        {
+          "SPR_CODE.SMO.CAMS": "139213386/1",
+          "MOD_CODE.SMO.CAMS": "CM30229",
+          "MAV_OCCUR.SMO.CAMS": "AF",
+          "AYR_CODE.SMO.CAMS": "2018/9",
+          "PSL_CODE.SMO.CAMS": "S2",
+          "SPR": {
+            "SPR.SRS": [
+              {
+                "SPR_CODE.SPR.SRS": "139213386/1",
+                "STU": {
+                  "STU.SRS": [
+                    {
+                      "STU_CODE.STU.SRS": "139213386",
+                      "STU_UDF1.STU.SRS": "ch724"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "SPR_CODE.SMO.CAMS": "139479823/1",
+          "MOD_CODE.SMO.CAMS": "CM30229",
+          "MAV_OCCUR.SMO.CAMS": "AFR",
+          "AYR_CODE.SMO.CAMS": "2018/9",
+          "PSL_CODE.SMO.CAMS": "S2",
+          "SPR": {
+            "SPR.SRS": [
+              {
+                "SPR_CODE.SPR.SRS": "139479823/1",
+                "STU": {
+                  "STU.SRS": [
+                    {
+                      "STU_CODE.STU.SRS": "139479823",
+                      "STU_UDF1.STU.SRS": "fn252"
+                    },
+                    {
+                      "STU_CODE.STU.SRS": "987654321",
+                      "STU_UDF1.STU.SRS": "ab321"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "SPR_CODE.SMO.CAMS": "149031787/1",
+          "MOD_CODE.SMO.CAMS": "CM30229",
+          "MAV_OCCUR.SMO.CAMS": "AFR",
+          "AYR_CODE.SMO.CAMS": "2018/9",
+          "PSL_CODE.SMO.CAMS": "S2",
+          "SPR": {
+            "SPR.SRS": [
+              {
+                "SPR_CODE.SPR.SRS": "149031787/1",
+                "STU": {
+                  "STU.SRS": [
+                    {
+                      "STU_CODE.STU.SRS": "149031787",
+                      "STU_UDF1.STU.SRS": "js2305"
+                    }
+                  ]
+                }
+              },
+              {
+                "SPR_CODE.SPR.SRS": "123456789/1",
+                "STU": {
+                  "STU.SRS": [
+                    {
+                      "STU_CODE.STU.SRS": "123456789",
+                      "STU_UDF1.STU.SRS": "zx81"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
