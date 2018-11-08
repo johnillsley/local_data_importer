@@ -20,29 +20,36 @@ class local_data_importer_connector_form extends moodleform {
     public function definition() {
         $mform =& $this->_form;
         // Connector Name.
-        $mform->addElement('text', 'connector_name', get_string('connector_name', 'local_data_importer'));
-        $mform->addRule('connector_name', get_string('required'), 'required', null, 'client');
-        $mform->setType('connector_name', PARAM_TEXT);
-       // $mform->setDefault('connector_name', $this->_customdata['name']);
+        $mform->addElement('text', 'name', get_string('connector_name', 'local_data_importer'));
+        $mform->addRule('name', get_string('required'), 'required', null, 'client');
+        $mform->setType('name', PARAM_TEXT);
 
         // Connector Description.
-        $mform->addElement('textarea', 'connector_description', get_string('connector_description', 'local_data_importer'), 'maxlength="254" size="50"');
-        $mform->addRule('connector_description', get_string('required'), 'required', null, 'client');
-        $mform->setType('connector_description', PARAM_TEXT);
-        //$mform->setDefault('connector_description', $this->_customdata['description']);
+        $mform->addElement('textarea', 'description', get_string('connector_description', 'local_data_importer'),
+            'maxlength="254" size="50"');
+        $mform->addRule('description', get_string('required'), 'required', null, 'client');
+        $mform->setType('description', PARAM_TEXT);
+        $mform->setDefault('description', $this->_customdata['description']);
+
         // Swaggerhub Definition API.
         $mform->addElement('text', 'openapidefinitionurl', get_string('openapidefinitionurl_label', 'local_data_importer'));
         $mform->addRule('openapidefinitionurl', get_string('required'), 'required', null, 'client');
         $mform->setType('openapidefinitionurl', PARAM_TEXT);
-        //$mform->setDefault('openapidefinitionurl', $this->_customdata['openapidefinitionurl']);
+        $mform->setDefault('openapidefinitionurl', $this->_customdata['openapidefinitionurl']);
         // Open API key.
         $mform->addElement('text', 'openapikey', get_string('apikey_label', 'local_data_importer'));
         $mform->setType('openapikey', PARAM_TEXT);
-       // $mform->setDefault('openapikey', $this->_customdata['openapikey']);
+        $mform->setDefault('openapikey', $this->_customdata['openapikey']);
 
         // Fetch Definition button.
-        /*if (!isset($this->_customdata)) {
+        if (!isset($this->_customdata)) {
             $mform->addElement('button', 'fetchapidef', 'Fetch');
+        }
+        if (isset($this->_customdata['openapidefinitionurl'])) {
+            $mform->updateElementAttr('openapidefinitionurl', ['disabled']);
+        }
+        if (isset($this->_customdata['openapikey'])) {
+            $mform->updateElementAttr('openapikey', ['disabled']);
         }
         // Servers drop-down.
         if (isset($this->_customdata['server'])) {
@@ -53,20 +60,23 @@ class local_data_importer_connector_form extends moodleform {
         } else {
             $servers = array();
             $mform->addElement('select', 'apiserver', get_string('server_label', 'local_data_importer'), $servers);
+            $mform->addRule('apiserver', get_string('required'), 'required', null, 'client');
         }
 
         // Server API Key.
-        $mform->addElement('text', 'serverapikey', get_string('apikey_label', 'local_data_importer'));
+        $mform->addElement('text', 'serverapikey', get_string('serverapikey_label', 'local_data_importer'));
         $mform->setType('serverapikey', PARAM_TEXT);
         $mform->setDefault('serverapikey', $this->_customdata['serverapikey']);
+        $mform->addRule('serverapikey', get_string('required'), 'required', null, 'client');
         if (isset($this->_customdata['id'])) {
             // Its an edit.
-            //$mform->addElement('hidden', 'connectorid', $this->_customdata['id']);
+            $mform->addElement('hidden', 'connectorid', $this->_customdata['id']);
             $mform->setType('connectorid', PARAM_INT);
-        }*/
+        }
         $this->add_action_buttons();
     }
 
-
-
+    public function definition_after_data() {
+        $mform =& $this->_form;
+    }
 }
