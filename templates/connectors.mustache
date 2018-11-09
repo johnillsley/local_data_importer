@@ -20,7 +20,7 @@
                 <td> {{description}} </td>
                 <td> {{server}} </td>
                 <td> {{openapidefinitionurl}} </td>
-                <td> <a href="index.php?action=edit_connector&connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+                <td> <a href="add_connector.php?connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
 
             </tr>
         {{/connectoritems}}
@@ -30,7 +30,7 @@
 <input type="submit" class="btn btn-success" value="Add new importer"/>
 </form>
 <br/>
-{{^pathitems}}<p class="alert alert-info">No path items available</p>{{/pathitems}}
+{{^pathitems}}<p class="alert alert-info">No importers available</p>{{/pathitems}}
     <table class="generaltable">
             <thead>
             <tr>
