@@ -16,20 +16,23 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Class local_data_importer_add_importer_form
+ */
 class local_data_importer_add_importer_form extends moodleform {
+    /**
+     *
+     */
     public function definition() {
         $mform = $this->_form;
         if (isset($this->_customdata['connectorid'])) {
             $options = null;
             if (isset($this->_customdata['selectedconnector'])) {
-                $mform->addElement('static', 'selectedconnector', 'Selected Connector', $this->_customdata['selectedconnector']->name);
+                $mform->addElement('static', 'selectedconnector', 'Selected Connector',
+                    $this->_customdata['selectedconnector']->name);
                 $mform->setType('connectorid', PARAM_INT);
                 $mform->addElement('hidden', 'connectorid', $this->_customdata['selectedconnector']->id);
-                $mform->addElement('text', 'pathitemname', 'Path Item Name');
-                $mform->addRule('pathitemname', get_string('required'), 'required', null, 'client');
-                $mform->setType('pathitemname', PARAM_TEXT);
             }
-
             if (isset($this->_customdata['subplugin'])) {
                 if (is_array($this->_customdata['subplugin'])) {
                     $options = $this->_customdata['subplugin'];
@@ -44,27 +47,69 @@ class local_data_importer_add_importer_form extends moodleform {
             }
             if (isset($this->_customdata['pathitem'])) {
                 if (is_array($this->_customdata['pathitem'])) {
+                    $mform->addElement('text', 'pathitemname', 'Path Item Name');
+                    $mform->addRule('pathitemname', get_string('required'), 'required', null, 'client');
+                    $mform->setType('pathitemname', PARAM_TEXT);
                     $options = $this->_customdata['pathitem'];
                     $mform->addElement('select', 'pathitem', 'Select Path Item', $options);
                     $mform->addRule('pathitem', get_string('required'), 'required', null, 'client');
+                    $mform->setType('pathitem', PARAM_RAW);
+
                 } else {
                     $mform->addElement('static', 'selectedpathitem', 'Path Item Selected', $this->_customdata['pathitem']);
                     $mform->addElement('static', 'selectedpathitemname', 'Path Item Name', $this->_customdata['pathitemname']);
+                    $mform->addElement('hidden', 'pathitemname', $this->_customdata['pathitemname']);
+                    $mform->setType('pathitemname', PARAM_RAW);
                     $mform->addElement('hidden', 'pathitem', $this->_customdata['pathitem']);
                     $mform->setType('pathitem', PARAM_RAW);
+                    $mform->setType('pathitemname', PARAM_RAW);
                 }
-
             }
 
-            $options = null;
+            // Path item parameters.
+            $mform->addElement('header', 'general', 'Path Item Parameter');
             if (isset($this->_customdata['subpluginparams'])) {
                 $subpluginparams = $this->_customdata['subpluginparams'];
                 foreach ($subpluginparams as $paramkey => $arrayparam) {
-                    $mform->addElement('static', 'subpluginparams', "Sub plugin response", "<strong>" . $arrayparam['name'] . "</strong>");
-                    $options = $this->_customdata['pathitemparams'];
-                    $mform->addElement('select', $arrayparam["name"], 'Web Service response', $options);
-                    $mform->addRule($arrayparam["name"], get_string('required'), 'required', null, 'client');
+                    foreach ($arrayparam as $key => $val) {
+                        // Display plugin component parameters.
+                        $mform->addElement('static', 'subpluginparams', "Sub plugin param",
+                            "<strong>" . $val . "</strong>");
+                        // Add hidden element for form capture.
+                        $plugincomponentidentifier = $paramkey . "_" . $val;
+                        $mform->addElement('hidden', 'plugincomponentparam', $plugincomponentidentifier);
+                        $mform->setType('plugincomponentparam', PARAM_TEXT);
+                        if (is_array($this->_customdata['pathitemparams'])) {
+                            foreach ($this->_customdata['pathitemparams'] as $key => $arraypathitemparams) {
+                                $options[$arraypathitemparams["name"]] = $arraypathitemparams["name"];
+                            }
+                        }
+                        // Display the path item parameters fetched from the web service.
+                        $mform->addElement('select', "pathitemparams[$plugincomponentidentifier]", 'Path item param', $options);
+                    }
+                }
+            }
+            $options = null;
 
+            $mform->addElement('header', 'general', 'Path Item Response');
+
+            if (isset($this->_customdata['subpluginresponses'])) {
+                $subpluginresponses = $this->_customdata['subpluginresponses'];
+                foreach ($subpluginresponses as $paramkey => $arrayparam) {
+                    foreach ($arrayparam as $key => $val) {
+                        $plugincomponentidentifier = $paramkey . "_" . $val;
+                        $mform->addElement('static', 'subpluginparams', "Sub plugin response", "<strong>" . $val . "</strong>");
+                        $mform->addElement('hidden', 'plugincomponentresponse', $plugincomponentidentifier);
+                        $mform->setType('plugincomponentresponse', PARAM_TEXT);
+
+                        if (is_array($this->_customdata['pathitemresponseparams'])) {
+                            foreach ($this->_customdata['pathitemresponseparams'] as $key => $response) {
+                                $options[$key] = $key;
+                            }
+                        }
+                        $mform->addElement('select', "pathitemresponseparams[$plugincomponentidentifier]",
+                            'Path Item response', $options);
+                    }
                 }
             }
         } else {
@@ -86,6 +131,9 @@ class local_data_importer_add_importer_form extends moodleform {
         $this->add_action_buttons();
     }
 
+    /**
+     *
+     */
     public function definition_after_data() {
         $mform = $this->_form;
         $hiddenelement = $mform->getElement('action');

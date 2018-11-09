@@ -32,8 +32,31 @@ $connectorid = optional_param('connectorid', null, PARAM_INT);
 $subplugin = optional_param('subplugin', null, PARAM_RAW);
 $pathitem = optional_param('pathitem', null, PARAM_RAW);
 $pathitemname = optional_param('pathitemname', null, PARAM_RAW);
+$pathitemparams = optional_param_array('pathitemparams', null, PARAM_RAW);
+$pathitemresponse = optional_param_array('pathitemresponseparams', null, PARAM_RAW);
+
+
 $renderer = $PAGE->get_renderer('local_data_importer');
 $connectorinstance = new local_data_importer_connectorinstance();
+if (isset($connectorid)) {
+    $connector = $connectorinstance->get_by_id($connectorid);
+    $connectordata = new stdClass();
+    $connectordata->openapidefinitionurl = $connector->get_openapidefinitionurl();
+    $connectordata->openapikey = $connector->get_openapi_key();
+    $connectordata->id = $connector->getid();
+    $connectordata->name = $connector->get_name();
+    try {
+        $httpconnection = new local_data_importer_http_connection($connectordata->openapidefinitionurl
+            , $connectordata->openapikey);
+        $httpresponse = $httpconnection->get_response();
+        $openapiinspector = new local_data_importer_openapi_inspector($httpresponse);
+    } catch (\Exception $e) {
+        // TODO Logging.
+        var_dump($e->getMessage());
+    }
+
+}
+
 $params = [
     'connectorid' => $connectorid,
     'subplugin' => $subplugin,
@@ -45,9 +68,6 @@ if ($selectconnectorform->is_cancelled()) {
 }
 $importerformdata[] = $params;
 if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted() && confirm_sesskey()) {
-    if (!$fromdata = $selectconnectorform->get_data()) {
-        var_dump($fromdata);
-    }
     switch ($action) {
         case 'fetch_path_items':
             $PAGE->set_heading("Select Path Items");
@@ -55,35 +75,21 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
             if (isset($connectorid)) {
                 if ($connectorid !== 0) {
                     try {
-                        $connector = $connectorinstance->get_by_id($connectorid);
                         if ($connector instanceof \local_data_importer_connectorinstance) {
-                            $connectordata = new stdClass();
-                            $connectordata->openapidefinitionurl = $connector->get_openapidefinitionurl();
-                            $connectordata->openapikey = $connector->get_openapi_key();
-                            $connectordata->id = $connector->getid();
-                            $connectordata->name = $connector->get_name();
-                            /*$client_connection = new local_data_importer_http_connection();
-                            $content = $client_connection->get_response();
-                            $spec = new local_data_importer_openapi_inspector($content);
-                            $pathitems = $spec->get_pathitems($methodfilter = array("get"));*/
+                            if (is_array($pathitems = $openapiinspector->get_pathitems())) {
+                                foreach ($pathitems as $pathitemlabel => $arraypathitem) {
+                                    $params['pathitem'][$pathitemlabel] = $pathitemlabel;
+                                }
+                            }
 
-
+                            $pluginlist = array();
                             // Get sub-plugins .
                             $plugins = core_plugin_manager::instance()->get_subplugins_of_plugin('local_data_importer');
                             foreach ($plugins as $component => $info) {
                                 $pluginlist[$component] = $component;
                             }
-                            // Display form.
-                            $params2 = [
-                                'selectedconnector' => $connectordata->name,
-                                'connectorid' => $connectordata->id,
-                                'subplugin' => $pluginlist,
-                                // TODO : These are fetched dynamically.
-                                'pathitems' => array('/MABS/MOD_CODE/{modcode}' => '/MABS/MOD_CODE/{modcode}')
-                            ];
                             $params['subplugin'] = $pluginlist;
                             $params['selectedconnector'] = $connectordata;
-                            $params['pathitem'] = array('/MABS/MOD_CODE/{modcode}' => '/MABS/MOD_CODE/{modcode}');
                             $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                             echo $selectconnectorform->display();
                             //$renderer = $PAGE->get_renderer('local_data_importer');
@@ -103,29 +109,26 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
             echo $OUTPUT->header();
 
             if (isset($connectorid) && isset($pathitem) && isset($subplugin) && isset($pathitemname)) {
-                $connector = $connectorinstance->get_by_id($connectorid);
                 try {
                     if ($connector instanceof \local_data_importer_connectorinstance) {
-                        $connectordata = new stdClass();
-                        $connectordata->name = $connector->get_name();
-                        $connectordata->id = $connector->getid();
-
                         // For the selected subplugin , get the params available.
                         $class = $subplugin . "_subplugin";
                         $object = new $class();
-                        $subpluginparams = $object->responses;
-                        // TODO : These are fetched dynamically.
-                        $pathitemparams = array('STU_CODE' => 'STU_CODE',
-                            'SCJ_CODE' => 'SCJ_CODE');
+                        $subpluginresponses = $object->responses;
+                        $subpluginparams = $object->params;
+                        $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
+                        $responseparams = $openapiinspector->get_pathitem_responses_selectable($pathitem);
+
+                        // Prepare parameters to pass to the form.
                         $params['subpluginparams'] = $subpluginparams;
+                        $params['subpluginresponses'] = $subpluginresponses;
                         $params['pathitemparams'] = $pathitemparams;
                         $params['selectedconnector'] = $connectordata;
                         $params['pathitem'] = $pathitem;
                         $params['pathitemname'] = $pathitemname;
+                        $params['pathitemresponseparams'] = $responseparams;
                         $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                         echo $selectconnectorform->display();
-                        // For the selected path item , get the params available.
-                        //echo $renderer->select_response_params($connectordata, $subplugin, $subpluginparams, $pathitem);
                     }
                 } catch (\Exception $e) {
                     var_dump($e);
@@ -133,53 +136,52 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
             }
             break;
         case 'save':
-            $PAGE->set_heading("Add Response Params");
-            echo $OUTPUT->header();
-            var_dump($connectorid);
-            var_dump($pathitem);
-            var_dump($subplugin);
-            var_dump($pathitemname);
-            if (isset($connectorid) && isset($pathitem) && isset($subplugin) && isset($pathitemname)) {
-                echo "yes ";
-                $class = $subplugin . "_subplugin";
-                $object = new $class();
-                $subpluginparams = $object->responses;
-                foreach ($subpluginparams as $paramkey => $arrayparam) {
-                    $paramname = $arrayparam['name'];
-                    // Look for post values with these names.
-                    $paramoptions[$paramname] = optional_param($paramname, null, PARAM_RAW);
+            // Add them to the database.
+            // 1. PATH ITEM.
+            $objpathitem = new local_data_importer_connectorpathitem();
+            $objpathitem->set_name($pathitemname);
+            $objpathitem->set_connector_id($connectorid); // No need to create a new connector instance (?).
+            $objpathitem->set_path_item($pathitem);
+            $objpathitem->set_active(true);
+            $objpathitem->set_http_method('GET');
+            $objpathitem->set_plugin_component($subplugin . "_subplugin");
+
+            try {
+                $pathitemid = $objpathitem->save(true);
+
+                // 2. PATH ITEM PARAMETER.
+
+                $objpathitemparameter = new local_data_importer_pathitem_parameter();
+                $objpathitemparameter->set_pathitemid($pathitemid);
+
+                if (isset($pathitemparams) && is_array($pathitemparams)) {
+                    foreach ($pathitemparams as $pip => $pcp) {
+                        $objpathitemparameter->set_pathitem_parameter($pip);
+                        $objpathitemparameter->set_plugincomponent_param($pcp);
+                        $objpathitemparameter->save();
+                    }
                 }
-                var_dump($paramoptions);
 
-                // Add them to the database.
 
-                $objpathitem = new local_data_importer_connectorpathitem();
-                $objpathitem->set_name($pathitemname);
-                $objpathitem->set_connector_id($connectorid); // No need to create a new connector instance (?).
-                $objpathitem->set_path_item($pathitem);
-                $objpathitem->set_active(true);
-                $objpathitem->set_http_method('GET');
-                $objpathitem->set_plugin_component($subplugin);
-                try {
-                    $pathitemid = $objpathitem->save(true);
+                // 3. PATH ITEM RESPONSE.
+                $objpathitemresponse = new local_data_importer_pathitem_response();
+                $objpathitemresponse->set_pathitemid($pathitemid);
 
-                    $responseparams = new local_data_importer_connectorresponseparams();
-                    $responseparams->set_pathitemid($pathitemid);
-                    if (is_array($paramoptions)) {
-                        foreach ($paramoptions as $subpluginparamname => $responseparamname) {
-                            $responseparams->set_pathparam($responseparamname);
-                            $responseparams->set_componentparam($subpluginparamname);
-                            $responseparams->save(true);
-
-                        }
-                        // All ok, go back to index.
+                if (isset($pathitemresponse) && is_array($pathitemresponse)) {
+                    foreach ($pathitemresponse as $pir => $pcr) {
+                        $objpathitemresponse->set_pathitem_response($pir);
+                        $objpathitemresponse->set_plugincomponent_response($pcr);
+                        $objpathitemresponse->save();
+                        // All Saved OK.
                         redirect($returnurl);
                     }
-                } catch (\Exception $e) {
-                    var_dump($e->getMessage());
                 }
 
+
+            } catch (\Exception $e) {
+                var_dump($e->getMessage());
             }
+
             break;
     }
 } else {
