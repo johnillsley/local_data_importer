@@ -1,0 +1,19 @@
+<form id="local_data_importer_form" method="post" action="add_importer.php?action=fetch_path_items">
+    <div class="form-group row">
+        <div class="col-md-3">
+            <label class="col-form-label d-inline " for="connectorid">
+                Select Connector
+            </label>
+        </div>
+        <div class="col-md-9 form-inline felement" data-fieldtype="select">
+            <select name="connectorid" data-fieldtype="select" class="custom-select" id="connectorid">
+                <option value="0">Select a connector</option>
+                {{#connectoritems}}
+                    <!--Loopable-->
+                    <option value="{{id}}">{{name}}</option>
+                {{/connectoritems}}
+            </select>
+        </div>
+    </div>
+    <input type="submit" class="btn btn-primary"/>
+</form>

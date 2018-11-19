@@ -1,0 +1,59 @@
+    <a href="add_connector.php" class="btn btn-success">Add new connector</a>
+
+<br/><br/>
+{{^connectoritems}}<p class="alert alert-info">No connectors available</p>{{/connectoritems}}
+    <table class="generaltable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Server</th>
+            <th>Open API Definition URL</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#connectoritems}}
+            <tr>
+                <!--Loopable-->
+                <td>{{name}}</td>
+                <td> {{description}} </td>
+                <td> {{server}} </td>
+                <td> {{openapidefinitionurl}} </td>
+                <td> <a href="add_connector.php?connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+
+            </tr>
+        {{/connectoritems}}
+        </tbody>
+    </table>
+<form id="add_importer" method="post" action="add_importer.php">
+<input type="submit" class="btn btn-success" value="Add new importer"/>
+</form>
+<br/>
+{{^pathitems}}<p class="alert alert-info">No importers available</p>{{/pathitems}}
+    <table class="generaltable">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Connector</th>
+                <th>Path Item</th>
+                <th>HTTP Method</th>
+                <th>Plugin Component</th>
+                <th>Active ? </th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#pathitems}}
+            <tr>
+            <td>{{name}}</td>
+            <td>{{connector}}</td>
+            <td>{{pathitem}}</td>
+            <td>{{http_method}}</td>
+            <td>{{plugin_component}}</td>
+            <td>{{active}}</td>
+            <td> <a href="edit_importer.php?action=edit&pathitemid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+            </tr>
+            {{/pathitems}}
+            </tbody>
+     </table>

@@ -15,13 +15,56 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die();
 
-class local_data_importer_connectorresponseparams {
+/**
+ * Class local_data_importer_pathitem_response
+ */
+class local_data_importer_pathitem_response {
+    /**
+     * @var
+     */
     private $id;
+    /**
+     * @var
+     */
     private $pathitemid;
+    /**
+     * @var
+     */
     private $timecreated;
+    /**
+     * @var
+     */
     private $timemodified;
-    private $pathparam;
-    private $componentparam;
+    /**
+     * @var
+     */
+    private $pathitemresponse;
+    /**
+     * @var
+     */
+    private $pluginresponsetable;
+    /**
+     * @var
+     */
+    private $pluginresponsefield;
+
+    /**
+     * @return mixed
+     */
+    public function get_pathitem_response() {
+        return $this->pathitemresponse;
+    }
+
+    /**
+     * @param mixed $pathitemresponse
+     */
+    public function set_pathitem_response($pathitemresponse) {
+        $this->pathitemresponse = $pathitemresponse;
+    }
+
+    /**
+     * @var string
+     */
     private $dbtable;
 
     /**
@@ -35,7 +78,7 @@ class local_data_importer_connectorresponseparams {
      * local_data_importer_connectorresponseparams constructor.
      */
     public function __construct() {
-        $this->dbtable = 'connector_response_params';
+        $this->dbtable = 'pathitem_response';
     }
 
     /**
@@ -61,8 +104,7 @@ class local_data_importer_connectorresponseparams {
 
 
     /**
-     * @param $pathitemid
-     * @return int
+     * @param int $pathitemid
      */
     public function set_pathitemid(int $pathitemid) {
         $this->pathitemid = $pathitemid;
@@ -99,51 +141,79 @@ class local_data_importer_connectorresponseparams {
     /**
      * @return mixed
      */
-    public function get_pathparam(): string {
-        return $this->pathparam;
+    public function get_pluginresponse_table() {
+        return $this->pluginresponsetable;
     }
 
     /**
-     * @param string $pathparam
+     * @param mixed $pluginresponsetable
      */
-    public function set_pathparam(string $pathparam) {
-        $this->pathparam = $pathparam;
+    public function set_pluginresponse_table($pluginresponsetable) {
+        $this->pluginresponsetable = $pluginresponsetable;
     }
 
     /**
      * @return mixed
      */
-    public function get_componentparam(): string {
-        return $this->componentparam;
+    public function get_pluginresponse_field() {
+        return $this->pluginresponsefield;
     }
 
     /**
-     * @param mixed $componentparam
+     * @param mixed $pluginresponsefield
      */
-    public function set_componentparam($componentparam) {
-        $this->componentparam = $componentparam;
+    public function set_pluginresponse_field($pluginresponsefield) {
+        $this->pluginresponsefield = $pluginresponsefield;
     }
 
     /**
      * @param int $id
-     * @return local_data_importer_connectorresponseparams
+     * @return local_data_importer_pathitem_response
      */
-    public function get_by_id($id): local_data_importer_connectorresponseparams {
+    public function get_by_id($id): local_data_importer_pathitem_response {
         global $DB;
+        $responseparaminstance = new self();
         try {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
-            $responseparaminstance = new self();
             $responseparaminstance->set_id($recordobject->id);
             $responseparaminstance->set_pathitemid($recordobject->pathitemid);
-            $responseparaminstance->set_pathparam($recordobject->pathparam);
-            $responseparaminstance->set_componentparam($recordobject->componentparam);
-            return $responseparaminstance;
+            $responseparaminstance->set_pathitem_response($recordobject->response);
+            $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
+            $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsefield);
         } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
+        return $responseparaminstance;
     }
 
-    /**
+    /** Get Path Item response by Path Item ID.
+     * @param $id
+     * @return array
+     */
+    public function get_by_pathitem_id($id) {
+        global $DB;
+        $responseparams = array();
+        try {
+            $responseparamrecords = $DB->get_records($this->dbtable, ['pathitemid' => $id]);
+            if ($responseparamrecords && is_array($responseparamrecords)) {
+                foreach ($responseparamrecords as $recordobject) {
+                    $responseparaminstance = new self();
+                    $responseparaminstance->set_id($recordobject->id);
+                    $responseparaminstance->set_pathitemid($recordobject->pathitemid);
+                    $responseparaminstance->set_pathitem_response($recordobject->response);
+                    $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
+                    $responseparaminstance->set_pluginresponse_field($recordobject->pluginresponsefield);
+                    $responseparams[] = $responseparaminstance;
+                }
+            }
+        } catch (\dml_exception $e) {
+            echo $e->getmessage();
+        }
+        return $responseparams;
+
+    }
+
+    /** Save a Path item response instance
      * @param bool $returnid
      * @return bool|int
      */
@@ -151,26 +221,27 @@ class local_data_importer_connectorresponseparams {
         global $DB;
         $data = new \stdclass();
         $data->pathitemid = $this->pathitemid;
-        $data->pathparam = $this->pathparam;
-        $data->componentparam = $this->componentparam;
+        $data->response = $this->pathitemresponse;
+        $data->pluginresponsetable = $this->pluginresponsetable;
+        $data->pluginresponsefield = $this->pluginresponsefield;
         $data->timemodified = time();
         if ($this->id) {
             // Its an update.
             $data->id = $this->id;
             try {
                 return $DB->update_record($this->dbtable, $data);
-                // Log it.
+                // TODO Log it.
             } catch (\exception $e) {
-                // Log it.
+                // TODO Log it.
                 var_dump($e->getmessage());
             }
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
                 return $DB->insert_record($this->dbtable, $data, $returnid);
-                // Log it.
+                // TODO Log it.
             } catch (\exception $e) {
-                // Log it.
+                // TODO Log it.
                 var_dump($e->getmessage());
             }
         }
@@ -178,7 +249,7 @@ class local_data_importer_connectorresponseparams {
     }
 
     /**
-     * Delete a connector response param test
+     * Delete a Path item response
      * @return bool
      */
     public function delete() {
@@ -192,8 +263,5 @@ class local_data_importer_connectorresponseparams {
             echo $e->getMessage();
         }
         return $deleted;
-
     }
-
-
 }

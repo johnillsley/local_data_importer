@@ -13,15 +13,16 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/**
- * contains the version information for Data Importer Plugin
- *
- * @package local_moodle_data_importer
- * @copyright  2018 University of Bath
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace importers_bath_user_enrolment\task;
+defined('MOODLE_INTERNAL') || die;
+class user_enrolment_sync_task extends \core\task\scheduled_task {
 
-defined('MOODLE_INTERNAL') || die();
-$plugin->version = 2018100205;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires = 2017110800;        // Requires this Moodle version
-$plugin->component = 'local_data_importer'; // Full name of the plugin (used for diagnostics).
+    public function get_name() {
+        return get_string('pluginname', 'importers_bath_user_enrolment');
+    }
+    public function execute() {
+        global $CFG;
+        $subplugin = new \importers_bath_user_enrolment_subplugin();
+        $subplugin->sync_enrolment_cron_task();
+    }
+}

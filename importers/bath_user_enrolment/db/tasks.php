@@ -13,4 +13,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die();$tasks = array(
+    array(
+        'classname' => '\importers_bath_user_enrolment\task\user_enrolment_sync_task',
+        'blocking' => 0,
+        'minute' => '15',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    )
+);

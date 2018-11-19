@@ -13,15 +13,31 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/**
- * contains the version information for Data Importer Plugin
- *
- * @package local_moodle_data_importer
- * @copyright  2018 University of Bath
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
-defined('MOODLE_INTERNAL') || die();
-$plugin->version = 2018100205;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires = 2017110800;        // Requires this Moodle version
-$plugin->component = 'local_data_importer'; // Full name of the plugin (used for diagnostics).
+/**
+ * Interface local_data_importer_iSubPlugin
+ */
+interface local_data_importer_iSubPlugin {
+    /**
+     * @return mixed
+     */
+    public function set_responses();
+
+    public function get_importers();
+
+    /**
+     * @return bool
+     */
+    public function is_available(): bool;
+
+    /**
+     * @return string
+     */
+    public function get_plugin_name(): string; // Used to identify the component name to be used in drop-down for example.
+
+    /**
+     * @return string
+     */
+    public function plugin_description(): string; // Method used to describe the functionality of the plugin.
+}

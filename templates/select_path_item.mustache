@@ -1,0 +1,30 @@
+<form id="local_data_importer_form" method="post" action="add_importer.php?action=fetch_response_params">
+    <div style="background-color: azure;">
+        <p>{{connectordata.openapidefinitionurl}}</p>
+        <p>{{connectordata.openapikey}}</p>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">Selected Connector: </div>
+        <div class="col-md-9">{{connectordata.name}}</div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <label class="col-form-label d-inline " for="id_pathitem">
+                Select PathItem
+            </label>
+        </div>
+        <div class="col-md-9 form-inline felement" data-fieldtype="select">
+            <select name="pathitem" data-fieldtype="select" class="custom-select" id="id_pathitem">
+                <option value="0">Select a path item</option>
+                {{#pathitems}}
+                    <!--Loopable-->
+                    <option value="{{name}}">{{name}}</option>
+                {{/pathitems}}
+            </select>
+        </div>
+
+    </div>
+    {{> local_data_importer/select_subplugins }}
+    <input type="hidden" name="connectorid" value="{{connectordata.id}}"/>
+    <input type="submit" class="btn btn-primary"/>
+</form>

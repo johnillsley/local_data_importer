@@ -15,14 +15,57 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die();
 
-class local_data_importer_connectorresponseparams {
+/**
+ * Class local_data_importer_pathitem_parameter
+ */
+class local_data_importer_pathitem_parameter {
+    /**
+     * @var
+     */
     private $id;
+    /**
+     * @var
+     */
     private $pathitemid;
+    /**
+     * @var
+     */
     private $timecreated;
+    /**
+     * @var
+     */
     private $timemodified;
-    private $pathparam;
-    private $componentparam;
+    /**
+     * @var
+     */
+    private $pathitemparameter;
+    /**
+     * @var
+     */
+    private $pluginparamtable;
+    /**
+     * @var
+     */
+    private $pluginparamfield;
+    /**
+     * @var string
+     */
     private $dbtable;
+
+
+    /**
+     * @return mixed
+     */
+    public function get_pathitem_parameter() {
+        return $this->pathitemparameter;
+    }
+
+    /**
+     * @param mixed $pathitemparameter
+     */
+    public function set_pathitem_parameter($pathitemparameter) {
+        $this->pathitemparameter = $pathitemparameter;
+    }
 
     /**
      * @return string
@@ -32,10 +75,10 @@ class local_data_importer_connectorresponseparams {
     }
 
     /**
-     * local_data_importer_connectorresponseparams constructor.
+     * local_data_importer_pathitem_parameter constructor.
      */
     public function __construct() {
-        $this->dbtable = 'connector_response_params';
+        $this->dbtable = 'pathitem_parameter';
     }
 
     /**
@@ -61,8 +104,7 @@ class local_data_importer_connectorresponseparams {
 
 
     /**
-     * @param $pathitemid
-     * @return int
+     * @param int $pathitemid
      */
     public function set_pathitemid(int $pathitemid) {
         $this->pathitemid = $pathitemid;
@@ -99,51 +141,80 @@ class local_data_importer_connectorresponseparams {
     /**
      * @return mixed
      */
-    public function get_pathparam(): string {
-        return $this->pathparam;
+    public function get_pluginparam_table() {
+        return $this->pluginparamtable;
     }
 
     /**
-     * @param string $pathparam
+     * @param mixed $pluginparamtable
      */
-    public function set_pathparam(string $pathparam) {
-        $this->pathparam = $pathparam;
+    public function set_pluginparam_table($pluginparamtable) {
+        $this->pluginparamtable = $pluginparamtable;
     }
 
     /**
      * @return mixed
      */
-    public function get_componentparam(): string {
-        return $this->componentparam;
+    public function get_pluginparam_field() {
+        return $this->pluginparamfield;
     }
 
     /**
-     * @param mixed $componentparam
+     * @param mixed $pluginparamfield
      */
-    public function set_componentparam($componentparam) {
-        $this->componentparam = $componentparam;
+    public function set_pluginparam_field($pluginparamfield) {
+        $this->pluginparamfield = $pluginparamfield;
     }
 
-    /**
+
+    /** Retrieve Path Item Parameter by Id.
      * @param int $id
-     * @return local_data_importer_connectorresponseparams
+     * @return local_data_importer_pathitem_parameter
      */
-    public function get_by_id($id): local_data_importer_connectorresponseparams {
+    public function get_by_id($id): local_data_importer_pathitem_parameter {
         global $DB;
+        $pathitemparaminstance = new self();
         try {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
-            $responseparaminstance = new self();
-            $responseparaminstance->set_id($recordobject->id);
-            $responseparaminstance->set_pathitemid($recordobject->pathitemid);
-            $responseparaminstance->set_pathparam($recordobject->pathparam);
-            $responseparaminstance->set_componentparam($recordobject->componentparam);
-            return $responseparaminstance;
+            $pathitemparaminstance->set_id($recordobject->id);
+            $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
+            $pathitemparaminstance->set_pathitem_parameter($recordobject->pathparameter);
+            $pathitemparaminstance->set_pluginparam_table($recordobject->pluginparamtable);
+            $pathitemparaminstance->set_pluginparam_field($recordobject->pluginparamfield);
         } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
+        return $pathitemparaminstance;
     }
 
-    /**
+    /** Retrieve Path Item Parameter by Path Item ID
+     * @param $id
+     * @return array
+     */
+    public function get_by_pathitem_id($id) {
+        global $DB;
+        $pathitemparams = array();
+        try {
+            $pathitemparamrecords = $DB->get_records($this->dbtable, ['pathitemid' => $id]);
+            if ($pathitemparamrecords && is_array($pathitemparamrecords)) {
+                foreach ($pathitemparamrecords as $recordobject) {
+                    $pathitemparaminstance = new self();
+                    $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
+                    $pathitemparaminstance->set_id($recordobject->id);
+                    $pathitemparaminstance->set_pathitem_parameter($recordobject->pathparameter);
+                    $pathitemparaminstance->set_pluginparam_table($recordobject->pluginparamtable);
+                    $pathitemparaminstance->set_pluginparam_field($recordobject->pluginparamfield);
+                    $pathitemparams[] = $pathitemparaminstance;
+                }
+            }
+        } catch (\dml_exception $e) {
+            echo $e->getmessage();
+        }
+        return $pathitemparams;
+
+    }
+
+    /** Save a path item parameter instance
      * @param bool $returnid
      * @return bool|int
      */
@@ -151,8 +222,9 @@ class local_data_importer_connectorresponseparams {
         global $DB;
         $data = new \stdclass();
         $data->pathitemid = $this->pathitemid;
-        $data->pathparam = $this->pathparam;
-        $data->componentparam = $this->componentparam;
+        $data->pathparameter = $this->pathitemparameter;
+        $data->pluginparamtable = $this->pluginparamtable;
+        $data->pluginparamfield = $this->pluginparamfield;
         $data->timemodified = time();
         if ($this->id) {
             // Its an update.
@@ -192,8 +264,5 @@ class local_data_importer_connectorresponseparams {
             echo $e->getMessage();
         }
         return $deleted;
-
     }
-
-
 }

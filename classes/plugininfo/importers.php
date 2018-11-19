@@ -13,10 +13,19 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-interface iSubPlugin{
-    public function params();
-    public function isAvailable();
-    public function getPluginName(); //used to identify the component name to be used in drop-down for example
-    public function pluginDescription(); //method used to describe the functionality of the plugin
+/**
+ * Subplugin info class.
+ *
+ **/
 
+namespace local_data_importer\plugininfo;
+
+use core\plugininfo\base;
+
+defined('MOODLE_INTERNAL') || die();
+
+class importers extends base {
+    public function is_uninstall_allowed() {
+        return true;
+    }
 }

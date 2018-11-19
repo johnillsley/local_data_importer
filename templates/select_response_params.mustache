@@ -1,0 +1,33 @@
+<form id="local_data_importer_form" method="post" action="index.php?action=add_new_importer_mapping">
+    <div class="form-group row">
+        <div class="col-md-3">Selected Connector:</div>
+        <div class="col-md-9"><strong>{{connectordata.name}}</strong></div>
+        <input type="hidden" value="{{connectordata.id}}" name="connectorid">
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">Selected Path Item:</div>
+        <div class="col-md-9"><strong>{{selectedpathitem}}</strong></div>
+        <input type="hidden" value="{{selectedpathitem}}" name="pathitem">
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">Selected Plugin:</div>
+        <div class="col-md-9"><strong>{{selectedsubplugin}}</strong></div>
+        <input type="hidden" value="{{selectedsubplugin}}" name="dsubplugin">
+    </div>
+    <!--loopable by the number of sub-plugin params available-->
+    <div class="form-group row">
+        <table class="generaltable">
+            <thead>
+            <tr>
+                <th> Sub-plugin Parameter Name </th>
+                <th> Web Service Parameter Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{> local_data_importer/subplugin_params_selector }}
+            </tbody>
+        </table>
+    </div>
+    <input type="submit" class="btn btn-success" value="Finish"/>
+    <input type="reset" class="btn btn-danger" value="Cancel"/>
+</form>

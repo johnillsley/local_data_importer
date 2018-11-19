@@ -1,0 +1,19 @@
+<!--loopable by the number of sub-plugin params available-->
+<div class="col-md-5">
+
+    <div class="col-md-12">
+        <!--Subplugin params select dropdown-->
+        {{^subpluginparams}}No sub-plugin params to show{{/subpluginparams}}
+        {{#subpluginparams}}
+            <!--Loopable-->
+            <tr>
+                <td><p>{{name}} {{type}} {{table}}</p>
+                    <input type="hidden" value="{{name}}"/></td>
+                <td> {{> local_data_importer/path_item_params_selector }}</td>
+            </tr>
+        {{/subpluginparams}}
+
+
+    </div>
+</div>
+
