@@ -80,8 +80,8 @@ class local_data_importer_openapi_inspector {
         $this->spec = $spec;
 
         if (is_null($this->spec["info"]["title"])
-                || is_null($this->spec["info"]["description"])
-                || is_null($this->spec["info"]["version"])) {
+            || is_null($this->spec["info"]["description"])
+            || is_null($this->spec["info"]["version"])) {
             throw new Exception('Tne openAPI document does not contain required data or it is not in array format.');
         }
 
@@ -267,41 +267,43 @@ class local_data_importer_openapi_inspector {
     private function build_response_properties($schema) {
         $properties = array();
         $definition = new stdClass();
+        if (is_array($schema)) {
+            foreach ($schema as $k => $v) {
+                switch ($k) {
 
-        foreach ($schema as $k => $v) {
-            switch ($k) {
-
-                case '$ref':
-                    $pointer = explode("/", $v);
-                    foreach ($pointer as $p) {
-                        if ($p == "#") {
-                            $definition = $this->spec;
-                        } else {
-                            $definition = $definition[$p];
+                    case '$ref':
+                        $pointer = explode("/", $v);
+                        foreach ($pointer as $p) {
+                            if ($p == "#") {
+                                $definition = $this->spec;
+                            } else {
+                                $definition = $definition[$p];
+                            }
                         }
-                    }
-                    $properties = $this->build_response_properties($definition);
-                    break;
+                        $properties = $this->build_response_properties($definition);
+                        break;
 
-                case 'properties':
-                    if (is_array($schema["properties"])) {
-                        $properties = $this->build_response_properties($schema["properties"]);
-                    }
-                    break;
+                    case 'properties':
+                        if (is_array($schema["properties"])) {
+                            $properties = $this->build_response_properties($schema["properties"]);
+                        }
+                        break;
 
-                case 'type':
-                    break;
+                    case 'type':
+                        break;
 
-                default:
+                    default:
 
-                    if (isset($v["type"]) && $v["type"] != 'object' && $v["type"] != 'array') {
-                        $properties[$k] = (array) $v;
-                    } else {
-                        $properties[$k] = $this->build_response_properties($v);
-                    }
-                    break;
+                        if (isset($v["type"]) && $v["type"] != 'object' && $v["type"] != 'array') {
+                            $properties[$k] = (array) $v;
+                        } else {
+                            $properties[$k] = $this->build_response_properties($v);
+                        }
+                        break;
+                }
             }
         }
+
         return $properties;
     }
 
