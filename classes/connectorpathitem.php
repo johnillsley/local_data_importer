@@ -187,7 +187,7 @@ class local_data_importer_connectorpathitem {
     /**
      * @return array|null
      */
-    public function get_all(){
+    public function get_all() {
         global $DB;
         $pathitems = null;
         try {
@@ -207,8 +207,7 @@ class local_data_importer_connectorpathitem {
                 }
 
             }
-        }
-        catch(\dml_exception $e){
+        } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
         return $pathitems;
@@ -234,8 +233,33 @@ class local_data_importer_connectorpathitem {
             $pathitem->set_path_item($recordobject->pathitem);
             return $pathitem;
         } catch (\dml_exception $e) {
+            throw $e->getmessage();
+        }
+    }
+
+    public function get_by_subplugin($subplugin) {
+        global $DB;
+        $pathitems = array();
+        try {
+            $records = $DB->get_records($this->dbtable, ['plugincomponent' => $subplugin]);
+            if (is_array($records)) {
+                foreach ($records as $recordobject) {
+                    $pathitem = new self();
+                    $pathitem->set_id($recordobject->id);
+                    $pathitem->set_name($recordobject->name);
+                    $pathitem->set_connector_id($recordobject->connectorid);
+                    $pathitem->set_active($recordobject->active);
+                    $pathitem->set_plugin_component($recordobject->plugincomponent);
+                    $pathitem->set_http_method($recordobject->httpmethod);
+                    $pathitem->set_path_item($recordobject->pathitem);
+                    $pathitems[] = $pathitem;
+                }
+            }
+        } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
+        return $pathitems;
+
     }
 
     /**

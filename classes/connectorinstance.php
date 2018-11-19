@@ -63,7 +63,6 @@ class local_data_importer_connectorinstance {
 
     /**
      * connectorinstance constructor.
-     * @param $dbtable
      */
     public function __construct() {
         $this->dbtable = 'connector_instance';
@@ -140,14 +139,14 @@ class local_data_importer_connectorinstance {
     }
 
     /**
-     * @param mixed $host
+     * @param mixed $server
      */
     public function setserver($server) {
         $this->server = $server;
     }
 
     /**
-     * @return mixed
+     * @return mixed $openapidefinitionurl
      */
     public function get_openapidefinitionurl() {
         return $this->openapidefinitionurl;
@@ -205,6 +204,7 @@ class local_data_importer_connectorinstance {
     /**
      * @param $id
      * @return local_data_importer_connectorinstance
+     * @throws \Exception
      */
     public function get_by_id($id) {
 
@@ -300,8 +300,10 @@ class local_data_importer_connectorinstance {
 
     }
 
-    /**
+    /** Delete the connector instance
      * @return bool
+     * @throws \dml_exception
+     * @throws \Exception
      */
     public function delete() {
         global $DB;

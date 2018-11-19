@@ -26,7 +26,7 @@ $PAGE->set_title("Data Importer");
 $PAGE->set_heading("Data Importer");
 echo $OUTPUT->header();
 $action = optional_param('action', null, PARAM_RAW);
-$pathitemid = required_param('pathitemid',PARAM_INT);
+$pathitemid = required_param('pathitemid', PARAM_INT);
 $pathitemname = optional_param('pathitemname', null, PARAM_INT);
 $renderable = new local_data_importer\output\importers_page();
 

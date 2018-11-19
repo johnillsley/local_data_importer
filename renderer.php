@@ -87,7 +87,8 @@ class local_data_importer_renderer extends plugin_renderer_base {
      * @return mixed
      */
     public function select_path_item_subplugin($items, $connectordata, $pluginlist) {
-        return $this->render_from_template('local_data_importer/select_path_item', ['pathitems' => $items, 'connectordata' => $connectordata, 'subplugins' => $pluginlist]);
+        return $this->render_from_template('local_data_importer/select_path_item',
+            ['pathitems' => $items, 'connectordata' => $connectordata, 'subplugins' => $pluginlist]);
 
     }
 
