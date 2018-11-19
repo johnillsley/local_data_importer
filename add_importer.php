@@ -92,8 +92,6 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $params['selectedconnector'] = $connectordata;
                             $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                             echo $selectconnectorform->display();
-                            //$renderer = $PAGE->get_renderer('local_data_importer');
-                            //echo $renderer->select_path_item_subplugin($items, $connectordata, $pluginlist);
                         }
                     } catch (\Exception $e) {
                         var_dump($e);
@@ -136,6 +134,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
             }
             break;
         case 'save':
+
             // Add them to the database.
             // 1. PATH ITEM.
             $objpathitem = new local_data_importer_connectorpathitem();
@@ -156,8 +155,10 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
 
                 if (isset($pathitemparams) && is_array($pathitemparams)) {
                     foreach ($pathitemparams as $pip => $pcp) {
-                        $objpathitemparameter->set_pathitem_parameter($pip);
-                        $objpathitemparameter->set_plugincomponent_param($pcp);
+                        $pip = explode("-", $pip);
+                        $objpathitemparameter->set_pluginparam_table($pip[0]);
+                        $objpathitemparameter->set_pluginparam_field($pip[1]);
+                        $objpathitemparameter->set_pathitem_parameter($pcp);
                         $objpathitemparameter->save();
                     }
                 }
@@ -169,8 +170,10 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
 
                 if (isset($pathitemresponse) && is_array($pathitemresponse)) {
                     foreach ($pathitemresponse as $pir => $pcr) {
-                        $objpathitemresponse->set_pathitem_response($pir);
-                        $objpathitemresponse->set_plugincomponent_response($pcr);
+                        $pir = explode("-", $pir);
+                        $objpathitemresponse->set_pathitem_response($pcr);
+                        $objpathitemresponse->set_pluginresponse_table($pir[0]);
+                        $objpathitemresponse->set_pluginresponse_field($pir[1]);
                         $objpathitemresponse->save();
                         // All Saved OK.
                         redirect($returnurl);
