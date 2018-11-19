@@ -17,8 +17,8 @@ define('AJAX_SCRIPT', true);
 require_once(dirname(__FILE__) . '/../../config.php');
 require_login();
 $action = optional_param('action', 'logentries', PARAM_RAW);
-$openapikey = optional_param('openapikey', '', PARAM_INT);
-$openapidefinitionurl = optional_param('openapidefinitionurl', '', PARAM_INT);
+$openapikey = optional_param('openapikey', '', PARAM_RAW);
+$openapidefinitionurl = optional_param('openapidefinitionurl', '', PARAM_RAW);
 $componentname = optional_param('componentname', '', PARAM_RAW);
 $connectorid = optional_param('connectorid', '', PARAM_INT);
 global $PAGE;
@@ -31,39 +31,11 @@ if ($openapikey) {
 if ($openapidefinitionurl) {
     $connector->openapidefinitionurl = $openapidefinitionurl;
 }
-if ($componentname) {
-    $class = $componentname . "_subplugin";
-    $object = new $class();
-    $object->params();
-    echo json_encode($object->params);
-    exit;
+try {
+    $httpconnection = new local_data_importer_http_connection($openapidefinitionurl, $openapikey);
+    $httpresponse = $httpconnection->get_response();
+    $openapiinspector = new local_data_importer_openapi_inspector($httpresponse);
+    echo json_encode($openapiinspector->servers);
+} catch (\Exception $e) {
+    echo json_encode(["Error fetching servers from Swaggerhub"]);
 }
-if ($action == 'fetchpathitems') {
-    if (isset($connectorid)) {
-        $connectorinstance = new \local_data_importer_connectorinstance();
-        try {
-            $connector = $connectorinstance->get_by_id($connectorid);
-            if ($connector instanceof \local_data_importer_connectorinstance) {
-                /*$data['openapidefinitionurl'] = $connector->get_openapidefinitionurl();
-                $data['openapikey'] = $connector->get_openapi_key();
-                $client_connection = new local_data_importer_http_connection();
-                $content = $client_connection->get_response();
-                $spec = new local_data_importer_openapi_inspector($content);
-                $pathitems = $spec->get_pathitems($methodfilter = array("get"));*/
-                $items = array();
-                $pathitem1 = new \stdClass();
-                $pathitem1->name = "PathItem1";
-                $pathitem2 = new \stdClass();
-                $pathitem2->name = "PathItem2";
-                $items = [$pathitem1, $pathitem2];
-                echo json_encode(['pathitems' => $items]);
-                die;
-            }
-        } catch (\Exception $e) {
-
-        }
-        die;
-
-    }
-}
-echo json_encode(['server1', 'server2']);
