@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/local/data_importer/vendor/autoload.php');
+require_once($CFG->dirroot . '/local/data_importer/vendor/autoload.php');
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
@@ -52,7 +52,7 @@ class local_data_importer_http_connection {
      * @throws Exception if Guzzle returns an error
      * @return void
      */
-    public function __construct($baseuri=null, $apikey=null) {
+    public function __construct($baseuri = null, $apikey = null) {
 
         if (isset($baseuri) && isset($apikey)) {
             try {
@@ -80,8 +80,8 @@ class local_data_importer_http_connection {
         // If set, use Moodle core settings to configure proxy.
         if (!empty($CFG->proxyhost) && !empty($CFG->proxyport)) {
             $proxycredentials = (!empty($CFG->proxyuser) && !empty($CFG->proxypassword))
-                    ? $CFG->proxyuser . ':' . $CFG->proxypassword . "@"
-                    : '';
+                ? $CFG->proxyuser . ':' . $CFG->proxypassword . "@"
+                : '';
 
             $proxy = array(
                 'http' => 'http://' . $proxycredentials . $CFG->proxyhost . ':' . $CFG->proxyport, // Use this proxy with "http".
@@ -94,10 +94,12 @@ class local_data_importer_http_connection {
         $headers = ['Authorization' => $apikey];
         try {
             $this->client = new GuzzleHttp\Client([
-                    'base_uri' => $baseuri,
-                    'headers' => $headers,
-                    'proxy' => $proxy,
-                    'timeout' => self::HTTP_TIMEOUT
+                'base_uri' => $baseuri,
+                'headers' => $headers,
+                'proxy' => $proxy,
+                'timeout' => self::HTTP_TIMEOUT,
+                'debug' => false,
+                'verify' => false
             ]);
         } catch (Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode(), $e);
@@ -111,7 +113,7 @@ class local_data_importer_http_connection {
      * @throws Exception if get fails or content not in the correct format.
      * @return array - if valid JSON or XML have been received the return value will be an array
      */
-    public function get_response($relativeuri='') {
+    public function get_response($relativeuri = '') {
 
         $timestart = microtime(true);
         $relativeuri = trim($relativeuri, '/');
