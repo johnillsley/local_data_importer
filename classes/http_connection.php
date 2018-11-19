@@ -99,6 +99,7 @@ class local_data_importer_http_connection {
                 'proxy' => $proxy,
                 'timeout' => self::HTTP_TIMEOUT,
                 'debug' => false,
+                // TODO : change this to true when going live.
                 'verify' => false
             ]);
         } catch (Exception $e) {
