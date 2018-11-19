@@ -28,13 +28,20 @@ abstract class local_data_importer_subpluginabstract implements local_data_impor
      */
     public $params;
     /**
+     * Plugin Name
      * @var
      */
     public $pluginname;
     /**
+     * Plugin Description
      * @var
      */
     public $plugindescription;
+
+    /**
+     * @var string
+     */
+    public $tablefieldseperator = ":";
 
 
     /**
@@ -42,8 +49,8 @@ abstract class local_data_importer_subpluginabstract implements local_data_impor
      */
     public function set_responses() {
         global $DB;
-        foreach ($this->responses as $key => $arrayparam) {
-            $table = $arrayparam['table'];
+        foreach ($this->responses as $tablename => $arrayparam) {
+
             $fieldname = $arrayparam['name'];
             try {
                 if (!empty($arrayparam['table'])) {
@@ -52,7 +59,7 @@ abstract class local_data_importer_subpluginabstract implements local_data_impor
                         $arrayparam['type'] = $columndetails->type;
                         $arrayparam['field'] = $columndetails->field;
                         // Add it back to the params.
-                         $this->responses[$key] = $arrayparam;
+                        $this->responses[$key] = $arrayparam;
                     }
 
                 }
@@ -62,6 +69,27 @@ abstract class local_data_importer_subpluginabstract implements local_data_impor
 
         }
     }
+
+    /** Find a response parameter from a web service response iteratively
+     * @param array $haystack
+     * @param $needle
+     * @return mixed|null
+     */
+    public function find_response_parameter(array $haystack, $needle) {
+        $value = null;
+        $iterator = new RecursiveArrayIterator($haystack);
+        $recursive = new RecursiveIteratorIterator(
+            $iterator,
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($recursive as $key => $value) {
+            if ($key === $needle) {
+                return $value;
+            }
+        }
+        return $value;
+    }
+
 
     /**
      * @return bool
@@ -80,6 +108,18 @@ abstract class local_data_importer_subpluginabstract implements local_data_impor
      * @return string
      */
     abstract public function plugin_description(): string;
+
+    /**
+     * @return array
+     */
+    public function get_importers() {
+        global $DB;
+        $pathitems = array();
+        // For this particular plugin, get all the importers it is attached to.
+        $pathitem = new local_data_importer_connectorpathitem();
+        $pathitems = $pathitem->get_by_subplugin($this->pluginname);
+        return $pathitems;
+    }
 
 
 }
