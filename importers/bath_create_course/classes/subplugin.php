@@ -24,13 +24,11 @@ class importers_bath_create_course_subplugin extends local_data_importer_subplug
      */
     public function __construct() {
         $this->responses = array(
-            array('name' => 'fullname', 'table' => 'course'),
-            array('name' => 'shortname', 'table' => 'course'),
-            array('name' => 'name', 'table' => 'course_categories'),
-            array('name' => 'idnumber', 'table' => 'course')
+            'course' => array('fullname', 'shortname  ', 'idnumber'),
+            'course_categories' => array('name')
         );
-        $this->params = array('name' => 'sits_code', 'table' => 'sits_mapping');
-        $this->set_responses();
+
+        $this->params = array('sits_mappings' => array('sits_code', 'acyear', 'period_code'));
     }
 
     /**
@@ -58,7 +56,17 @@ class importers_bath_create_course_subplugin extends local_data_importer_subplug
         $this->plugindescription = get_string('plugindescription', 'local_create_course');
     }
 
-
-    //TODO New function called "available_params_for_url" , "actual_params_for_url"
-    // TODO additional form elements
+    /**
+     * Traverse through the params property and return actual data to be passed to the WS call
+     */
+    public function get_parameters_for_ws() {
+        // List of sits mapping mod_codes to pass back.
+        global $DB;
+        foreach ($this->params as $table => $fields) {
+            foreach ($fields as $field) {
+                $params = $DB->get_records($table, [], $field);
+            }
+        }
+        return $params;
+    }
 }
