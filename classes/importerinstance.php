@@ -84,8 +84,6 @@ class local_data_importer_importerinstance {
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
-
-
     }
 
     /**
