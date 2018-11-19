@@ -31,11 +31,17 @@ class importers_page implements templatable, renderable {
      * @var
      */
     public $connectoritems;
+    /**
+     * @var
+     */
     public $pathitems;
     /**
      * @var \local_data_importer_connectorinstance
      */
     public $connectorinstance;
+    /**
+     * @var \local_data_importer_connectorpathitem
+     */
     public $pathiteminstance;
 
     /**
@@ -46,6 +52,9 @@ class importers_page implements templatable, renderable {
         $this->pathiteminstance = new \local_data_importer_connectorpathitem();
     }
 
+    /**
+     * @return array
+     */
     public function connector_items() {
         $connectors = $this->connectorinstance->get_all();
         if (is_array($connectors)) {
@@ -124,17 +133,22 @@ class importers_page implements templatable, renderable {
         $connector = $this->connectorinstance->get_by_id($id);
         $data = array();
         if ($connector instanceof \local_data_importer_connectorinstance) {
-            $data['id'] = $connector->getid();
-            $data['name'] = $connector->get_name();
-            $data['description'] = $connector->getdescription();
-            $data['openapikey'] = $connector->get_openapi_key();
-            $data['serverapikey'] = $connector->get_server_apikey();
-            $data['server'] = $connector->getserver();
-            $data['lastmodified'] = date('d-m-Y H:i', $connector->get_timemodified());
-            $data['openapidefinitionurl'] = $connector->get_openapidefinitionurl();
+            $data = new stdClass();
+            $data->id = $connector->getid();
+            $data->name = $connector->get_name();
+            $data->description = $connector->getdescription();
+            $data->server = $connector->getserver();
+            $data->openapikey = $connector->get_openapi_key();
+            $data->openapidefinitionurl = $connector->get_openapidefinitionurl();
+            $data->serverapikey = $connector->get_server_apikey();
+
         }
         return $data;
     }
+
+    /**
+     * @return array
+     */
     public function get_all_connector_names() {
         $connectors = $this->connectorinstance->get_all();
         $connectoritems = array();
@@ -151,7 +165,12 @@ class importers_page implements templatable, renderable {
         }
         return array('connectoritems' => $connectoritems);
     }
-    public function get_single_path_item_instance($id){
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function get_single_path_item_instance($id) {
         $pathiteminstance = $this->pathiteminstance->get_by_id($id);
         $data = array();
         if ($pathiteminstance instanceof \local_data_importer_connectorpathitem) {
