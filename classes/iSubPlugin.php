@@ -24,6 +24,8 @@ interface local_data_importer_iSubPlugin {
      */
     public function set_responses();
 
+    public function get_importers();
+
     /**
      * @return bool
      */
