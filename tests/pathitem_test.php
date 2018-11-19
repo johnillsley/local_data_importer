@@ -39,13 +39,15 @@ class local_data_importer_pathitem_testcase extends advanced_testcase {
         $object->set_name("NewPathItemName");
         $object->set_active(false);
         $object->save(true);
-        $object2 = $this->pathitem->getbyid($this->pathitemid);
-        $this->assertEquals("NewPathItemName", $object2->getname());
+        $object2 = $this->pathitem->get_by_id($this->pathitemid);
+        $this->assertEquals("NewPathItemName", $object2->get_name());
     }
 
     public function test_delete_pathitem() {
         global $DB;
         $object = $this->pathitem->get_by_id($this->pathitemid);
+        $pathitemparam = new local_data_importer_pathitem_parameter();
+        $pathitemresponse = new local_data_importer_pathitem_response();
         $responseparam = new local_data_importer_connectorresponseparams();
         try {
             if ($DB->record_exists($responseparam->get_dbtable(), ['pathitemid' => $object->get_id()])) {
