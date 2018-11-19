@@ -14,8 +14,6 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                     alert("Cannot be blank");
                     return false;
                 }
-                console.log(apikey);
-                console.log(apiurl);
                 $.ajax({
                     type: 'GET',
                     dataType: 'json',
@@ -25,9 +23,8 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                     console.log(servers);
                     // add it to the disabled control
                     $.each(servers, function (key, value) {
-                        console.log(key);
-                        console.log(value);
                         var option = $("<option />");
+                        option.empty();
                         option.html(value);
                         option.val(value);
                         server_control.append(option);
