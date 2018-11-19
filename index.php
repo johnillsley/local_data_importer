@@ -37,7 +37,6 @@ $connectorinstance = new local_data_importer_connectorinstance();
 $importerform = new local_data_importer_connector_form();
 if ($formdata = $importerform->get_data()) {
     // Process the data.
-    //$formdata = $importerform->get_data();
     $server = '';
     // Additionally get the servers.
     if (isset($_POST['apiserver'])) {
@@ -121,5 +120,4 @@ switch ($action) {
         echo $renderer->importers_page();
         break;
 }
-// https://docs.moodle.org/dev/Subplugins
 echo $OUTPUT->footer();
