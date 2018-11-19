@@ -53,7 +53,7 @@ class local_data_importer_connector_testcase extends advanced_testcase {
             $contents = (string)$response->getBody()->getContents();
             $contents = json_decode($contents);
             if ($contents && property_exists($contents, 'swagger')) {
-                // verify the swagger version
+                // Verify the swagger version.
                 $this->assertEquals('2.0', $contents->swagger);
             }
         }
@@ -90,7 +90,7 @@ class local_data_importer_connector_testcase extends advanced_testcase {
     }
 
     /**
-     *
+     * Test Connector Instance Deletion
      */
     public function test_delete_connector() {
         global $DB;
