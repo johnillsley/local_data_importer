@@ -23,6 +23,7 @@ class local_data_importer_add_importer_form extends moodleform {
     /**
      *
      */
+    const TABLE_FIELD_SEPERATOR = '-';
     public function definition() {
         $mform = $this->_form;
         if (isset($this->_customdata['connectorid'])) {
@@ -76,7 +77,8 @@ class local_data_importer_add_importer_form extends moodleform {
                         $mform->addElement('static', 'subpluginparams', "Sub plugin param",
                             "<strong>" . $val . "</strong>");
                         // Add hidden element for form capture.
-                        $plugincomponentidentifier = $paramkey . "_" . $val;
+                        $plugincomponentidentifier = $paramkey . self::TABLE_FIELD_SEPERATOR . $val;
+
                         $mform->addElement('hidden', 'plugincomponentparam', $plugincomponentidentifier);
                         $mform->setType('plugincomponentparam', PARAM_TEXT);
                         if (is_array($this->_customdata['pathitemparams'])) {
@@ -97,7 +99,7 @@ class local_data_importer_add_importer_form extends moodleform {
                 $subpluginresponses = $this->_customdata['subpluginresponses'];
                 foreach ($subpluginresponses as $paramkey => $arrayparam) {
                     foreach ($arrayparam as $key => $val) {
-                        $plugincomponentidentifier = $paramkey . "_" . $val;
+                        $plugincomponentidentifier = $paramkey . self::TABLE_FIELD_SEPERATOR . $val;
                         $mform->addElement('static', 'subpluginparams', "Sub plugin response", "<strong>" . $val . "</strong>");
                         $mform->addElement('hidden', 'plugincomponentresponse', $plugincomponentidentifier);
                         $mform->setType('plugincomponentresponse', PARAM_TEXT);
@@ -121,8 +123,6 @@ class local_data_importer_add_importer_form extends moodleform {
                 }
                 $mform->addElement('select', 'connectorid', 'Select Connector', $connectoroptions);
                 $mform->addRule('connectorid', get_string('required'), 'required', null, 'client');
-
-
             }
 
         }
