@@ -71,23 +71,22 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         $this->connectorinstance->setopenapikey('openapikey');
         $host = $data->host;
         $basepath = $data->basePath;
-        $this->connectorinstance->sethost($host);
-        $this->connectorinstance->setbasepath($basepath);
+        $this->connectorinstance->setserver($host);
         $openapidefinitionurl = "https://api.swaggerhub.com/apis/UniversityofBath/GradesTransferOAS20/1.0.0";
-        $this->connectorinstance->setopenapidefinitionurl($openapidefinitionurl);
+        $this->connectorinstance->set_openapidefinitionurl($openapidefinitionurl);
         $this->connectorinstanceid = $this->connectorinstance->save(true);
     }
 
 
     public function test_update_connector_instance() {
         $this->resetAfterTest();
-        $object = $this->connectorinstance->getbyid($this->connectorinstanceid);
+        $object = $this->connectorinstance->get_by_id($this->connectorinstanceid);
         $object->setname('Connector Name2');
         $object->setdescription('New Description');
-        $object->settimemodified(time());
+        $object->set_timemodified(time());
         $object->save();
-        $object2 = $this->connectorinstance->getbyid($this->connectorinstanceid);
-        $this->assertEquals("Connector Name2", $object2->getname());
+        $object2 = $this->connectorinstance->get_by_id($this->connectorinstanceid);
+        $this->assertEquals("Connector Name2", $object2->get_name());
     }
 
     /**
@@ -98,13 +97,13 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         // Path item active.
 
         $instancescount = $DB->count_records($this->connectorinstance->getdbtable());
-        $object = $this->connectorinstance->getbyid
+        $object = $this->connectorinstance->get_by_id
         (
             $this->connectorinstanceid
         );
         $pathitem = new local_data_importer_connectorpathitem();
         try {
-            if ($DB->record_exists($pathitem->getdbtable(), ['connectorid' => $object->getid()])) {
+            if ($DB->record_exists($pathitem->get_dbtable(), ['connectorid' => $object->getid()])) {
                 // It is already used by a connnector , cannot delete.
             } else {
                 // Ok to delete connector.
@@ -115,12 +114,5 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         } catch (\dml_exception $e) {
             echo $e->getMessage();
         }
-    }
-
-    /**
-     *
-     */
-    public function validate_connector_test() {
-
     }
 }
