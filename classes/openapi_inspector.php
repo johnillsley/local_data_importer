@@ -80,11 +80,10 @@ class local_data_importer_openapi_inspector {
         $this->spec = $spec;
 
         if (is_null($this->spec["info"]["title"])
-                || is_null($this->spec["info"]["description"])
-                || is_null($this->spec["info"]["version"])) {
-            throw new Exception('Tne openAPI document does not contain required data or it is not in array format.');
+            || is_null($this->spec["info"]["description"])
+            || is_null($this->spec["info"]["version"])) {
+            throw new Exception('The openAPI document does not contain required data or it is not in array format.');
         }
-
         $this->title        = $this->spec["info"]["title"];
         $this->description  = $this->spec["info"]["description"];
         $this->version      = $this->spec["info"]["version"];
