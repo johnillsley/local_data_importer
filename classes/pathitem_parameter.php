@@ -207,8 +207,6 @@ class local_data_importer_pathitem_parameter {
                     $pathitemparams[] = $pathitemparaminstance;
                 }
             }
-
-
         } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
@@ -241,7 +239,7 @@ class local_data_importer_pathitem_parameter {
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
-                 return $DB->insert_record($this->dbtable, $data, $returnid);
+                return $DB->insert_record($this->dbtable, $data, $returnid);
                 // Log it.
             } catch (\exception $e) {
                 // Log it.
