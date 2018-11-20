@@ -16,7 +16,6 @@
 
 require_once("../../config.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/connector_form.php");
-require_once($CFG->dirroot . "/local/data_importer/importer_form.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/importer/edit_importer.php");
 $url = new moodle_url('/local/data_importer/index.php');
 $PAGE->set_url($url);
