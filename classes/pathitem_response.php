@@ -177,7 +177,7 @@ class local_data_importer_pathitem_response {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
             $responseparaminstance->set_id($recordobject->id);
             $responseparaminstance->set_pathitemid($recordobject->pathitemid);
-            $responseparaminstance->set_pathitem_response($recordobject->response);
+            $responseparaminstance->set_pathitem_response($recordobject->pathitemresponse);
             $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
             $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsefield);
         } catch (\dml_exception $e) {
@@ -221,7 +221,7 @@ class local_data_importer_pathitem_response {
         global $DB;
         $data = new \stdclass();
         $data->pathitemid = $this->pathitemid;
-        $data->response = $this->pathitemresponse;
+        $data->pathitemresponse = $this->pathitemresponse;
         $data->pluginresponsetable = $this->pluginresponsetable;
         $data->pluginresponsefield = $this->pluginresponsefield;
         $data->timemodified = time();

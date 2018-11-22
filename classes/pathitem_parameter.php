@@ -178,7 +178,7 @@ class local_data_importer_pathitem_parameter {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
             $pathitemparaminstance->set_id($recordobject->id);
             $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
-            $pathitemparaminstance->set_pathitem_parameter($recordobject->pathparameter);
+            $pathitemparaminstance->set_pathitem_parameter($recordobject->pathitemparameter);
             $pathitemparaminstance->set_pluginparam_table($recordobject->pluginparamtable);
             $pathitemparaminstance->set_pluginparam_field($recordobject->pluginparamfield);
         } catch (\dml_exception $e) {
@@ -222,7 +222,7 @@ class local_data_importer_pathitem_parameter {
         global $DB;
         $data = new \stdclass();
         $data->pathitemid = $this->pathitemid;
-        $data->pathparameter = $this->pathitemparameter;
+        $data->pathitemparameter = $this->pathitemparameter;
         $data->pluginparamtable = $this->pluginparamtable;
         $data->pluginparamfield = $this->pluginparamfield;
         $data->timemodified = time();
