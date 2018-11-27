@@ -21,16 +21,7 @@ $openapikey = optional_param('openapikey', '', PARAM_RAW);
 $openapidefinitionurl = optional_param('openapidefinitionurl', '', PARAM_RAW);
 $componentname = optional_param('componentname', '', PARAM_RAW);
 $connectorid = optional_param('connectorid', '', PARAM_INT);
-global $PAGE;
-$PAGE->set_context(\context_system::instance());
-$renderer = $PAGE->get_renderer('local_data_importer');
-$connector = new \stdClass();
-if ($openapikey) {
-    $connector->openapikey = $openapikey;
-}
-if ($openapidefinitionurl) {
-    $connector->openapidefinitionurl = $openapidefinitionurl;
-}
+
 try {
     $httpconnection = new local_data_importer_http_connection($openapidefinitionurl, $openapikey);
     $httpresponse = $httpconnection->get_response();
