@@ -33,7 +33,9 @@ class local_data_importer_data_fetcher {
         try {
             $this->importer = new local_data_importer_importerinstance($this->pathitemid);
             if ($this->importer instanceof local_data_importer_importerinstance) {
-
+                // TODO - What is supposed to happen on else? What is this checking for? Better for constructor to throw an exception
+                // https://softwareengineering.stackexchange.com/questions/137581/should-i-throw-exception-from-constructor
+                
                 // Get the base uri and api-key to connect to the web service.
                 $baseuri = $this->importer->connectorinstance->getserver();
                 $serverapikey = $this->importer->connectorinstance->get_server_apikey();
@@ -57,6 +59,7 @@ class local_data_importer_data_fetcher {
                         // Do one by one on the pathitem call , give it back to subplugin and then do the next.
                         try {
                             $response[] = $this->httpclient->get_response($afterpathitemstring);
+                            // TODO - why is this called multiple times before the URL is completely formed? This is wrong.
                             // If got a positive response, pass the data back to the subplugin
                             // for consumption.
                             $wsresponse = $this->extract_response($response);
@@ -68,7 +71,7 @@ class local_data_importer_data_fetcher {
                     }
 
                 }
-            }
+            } 
         }
         catch (\Exception $e) {
         }

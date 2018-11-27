@@ -221,8 +221,10 @@ class local_data_importer_connectorinstance {
                 $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
                 $connectorinstance->setopenapikey($recordobject->openapikey);
                 $connectorinstance->set_server_apikey($recordobject->serverapikey);
+                // TODO - why do some methods have underscore and some don't?
             } else {
                 $connectorinstance = false;
+                // TODO - This should throw an exception to stop code continuing above. Surely if you request object with invalid id something went wrong.
             }
 
             return $connectorinstance;

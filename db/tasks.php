@@ -13,14 +13,27 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-defined('MOODLE_INTERNAL') || die();$tasks = array(
+
+/**
+ * Definition of Data Importer scheduled tasks.
+ *
+ * @package   local_data_importer
+ * @category  task
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @copyright  2018 University of Bath
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+$tasks = array(
     array(
-        'classname' => '\importers_bath_create_course\task\create_course_sync_task',
+        'classname' => 'local_data_importer\task\doimports',
         'blocking' => 0,
-        'minute' => '15',
+        'minute' => '10',
         'hour' => '*',
         'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
+        'month' => '*',
+        'dayofweek' => '*'
     )
 );

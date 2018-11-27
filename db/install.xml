@@ -30,6 +30,7 @@
                 <FIELD NAME="httpmethod" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="plugincomponent" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="active" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+                <FIELD NAME="importorder" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
             </FIELDS>
             <KEYS>
