@@ -13,6 +13,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * Ajax File to handle fetching of server details through Web Services
+ *
+ * @package    local_data_importer
+ * @author     Hittesh Ahuja <ha386@bath.ac.uk>
+ * @copyright  2018 University of Bath
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 define('AJAX_SCRIPT', true);
 require_once(dirname(__FILE__) . '/../../config.php');
 require_login();
@@ -37,5 +45,6 @@ try {
     $openapiinspector = new local_data_importer_openapi_inspector($httpresponse);
     echo json_encode($openapiinspector->servers);
 } catch (\Exception $e) {
+    var_dump($e->getMessage());
     echo json_encode(["Error fetching servers from Swaggerhub"]);
 }

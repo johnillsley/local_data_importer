@@ -20,7 +20,7 @@
                 <td> {{description}} </td>
                 <td> {{server}} </td>
                 <td> {{openapidefinitionurl}} </td>
-                <td> <a href="add_connector.php?connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+                <td> <a href="edit_connector.php?connectorid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
 
             </tr>
         {{/connectoritems}}
@@ -52,7 +52,7 @@
             <td>{{http_method}}</td>
             <td>{{plugin_component}}</td>
             <td>{{active}}</td>
-            <td> <a href="edit_importer.php?action=edit&pathitemid={{id}}">Edit</a> | <a href="index.php?action=delete_connector&connectorid={{id}}">Delete</a> </td>
+            <td> <a href="edit_importer.php?action=edit&pathitemid={{id}}">Edit</a> | <a href="edit_importer.php?action=delete&pathitemid={{pathitemid}}">Delete</a> </td>
             </tr>
             {{/pathitems}}
             </tbody>
