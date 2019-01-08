@@ -18,6 +18,7 @@ global $CFG;
 
 /**
  * Class local_data_importer_pathitem_testcase
+ * @group local_data_importer
  */
 class local_data_importer_pathitem_testcase extends advanced_testcase {
     /**
