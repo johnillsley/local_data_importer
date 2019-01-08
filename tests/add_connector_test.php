@@ -27,14 +27,21 @@ use GuzzleHttp\Exception\RequestException;
 
 /**
  * Class local_data_importer_testcase
+ * @group local_data_importer
  */
-class local_data_importer_connector_testcase extends advanced_testcase {
+class local_data_importer_add_connector_testcase extends advanced_testcase {
     /**
      *
      */
     protected $connectorinstanceid;
+    /**
+     * @var
+     */
     public $connectorinstance;
 
+    /**
+     *
+     */
     public function test_swaggerhub_api() {
         global $CFG;
         // Create a mock and queue two responses.
@@ -59,8 +66,12 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         }
     }
 
-    public function setUp() {
-        global $DB, $CFG;
+    /**
+     * Test Adding of a new connector to the database.
+     * @throws Exception
+     */
+    public function test_add_connector_instance() {
+        global  $CFG;
         $this->resetAfterTest(false);
         $json = file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/swaggerresponse.json');
         $data = json_decode($json);
@@ -70,49 +81,12 @@ class local_data_importer_connector_testcase extends advanced_testcase {
         $this->connectorinstance->set_server_apikey('serverapikey');
         $this->connectorinstance->setopenapikey('openapikey');
         $host = $data->host;
-        $basepath = $data->basePath;
         $this->connectorinstance->setserver($host);
         $openapidefinitionurl = "https://api.swaggerhub.com/apis/UniversityofBath/GradesTransferOAS20/1.0.0";
         $this->connectorinstance->set_openapidefinitionurl($openapidefinitionurl);
         $this->connectorinstanceid = $this->connectorinstance->save(true);
-    }
+        $connector = $this->connectorinstance->get_by_id($this->connectorinstanceid);
+        $this->assertInstanceOf(\local_data_importer_connectorinstance::class, $connector);
 
-
-    public function test_update_connector_instance() {
-        $this->resetAfterTest();
-        $object = $this->connectorinstance->get_by_id($this->connectorinstanceid);
-        $object->setname('Connector Name2');
-        $object->setdescription('New Description');
-        $object->set_timemodified(time());
-        $object->save();
-        $object2 = $this->connectorinstance->get_by_id($this->connectorinstanceid);
-        $this->assertEquals("Connector Name2", $object2->get_name());
-    }
-
-    /**
-     * Test Connector Instance Deletion
-     */
-    public function test_delete_connector() {
-        global $DB;
-        // Path item active.
-
-        $instancescount = $DB->count_records($this->connectorinstance->getdbtable());
-        $object = $this->connectorinstance->get_by_id
-        (
-            $this->connectorinstanceid
-        );
-        $pathitem = new local_data_importer_connectorpathitem();
-        try {
-            if ($DB->record_exists($pathitem->get_dbtable(), ['connectorid' => $object->getid()])) {
-                // It is already used by a connnector , cannot delete.
-            } else {
-                // Ok to delete connector.
-                $object->delete();
-                $deletedcount = $DB->count_records($this->connectorinstance->getdbtable());
-                $this->assertEquals(0, $deletedcount);
-            }
-        } catch (\dml_exception $e) {
-            echo $e->getMessage();
-        }
     }
 }
