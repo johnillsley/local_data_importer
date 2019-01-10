@@ -16,30 +16,83 @@
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 global $CFG;
 
+/**
+ * Class local_data_importer_pathitem_response_testcase
+ * @group local_data_importer
+ */
 class local_data_importer_pathitem_response_testcase extends advanced_testcase {
+    /**
+     * @var
+     */
     public $pathitemresponse;
+    /**
+     * @var
+     */
     public $pathitemresponseid;
+    /**
+     * @var
+     */
+    public $pathitem;
+    /**
+     * @var
+     */
+    public $pathitemid;
 
+    /**
+     * @throws Exception
+     */
     public function setUp() {
         global $DB, $CFG;
         $this->resetAfterTest(false);
-        $this->pathitemresponse = new local_data_importer_pathitem_response();
-        $this->pathitemresponse->set_pathitemid(1);
-        $this->pathitemresponse->set_pathitem_response("mod_code");
-        $this->pathitemresponse->set_pluginresponse_table("course");
-        $this->pathitemresponse->set_pluginresponse_field("idnumber");
-        $this->pathitemresponseid = $this->pathitemresponse->save(true);
+        // Path-item instance.
+        $this->pathitem = new local_data_importer_connectorpathitem();
+        $this->pathitem->set_name("Get Assessments");
+        $this->pathitem->set_connector_id(1); // No need to create a new connector instance (?).
+        $this->pathitem->set_path_item("/MABS/MOD_CODE/{modcode}");
+        $this->pathitem->set_active(true);
+        $this->pathitem->set_http_method('GET');
+        $this->pathitem->set_plugin_component('local_create_course');
+        $this->pathitemid = $this->pathitem->save(true);
     }
 
-    public function test_update_pathitem_parameter() {
+    /**
+     * Add a new path item response to the database
+     */
+    public function test_add_pathitem_response() {
         $this->resetAfterTest();
-        $object = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
-        $object->set_pathitem_response("mod_code2");
-        $object->set_pluginresponse_table("course2");
-        $object->set_pluginresponse_field("idnumber2");
-        $object->save(true);
-        $object2 = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
-        $this->assertEquals("mod_code2", $object2->get_pathitem_response());
+        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
+        $this->pathitemresponse = new local_data_importer_pathitem_response();
+        $this->pathitemresponse->set_pathitemid($pathitemobject->get_id());
+        $this->pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $this->pathitemresponse->set_pluginresponse_table('user');
+        $this->pathitemresponse->set_pluginresponse_field('username');
+        $this->pathitemresponseid = $this->pathitemresponse->save(true);
+        $pathitemresponse = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
+        $this->assertInstanceOf(\local_data_importer_pathitem_response::class, $pathitemresponse);
 
+    }
+
+    /**
+     * Test update of path item response entities
+     */
+    public function test_update_pathitem_response() {
+        $this->resetAfterTest();
+        // Add again.
+        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
+        $this->pathitemresponse = new local_data_importer_pathitem_response();
+        $this->pathitemresponse->set_pathitemid($pathitemobject->get_id());
+        $this->pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $this->pathitemresponse->set_pluginresponse_table('user');
+        $this->pathitemresponse->set_pluginresponse_field('username');
+        $this->pathitemresponseid = $this->pathitemresponse->save(true);
+        // Update.
+        $pathitemresponse = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
+        $pathitemresponse->set_pluginresponse_table('user2');
+        $pathitemresponse->set_pluginresponse_field('username2');
+        $pathitemresponse->save(true);
+        $pathitemresponse = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
+        // Confirm.
+        $this->assertEquals("username2", $pathitemresponse->get_pluginresponse_field());
+        $this->assertEquals("user2", $pathitemresponse->get_pluginresponse_table());
     }
 }

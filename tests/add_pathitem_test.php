@@ -57,7 +57,6 @@ class local_data_importer_pathitem_testcase extends advanced_testcase {
         $this->connectorinstance->set_openapidefinitionurl($openapidefinitionurl);
         $this->connectorinstanceid = $this->connectorinstance->save(true);
 
-
     }
     /**
      * Add new Pathitem

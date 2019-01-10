@@ -16,30 +16,80 @@
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 global $CFG;
 
+/**
+ * Class local_data_importer_pathitem_parameter_testcase
+ * @group local_data_importer
+ */
 class local_data_importer_pathitem_parameter_testcase extends advanced_testcase {
+    /**
+     * @var
+     */
     public $pathitemparameter;
+    /**
+     * @var
+     */
     public $pathitemparameterid;
+    public $pathitem;
+    public $pathitemid;
 
+    /**
+     *
+     */
     public function setUp() {
         global $DB, $CFG;
         $this->resetAfterTest(false);
+
+        // Path-item instance.
+        $this->pathitem = new local_data_importer_connectorpathitem();
+        $this->pathitem->set_name("Get Assessments");
+        $this->pathitem->set_connector_id(1); // No need to create a new connector instance (?).
+        $this->pathitem->set_path_item("/MABS/MOD_CODE/{modcode}");
+        $this->pathitem->set_active(true);
+        $this->pathitem->set_http_method('GET');
+        $this->pathitem->set_plugin_component('local_create_course');
+        $this->pathitemid = $this->pathitem->save(true);
+
+    }
+
+    /**
+     * Add new path item parameter
+     */
+    public function test_add_pathitem_parameter() {
+        $this->resetAfterTest();
+        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
         $this->pathitemparameter = new local_data_importer_pathitem_parameter();
-        $this->pathitemparameter->set_pathitemid(1);
+        $this->pathitemparameter->set_pathitemid($pathitemobject->get_id());
         $this->pathitemparameter->set_pathitem_parameter("mod_code");
         $this->pathitemparameter->set_pluginparam_table("course");
         $this->pathitemparameter->set_pluginparam_field("idnumber");
         $this->pathitemparameterid = $this->pathitemparameter->save(true);
+        $pathitemparameter = $this->pathitemparameter->get_by_id($this->pathitemparameterid);
+        $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $pathitemparameter);
     }
 
+    /**
+     * Add new path item parameter
+     */
     public function test_update_pathitem_parameter() {
         $this->resetAfterTest();
-        $object = $this->pathitemparameter->get_by_id($this->pathitemparameterid);
-        $object->set_pathitem_parameter("mod_code2");
-        $object->set_pluginparam_table("course2");
-        $object->set_pluginparam_field("idnumber2");
-        $object->save(true);
-        $object2 = $this->pathitemparameter->get_by_id($this->pathitemparameterid);
-        $this->assertEquals("mod_code2", $object2->get_pathitem_parameter());
+        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
 
+        // Add.
+        $this->pathitemparameter = new local_data_importer_pathitem_parameter();
+        $this->pathitemparameter->set_pathitemid($pathitemobject->get_id());
+        $this->pathitemparameter->set_pathitem_parameter("mod_code");
+        $this->pathitemparameter->set_pluginparam_table("course");
+        $this->pathitemparameter->set_pluginparam_field("idnumber");
+        $this->pathitemparameterid = $this->pathitemparameter->save(true);
+
+        // Update.
+        $this->pathitemparameter = new local_data_importer_pathitem_parameter();
+        $this->pathitemparameter->set_pathitemid($pathitemobject->get_id());
+        $this->pathitemparameter->set_pathitem_parameter("mod_code");
+        $this->pathitemparameter->set_pluginparam_table("course");
+        $this->pathitemparameter->set_pluginparam_field("idnumber");
+        $this->pathitemparameterid = $this->pathitemparameter->save(true);
+        $pathitemparameter = $this->pathitemparameter->get_by_id($this->pathitemparameterid);
+        $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $pathitemparameter);
     }
 }
