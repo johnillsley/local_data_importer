@@ -221,6 +221,8 @@ class local_data_importer_connectorinstance {
                 $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
                 $connectorinstance->setopenapikey($recordobject->openapikey);
                 $connectorinstance->set_server_apikey($recordobject->serverapikey);
+                $connectorinstance->set_timecreated($recordobject->timecreated);
+                $connectorinstance->set_timemodified($recordobject->timemodified);
             } else {
                 $connectorinstance = false;
             }

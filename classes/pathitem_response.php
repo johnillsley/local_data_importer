@@ -179,7 +179,7 @@ class local_data_importer_pathitem_response {
             $responseparaminstance->set_pathitemid($recordobject->pathitemid);
             $responseparaminstance->set_pathitem_response($recordobject->pathitemresponse);
             $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
-            $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsefield);
+            $responseparaminstance->set_pluginresponse_field($recordobject->pluginresponsefield);
         } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
@@ -200,7 +200,7 @@ class local_data_importer_pathitem_response {
                     $responseparaminstance = new self();
                     $responseparaminstance->set_id($recordobject->id);
                     $responseparaminstance->set_pathitemid($recordobject->pathitemid);
-                    $responseparaminstance->set_pathitem_response($recordobject->response);
+                    $responseparaminstance->set_pathitem_response($recordobject->pathitemresponse);
                     $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
                     $responseparaminstance->set_pluginresponse_field($recordobject->pluginresponsefield);
                     $responseparams[] = $responseparaminstance;

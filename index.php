@@ -34,6 +34,7 @@ $pathitemid = optional_param('pathitemid', null, PARAM_INT);
 $confirmdelete = optional_param('confirmdelete', null, PARAM_INT);
 $connectorinstance = new local_data_importer_connectorinstance();
 $importerform = new local_data_importer_connector_form();
+$pathiteminstance = new local_data_importer_connectorpathitem();
 if ($formdata = $importerform->get_data()) {
     // Process the data.
     $server = '';
@@ -96,16 +97,21 @@ switch ($action) {
             $pathitemdata = $renderable->get_single_path_item_instance($pathitemid);
             $importereditform = new local_data_importer_edit_importer_form(null, $pathitemdata);
             echo $importereditform->display();
-
-
         }
-
+        break;
+    case 'deletepathitem':
+        $PAGE->set_heading("Delete Pathitem");
+        echo $OUTPUT->header();
+        $renderer = $PAGE->get_renderer('local_data_importer');
+        echo $renderer->delete_pathitem_page($connectorid);
         break;
     default:
         // LIST ALL.
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
+
         if ($confirmdelete == 1) {
+            // Delete connector.
             if (isset($connectorid)) {
                 $connectorinstance->setid($connectorid);
                 try {
@@ -115,8 +121,18 @@ switch ($action) {
                 }
 
             }
+            if (isset($pathitemid)) {
+                // Delete pathitem.
+                $pathiteminstance->set_id($connectorid);
+                try {
+                    $pathiteminstance->delete();
+                } catch (\Exception $e) {
+                    echo $OUTPUT->notification($e->getMessage());    // Good (usually green).
+                }
+
+            }
         }
-        echo $renderer->importers_page();
+        echo $renderer->index_page();
         break;
 }
 echo $OUTPUT->footer();

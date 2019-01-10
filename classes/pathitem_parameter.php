@@ -201,7 +201,7 @@ class local_data_importer_pathitem_parameter {
                     $pathitemparaminstance = new self();
                     $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
                     $pathitemparaminstance->set_id($recordobject->id);
-                    $pathitemparaminstance->set_pathitem_parameter($recordobject->pathparameter);
+                    $pathitemparaminstance->set_pathitem_parameter($recordobject->pathitemparameter);
                     $pathitemparaminstance->set_pluginparam_table($recordobject->pluginparamtable);
                     $pathitemparaminstance->set_pluginparam_field($recordobject->pluginparamfield);
                     $pathitemparams[] = $pathitemparaminstance;

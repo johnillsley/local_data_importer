@@ -308,18 +308,18 @@ class local_data_importer_connectorpathitem {
             try {
                 return $DB->update_record($this->dbtable, $data);
                 // Log it.
-            } catch (\exception $e) {
+            } catch (\dml_exception $e) {
                 // Log it.
-                var_dump($e->getmessage());
+                throw new Exception($e->getMessage());
             }
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
                 return $DB->insert_record($this->dbtable, $data, $returnid);
                 // Log it.
-            } catch (\exception $e) {
+            } catch (\dml_exception $e) {
                 // Log it.
-                var_dump($e->getmessage());
+                throw new Exception($e->getMessage());
             }
         }
     }
