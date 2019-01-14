@@ -20,7 +20,6 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                     data: {'openapikey': apikey, 'openapidefinitionurl': apiurl},
                     url: URL
                 }).done(function (servers) {
-                    console.log(servers);
                     // add it to the disabled control
                     $.each(servers, function (key, value) {
                         var option = $("<option />");
