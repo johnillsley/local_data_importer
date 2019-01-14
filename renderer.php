@@ -35,8 +35,8 @@ class local_data_importer_renderer extends plugin_renderer_base {
      * @return bool|string
      * @throws \moodle_exception
      */
-    public function index_page() {
-        $renderable = new local_data_importer\output\importers_page();
+    public function index_page($connector, $pathitem) {
+        $renderable = new local_data_importer\output\importers_page($connector, $pathitem);
         $connectorspathitems = $renderable->export_for_template($this->output);
         return parent::render_from_template('local_data_importer/connectors', $connectorspathitems);
     }

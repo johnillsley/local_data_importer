@@ -47,9 +47,9 @@ class importers_page implements templatable, renderable {
     /**
      * connectors_page constructor.
      */
-    public function __construct() {
-        $this->connectorinstance = new \local_data_importer_connectorinstance();
-        $this->pathiteminstance = new \local_data_importer_connectorpathitem();
+    public function __construct($connectorinstance, $pathiteminstance) {
+        $this->connectorinstance = $connectorinstance;
+        $this->pathiteminstance = $pathiteminstance;
     }
 
     /**
@@ -100,7 +100,7 @@ class importers_page implements templatable, renderable {
         if (is_array($pathitems)) {
             foreach ($pathitems as $pathitem) {
                 $data = new stdClass();
-                $data->id = $pathitem->get_id();
+                $data->pathitemid = $pathitem->get_id();
                 $data->name = $pathitem->get_name();
                 $data->http_method = $pathitem->get_http_method();
                 $data->plugin_component = $pathitem->get_plugin_component();
@@ -168,21 +168,25 @@ class importers_page implements templatable, renderable {
 
     /**
      * @param $id
-     * @return array
+     * @return mixed
      */
     public function get_single_path_item_instance($id) {
-        $pathiteminstance = $this->pathiteminstance->get_by_id($id);
-        $data = array();
-        if ($pathiteminstance instanceof \local_data_importer_connectorpathitem) {
-            $data['id'] = $pathiteminstance->get_id();
-            $data['name'] = $pathiteminstance->get_name();
-            $data['connnectorid'] = $pathiteminstance->get_connector_id();
-            $data['http_method'] = $pathiteminstance->get_http_method();
-            $data['plugin_component'] = $pathiteminstance->get_plugin_component();
-            $data['active'] = ($pathiteminstance->get_active() == 1 ? 'Yes' : 'No');
-            $data['pathitem'] = $pathiteminstance->get_path_item();
+        if ($id) {
+            $pathiteminstance = $this->pathiteminstance->get_by_id($id);
+            $data = array();
+            if ($pathiteminstance instanceof \local_data_importer_connectorpathitem) {
+                $data['id'] = $pathiteminstance->get_id();
+                $data['name'] = $pathiteminstance->get_name();
+                $data['connnectorid'] = $pathiteminstance->get_connector_id();
+                $data['http_method'] = $pathiteminstance->get_http_method();
+                $data['plugin_component'] = $pathiteminstance->get_plugin_component();
+                $data['active'] = ($pathiteminstance->get_active() == 1 ? 'Yes' : 'No');
+                $data['pathitem'] = $pathiteminstance->get_path_item();
+            }
+            return $data;
         }
-        return $data;
+        return false;
+
     }
 
 }
