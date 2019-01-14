@@ -132,7 +132,7 @@ switch ($action) {
 
             }
         }
-        echo $renderer->index_page();
+        echo $renderer->index_page($connectorinstance, $pathiteminstance);
         break;
 }
 echo $OUTPUT->footer();
