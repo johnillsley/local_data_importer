@@ -29,7 +29,7 @@ use GuzzleHttp\Exception\RequestException;
  * Class local_data_importer_testcase
  * @group local_data_importer
  */
-class local_data_importer_add_connector_testcase extends advanced_testcase {
+class local_data_importer_delete_connector_testcase extends advanced_testcase {
     /**
      *
      */
