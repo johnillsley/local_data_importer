@@ -134,7 +134,6 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
             }
             break;
         case 'save':
-
             // Add them to the database.
             // 1. PATH ITEM.
             $objpathitem = new local_data_importer_connectorpathitem();
@@ -175,9 +174,9 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                         $objpathitemresponse->set_pluginresponse_table($pir[0]);
                         $objpathitemresponse->set_pluginresponse_field($pir[1]);
                         $objpathitemresponse->save();
-                        // All Saved OK.
-                        redirect($returnurl);
                     }
+                    // All Saved OK.
+                    redirect($returnurl);
                 }
 
 

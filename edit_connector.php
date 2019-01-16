@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
- * Logic to handle adding new connectors
+ * Logic to handle editing existing connectors
  *
  * @package    local_data_importer
  * @author     Hittesh Ahuja <j.s.illsley@bath.ac.uk>
@@ -24,34 +24,41 @@
 require_once("../../config.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/connector_form.php");
 $returnurl = new moodle_url('/local/data_importer/index.php');
-$url = new moodle_url('/local/data_importer/add_connector.php');
-$action = optional_param('action', '', PARAM_RAW);
+$url = new moodle_url('/local/data_importer/edit_connector.php');
 $PAGE->set_url($url);
 $PAGE->set_context(\context_system::instance());
 require_login();
+$connectorid = optional_param('connectorid', 0, PARAM_INT);
+$connectordata = null;
+$renderable = new local_data_importer\output\importers_page();
+$connectordata = $renderable->get_single_connector_instance($connectorid);
 $connectorinstance = new local_data_importer_connectorinstance();
-$mform = new local_data_importer_connector_form(null);
-// Form submission.
+$mform = new local_data_importer_connector_form(null, ['id' => $connectorid,
+    'description' => $connectordata->description,
+    'name' => $connectordata->name,
+    'openapidefinitionurl' => $connectordata->openapidefinitionurl,
+    'openapikey' => $connectordata->openapikey,
+    'server' => $connectordata->server,
+    'serverapikey' => $connectordata->serverapikey]);
 if (!$mform->is_cancelled() && $formdata = $mform->get_data()) {
-    // Server needs to be retrieved using POST as its fetched through ajax so $mform knows nothing about it.
-    $apiserver = $_POST['apiserver'];
     if (!empty($formdata)) {
+        $connectorinstance->setid($connectorid);
         $connectorinstance->setdescription($formdata->description);
         $connectorinstance->setname($formdata->name);
         $connectorinstance->set_openapidefinitionurl($formdata->openapidefinitionurl);
         $connectorinstance->setopenapikey($formdata->openapikey);
         $connectorinstance->set_server_apikey($formdata->serverapikey);
-        $connectorinstance->setserver($apiserver);
+        $connectorinstance->setserver($formdata->apiserver);
         $connectorinstance->save(true);
+        // Return to index.
         redirect($returnurl);
     }
+} else if ($mform->is_cancelled()) {
+    // Form is cancelled, return to index.
+    redirect($returnurl);
 }
-$PAGE->set_heading("Add Connector");
+$PAGE->set_heading("Edit Connector");
 echo $OUTPUT->header();
 $PAGE->requires->js_call_amd('local_data_importer/fetch_api_definition', 'init', []);
 $mform->display();
-
-if ($mform->is_cancelled()) {
-    redirect($returnurl);
-}
 echo $OUTPUT->footer();

@@ -115,6 +115,7 @@ class local_data_importer_connectorpathitem {
     }
 
     /**
+     * Return Path Item instance
      * @return mixed
      */
     public function get_path_item() {
@@ -122,6 +123,7 @@ class local_data_importer_connectorpathitem {
     }
 
     /**
+     * Set Path Item instance
      * @param mixed $pathitem
      */
     public function set_path_item($pathitem) {
@@ -185,6 +187,7 @@ class local_data_importer_connectorpathitem {
     }
 
     /**
+     * Get all available Path Items from the database table
      * @return array|null
      */
     public function get_all() {
@@ -237,6 +240,11 @@ class local_data_importer_connectorpathitem {
         }
     }
 
+    /**
+     * Return a path item instance by subplugin
+     * @param $subplugin
+     * @return array
+     */
     public function get_by_subplugin($subplugin) {
         global $DB;
         $pathitems = array();
@@ -300,20 +308,19 @@ class local_data_importer_connectorpathitem {
             try {
                 return $DB->update_record($this->dbtable, $data);
                 // Log it.
-            } catch (\exception $e) {
+            } catch (\dml_exception $e) {
                 // Log it.
-                var_dump($e->getmessage());
+                throw new Exception($e->getMessage());
             }
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
                 return $DB->insert_record($this->dbtable, $data, $returnid);
                 // Log it.
-            } catch (\exception $e) {
+            } catch (\dml_exception $e) {
                 // Log it.
-                var_dump($e->getmessage());
+                throw new Exception($e->getMessage());
             }
         }
-
     }
 }

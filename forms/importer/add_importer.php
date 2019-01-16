@@ -21,7 +21,7 @@ require_once($CFG->libdir . '/formslib.php');
  */
 class local_data_importer_add_importer_form extends moodleform {
     /**
-     *
+     * Add importer form class used to add a new importer to the database
      */
     const TABLE_FIELD_SEPERATOR = '-';
     public function definition() {
@@ -83,7 +83,8 @@ class local_data_importer_add_importer_form extends moodleform {
                         $mform->setType('plugincomponentparam', PARAM_TEXT);
                         if (is_array($this->_customdata['pathitemparams'])) {
                             foreach ($this->_customdata['pathitemparams'] as $key => $arraypathitemparams) {
-                                $options[$arraypathitemparams["name"]] = $arraypathitemparams["name"];
+                                $options[$arraypathitemparams["name"]] =
+                                    $arraypathitemparams["name"]." [".$arraypathitemparams["type"]."]";
                             }
                         }
                         // Display the path item parameters fetched from the web service.

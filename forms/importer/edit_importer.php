@@ -16,21 +16,34 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Class local_data_importer_edit_importer_form
+ */
 class local_data_importer_edit_importer_form extends moodleform {
+    /**
+     * Class that displays form for editing an existing importer
+     */
     public function definition() {
         $mform = $this->_form;
-
+        // Path item name.
         $mform->addElement('text', 'pathitemname', 'Path Item Name');
         $mform->setType('pathitemname', PARAM_RAW);
         $mform->setDefault('pathitemname', $this->_customdata['name']);
-
+        // Connector ID.
         $mform->addElement('text', 'connnectorid', 'Connector ID', ['disabled']);
         $mform->setType('connnectorid', PARAM_RAW);
         $mform->setDefault('connnectorid', $this->_customdata['connnectorid']);
-
+        // Path Item function.
         $mform->addElement('text', 'pathitem', 'Path Item', ['disabled']);
         $mform->setType('pathitem', PARAM_RAW);
         $mform->setDefault('pathitem', $this->_customdata['pathitem']);
+        // HTTP Method.
+        $options = ['POST' => 'POST', 'GET' => 'GET'];
+        $options[$this->_customdata['http_method']] = $this->_customdata['http_method'];
+        $mform->addElement('select', 'httpmethod', 'HTTP Method', $options);
+        $mform->setType('httpmethod', PARAM_RAW);
+        $mform->setDefault('httpmethod', $this->_customdata['http_method']);
+        // Sub-plugin.
         $mform->addElement('text', 'subplugin', 'Subplugin', ['disabled']);
         $mform->setType('subplugin', PARAM_RAW);
         $mform->setDefault('subplugin', $this->_customdata['plugin_component']);

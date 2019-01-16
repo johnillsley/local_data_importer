@@ -15,7 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
-
+/**
+ * Class to display forms for edit and adding connectors
+ *
+ * @package    local_data_importer
+ * @author     Hittesh Ahuja <j.s.illsley@bath.ac.uk>
+ * @uses       moodleform
+ * @copyright  2018 University of Bath
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class local_data_importer_connector_form extends moodleform {
     public function definition() {
         $mform =& $this->_form;
@@ -23,6 +31,7 @@ class local_data_importer_connector_form extends moodleform {
         $mform->addElement('text', 'name', get_string('connector_name', 'local_data_importer'));
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
         $mform->setType('name', PARAM_TEXT);
+        $mform->setDefault('name', $this->_customdata['name']);
 
         // Connector Description.
         $mform->addElement('textarea', 'description', get_string('connector_description', 'local_data_importer'),
@@ -33,12 +42,11 @@ class local_data_importer_connector_form extends moodleform {
 
         // Swaggerhub Definition API.
         $mform->addElement('text', 'openapidefinitionurl', get_string('openapidefinitionurl_label', 'local_data_importer'));
-        $mform->addRule('openapidefinitionurl', get_string('required'), 'required', null, 'client');
-        $mform->setType('openapidefinitionurl', PARAM_TEXT);
+        $mform->setType('openapidefinitionurl', PARAM_RAW);
         $mform->setDefault('openapidefinitionurl', $this->_customdata['openapidefinitionurl']);
         // Open API key.
         $mform->addElement('text', 'openapikey', get_string('apikey_label', 'local_data_importer'));
-        $mform->setType('openapikey', PARAM_TEXT);
+        $mform->setType('openapikey', PARAM_RAW);
         $mform->setDefault('openapikey', $this->_customdata['openapikey']);
 
         // Fetch Definition button.

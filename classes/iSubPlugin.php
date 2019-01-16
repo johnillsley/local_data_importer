@@ -34,10 +34,10 @@ interface local_data_importer_iSubPlugin {
     /**
      * @return string
      */
-    public function get_plugin_name(): string; // Used to identify the component name to be used in drop-down for example.
+    public function get_plugin_name(); // Used to identify the component name to be used in drop-down for example.
 
     /**
      * @return string
      */
-    public function plugin_description(): string; // Method used to describe the functionality of the plugin.
+    public function plugin_description(); // Method used to describe the functionality of the plugin.
 }
