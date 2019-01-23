@@ -16,12 +16,13 @@
 
 require_once("../../config.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/connector_form.php");
+//require_once($CFG->dirroot . "/local/data_importer/importer_form.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/importer/edit_importer.php");
 $url = new moodle_url('/local/data_importer/index.php');
 $PAGE->set_url($url);
 require_login();
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_pagelayout('incourse');
+$PAGE->set_pagelayout('base'); // No blocks so table does not run into blocks.
 
 // Print the header.
 $PAGE->navbar->add('Data Importer');
@@ -59,7 +60,6 @@ if ($formdata = $importerform->get_data()) {
         } catch (\Exception $e) {
             $displaynoticebad = $e->getMessage();
         }
-
     }
     // Pass it on.
 }
@@ -77,18 +77,21 @@ switch ($action) {
         $PAGE->requires->js_call_amd('local_data_importer/fetch_api_definition', 'init', []);
         echo $importerform->display();
         break;
+
     case 'edit_connector':
         $PAGE->set_heading("Edit connector");
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->edit_connector_page($connectorid);
         break;
+
     case 'delete_connector':
         $PAGE->set_heading("Delete connector");
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->delete_connector_page($connectorid);
         break;
+
     case 'edit_importer':
         $PAGE->set_heading("Edit Importer");
         echo $OUTPUT->header();
@@ -99,12 +102,32 @@ switch ($action) {
             echo $importereditform->display();
         }
         break;
+        
     case 'deletepathitem':
         $PAGE->set_heading("Delete Pathitem");
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->delete_pathitem_page($connectorid);
         break;
+
+    case 'move_up':
+        $connector = new local_data_importer_connectorpathitem;
+        $importer = $connector->get_by_id($connectorid);
+        $importer->reorder_import('up');
+        echo $OUTPUT->header();
+        $renderer = $PAGE->get_renderer('local_data_importer');
+        echo $renderer->importers_page();
+        break;
+
+    case 'move_down':
+        $connector = new local_data_importer_connectorpathitem;
+        $importer = $connector->get_by_id($connectorid);
+        $importer->reorder_import('down');
+        echo $OUTPUT->header();
+        $renderer = $PAGE->get_renderer('local_data_importer');
+        echo $renderer->importers_page();
+        break;
+
     default:
         // LIST ALL.
         echo $OUTPUT->header();
@@ -119,7 +142,6 @@ switch ($action) {
                 } catch (\Exception $e) {
                     echo $OUTPUT->notification($e->getMessage());    // Good (usually green).
                 }
-
             }
             if (isset($pathitemid)) {
                 // Delete pathitem.
