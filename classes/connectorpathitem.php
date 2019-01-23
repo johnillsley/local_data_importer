@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -21,37 +22,41 @@ defined('MOODLE_INTERNAL') || die();
  */
 class local_data_importer_connectorpathitem {
     /**
-     * @var
+     * @var integer
      */
     public $id;
     /**
-     * @var
+     * @var string
      */
     private $name;
     /**
-     * @var
+     * @var integer
      */
     private $connectorid;
     /**
-     * @var
+     * @var string
      */
     private $pathitem;
     /**
-     * @var
+     * @var string
      */
     private $httpmethod;
     /**
-     * @var
+     * @var string
      */
     private $plugincomponent;
     /**
-     * @var
+     * @var bool
      */
     private $active;
     /**
-     * @var
+     * @var integer
      */
     private $timecreated;
+    /**
+     * @var integer
+     */
+    private $importorder;
     /**
      * @var string
      */
@@ -66,9 +71,9 @@ class local_data_importer_connectorpathitem {
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
-    public function get_id() {
+    public function get_id() : int {
         return $this->id;
     }
 
@@ -80,35 +85,35 @@ class local_data_importer_connectorpathitem {
     }
 
     /**
-     * @param mixed $id
+     * @param integer $id
      */
     public function set_id($id) {
         $this->id = $id;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_name() {
         return $this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      */
     public function set_name($name) {
         $this->name = $name;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
-    public function get_connector_id() {
+    public function get_connector_id() : int {
         return $this->connectorid;
     }
 
     /**
-     * @param mixed $connectorid
+     * @param integer $connectorid
      */
     public function set_connector_id($connectorid) {
         $this->connectorid = $connectorid;
@@ -116,7 +121,7 @@ class local_data_importer_connectorpathitem {
 
     /**
      * Return Path Item instance
-     * @return mixed
+     * @return string
      */
     public function get_path_item() {
         return $this->pathitem;
@@ -124,77 +129,96 @@ class local_data_importer_connectorpathitem {
 
     /**
      * Set Path Item instance
-     * @param mixed $pathitem
+     * @param string $pathitem
      */
     public function set_path_item($pathitem) {
         $this->pathitem = $pathitem;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_http_method() {
         return $this->httpmethod;
     }
 
     /**
-     * @param mixed $httpmethod
+     * @param string $httpmethod
      */
     public function set_http_method($httpmethod) {
         $this->httpmethod = $httpmethod;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_plugin_component() {
         return $this->plugincomponent;
     }
 
     /**
-     * @param mixed $plugincomponent
+     * @param string $plugincomponent
      */
     public function set_plugin_component($plugincomponent) {
         $this->plugincomponent = $plugincomponent;
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function get_active() {
+    public function get_active() : bool {
         return $this->active;
     }
 
     /**
-     * @param mixed $active
+     * @param bool $active
      */
     public function set_active($active) {
         $this->active = $active;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
-    public function get_time_created() {
+    public function get_time_created() : int {
         return $this->timecreated;
     }
 
     /**
-     * @param mixed $timecreated
+     * @param integer $timecreated
      */
     public function set_time_created($timecreated) {
         $this->timecreated = $timecreated;
+    }
+    
+    /**
+     * @param integer
+     */
+    public function get_import_order() : int {
+        return $this->importorder;
+    }
+
+    /**
+     * @param integer
+     */
+    public function set_import_order($importorder) {
+        $this->importorder = $importorder;
     }
 
     /**
      * Get all available Path Items from the database table
      * @return array|null
      */
-    public function get_all() {
+    public function get_all($activeonly = false) {
         global $DB;
-        $pathitems = null;
+        $pathitems = array();
+        if ($activeonly == true) {
+            $conditions = array("active" => 1);
+        } else {
+            $conditions = null;
+        }
         try {
-            $pathitemrecords = $DB->get_records($this->dbtable);
+            $pathitemrecords = $DB->get_records($this->dbtable, $conditions, 'importorder ASC');
             if ($pathitemrecords && is_array($pathitemrecords)) {
                 foreach ($pathitemrecords as $recordobject) {
                     $pathiteminstance = new self();
@@ -206,9 +230,9 @@ class local_data_importer_connectorpathitem {
                     $pathiteminstance->set_path_item($recordobject->pathitem);
                     $pathiteminstance->set_connector_id($recordobject->connectorid);
                     $pathiteminstance->set_time_created($recordobject->timecreated);
+                    $pathiteminstance->set_import_order($recordobject->importorder);
                     $pathitems[] = $pathiteminstance;
                 }
-
             }
         } catch (\dml_exception $e) {
             echo $e->getmessage();
@@ -225,6 +249,7 @@ class local_data_importer_connectorpathitem {
         global $DB;
         try {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
+            // TODO - what happens if id not found? - should it throw exception as not expected
             // Take the db object and turn it into this class object.
             $pathitem = new self();
             $pathitem->set_id($recordobject->id);
@@ -234,6 +259,8 @@ class local_data_importer_connectorpathitem {
             $pathitem->set_plugin_component($recordobject->plugincomponent);
             $pathitem->set_http_method($recordobject->httpmethod);
             $pathitem->set_path_item($recordobject->pathitem);
+            $pathitem->set_import_order($recordobject->importorder);
+            $pathitem->set_time_created($recordobject->timecreated);
             return $pathitem;
         } catch (\dml_exception $e) {
             throw $e->getmessage();
@@ -249,7 +276,7 @@ class local_data_importer_connectorpathitem {
         global $DB;
         $pathitems = array();
         try {
-            $records = $DB->get_records($this->dbtable, ['plugincomponent' => $subplugin]);
+            $records = $DB->get_records($this->dbtable, ['plugincomponent' => $subplugin], 'importorder ASC');
             if (is_array($records)) {
                 foreach ($records as $recordobject) {
                     $pathitem = new self();
@@ -260,6 +287,7 @@ class local_data_importer_connectorpathitem {
                     $pathitem->set_plugin_component($recordobject->plugincomponent);
                     $pathitem->set_http_method($recordobject->httpmethod);
                     $pathitem->set_path_item($recordobject->pathitem);
+                    $pathitem->set_import_order($recordobject->importorder);
                     $pathitems[] = $pathitem;
                 }
             }
@@ -294,6 +322,7 @@ class local_data_importer_connectorpathitem {
      */
     public function save($returnid = false) {
         global $DB;
+
         $data = new \stdclass();
         $data->name = $this->name;
         $data->connectorid = $this->connectorid;
@@ -313,7 +342,8 @@ class local_data_importer_connectorpathitem {
                 throw new Exception($e->getMessage());
             }
         } else {
-            $data->timecreated = $data->timemodified = time();
+            $data->timecreated = time();
+            $data->importorder = $this->get_next_importorder();
             try {
                 return $DB->insert_record($this->dbtable, $data, $returnid);
                 // Log it.
@@ -322,5 +352,75 @@ class local_data_importer_connectorpathitem {
                 throw new Exception($e->getMessage());
             }
         }
+    }
+
+    /**
+     * Move the pathitem importorder up or down the list
+     * @param string $direction 'up' or 'down'
+     * @return boolean true if item has been moved otherwise return false.
+     */
+    public function reorder_import($direction) : bool {
+        global $DB;
+
+        $id = $this->get_id();
+        $currentorder = $this->get_import_order();
+
+        if ($direction == 'up') {
+            $sqlorder = 'DESC';
+            $sqlwhere = "importorder < " . $currentorder;
+        } else if ($direction == 'down') {
+            $sqlorder = 'ASC';
+            $sqlwhere = "importorder > " . $currentorder;
+        } else {
+            // Direction not specified.
+            return false;
+        }
+
+        $target = $DB->get_record_sql("
+                SELECT id, importorder
+                FROM {connector_pathitem}
+                WHERE " . $sqlwhere . "
+                ORDER BY importorder " . $sqlorder . "
+                LIMIT 1
+                ");
+
+        if (empty($target)) {
+            // No pathitem to swap with.
+            return false;
+        }
+
+        try {
+            $transaction = $DB->start_delegated_transaction();
+
+            $update = array("id" => $id, "importorder" => "-1");
+            $DB->update_record($this->dbtable, $update);
+            $update = array("id" => $target->id, "importorder" => $currentorder);
+            $DB->update_record($this->dbtable, $update);
+            $update = array("id" => $id, "importorder" => $target->importorder);
+            $DB->update_record($this->dbtable, $update);
+
+            $transaction->allow_commit();
+            $this->set_import_order($target->importorder);
+            return true;
+        } catch (Exception $e) {
+            $transaction->rollback($e);
+            return false;
+        }
+    }
+
+    /**
+     * Return the next available value for importorder i.e. current max value plus one.
+     * @return integer
+     */
+    private function get_next_importorder(): int {
+        global $DB;
+
+        $maxorder = $DB->get_field_sql("SELECT MAX(importorder) FROM {connector_pathitem}");
+        if (is_null($maxorder)) {
+            $importorder = 1;
+        } else {
+            $importorder = $maxorder + 1;
+        }
+        return $importorder;
     }
 }
