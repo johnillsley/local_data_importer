@@ -47,9 +47,9 @@ class importers_page implements templatable, renderable {
     /**
      * connectors_page constructor.
      */
-    public function __construct($connectorinstance, $pathiteminstance) {
-        $this->connectorinstance = $connectorinstance;
-        $this->pathiteminstance = $pathiteminstance;
+    public function __construct() {
+        $this->connectorinstance = new \local_data_importer_connectorinstance();
+        $this->pathiteminstance = new \local_data_importer_connectorpathitem();
     }
 
     /**
