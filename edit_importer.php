@@ -38,7 +38,7 @@ $pathitemid = required_param('pathitemid', PARAM_INT);
 $pathitemname = optional_param('pathitemname', null, PARAM_INT);
 $renderable = new local_data_importer\output\importers_page();
 $pathitemdata = $renderable->get_single_path_item_instance($pathitemid);
- $pathiteminstance = new local_data_importer_connectorpathitem();
+$pathiteminstance = new local_data_importer_connectorpathitem();
 $mform = new local_data_importer_edit_importer_form(null, $pathitemdata);
 if (!$mform->is_cancelled() && $formdata = $mform->get_data()) {
     if (!empty($formdata)) {
@@ -49,12 +49,11 @@ if (!$mform->is_cancelled() && $formdata = $mform->get_data()) {
         $pathiteminstance->set_active(true);
         $pathiteminstance->set_http_method($formdata->httpmethod);
         $pathiteminstance->set_plugin_component($formdata->subplugin);
-        try{
+        try {
             $pathiteminstance->save(true);
 
-        }
-        catch (\Exception$e){
-            var_dump("Message:".$e->getMessage());
+        } catch (\Exception$e) {
+            var_dump("Message:" . $e->getMessage());
         }
         // Return to index.
         redirect($returnurl);
