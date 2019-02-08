@@ -17,6 +17,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class connectorPathItem
+ * @copyright 2019 University of Bath
  * @package local\moodle_data_importer
  */
 class local_data_importer_connectorpathitem {
