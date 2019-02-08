@@ -37,7 +37,5 @@ class local_data_importer_subplugin_parameter {
         } catch (\dml_exception $e) {
             $this->type = null;
         }
-
-
     }
 }
