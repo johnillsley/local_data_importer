@@ -24,6 +24,7 @@ class local_data_importer_add_importer_form extends moodleform {
      * Add importer form class used to add a new importer to the database
      */
     const TABLE_FIELD_SEPERATOR = '-';
+
     public function definition() {
         $mform = $this->_form;
         if (isset($this->_customdata['connectorid'])) {
@@ -84,7 +85,7 @@ class local_data_importer_add_importer_form extends moodleform {
                         if (is_array($this->_customdata['pathitemparams'])) {
                             foreach ($this->_customdata['pathitemparams'] as $key => $arraypathitemparams) {
                                 $options[$arraypathitemparams["name"]] =
-                                    $arraypathitemparams["name"]." [".$arraypathitemparams["type"]."]";
+                                    $arraypathitemparams["name"] . " [" . $arraypathitemparams["type"] . "]";
                             }
                         }
                         // Display the path item parameters fetched from the web service.

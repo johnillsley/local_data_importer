@@ -4,9 +4,9 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
         init: function () {
             var URL = config.wwwroot + '/local/data_importer/ajax.php';
             var server_control = $('#id_apiserver');
-            // When 'fetch' is pressed
+            // When 'fetch' is pressed.
             $('#id_fetchapidef').on("click", function () {
-                // get the api url from text control
+                // Get the api url from text control.
 
                 var apikey = $('#id_openapikey').val();
                 var apiurl = $('#id_openapidefinitionurl').val();
@@ -20,7 +20,7 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                     data: {'openapikey': apikey, 'openapidefinitionurl': apiurl},
                     url: URL
                 }).done(function (servers) {
-                    // add it to the disabled control
+                    // Add it to the disabled control.
                     $.each(servers, function (key, value) {
                         var option = $("<option />");
                         option.empty();
@@ -29,7 +29,7 @@ define(['jquery', 'core/ajax', 'core/config'], function ($, ajax, config) {
                         server_control.append(option);
                     });
 
-                    //enable the control
+                    // Enable the control.
                     server_control.prop('disabled', false);
                 });
             });

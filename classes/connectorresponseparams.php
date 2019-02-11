@@ -15,6 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * @copyright 2019 University of Bath
+ * Class local_data_importer_connectorresponseparams
+ */
 class local_data_importer_connectorresponseparams {
     private $id;
     private $pathitemid;

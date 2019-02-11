@@ -16,6 +16,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * @copyright 2019 University of Bath
  * Class local_data_importer_pathitem_response
  */
 class local_data_importer_pathitem_response {

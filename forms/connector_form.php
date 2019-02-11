@@ -21,7 +21,7 @@ require_once($CFG->libdir . '/formslib.php');
  * @package    local_data_importer
  * @author     Hittesh Ahuja <j.s.illsley@bath.ac.uk>
  * @uses       moodleform
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_data_importer_connector_form extends moodleform {
