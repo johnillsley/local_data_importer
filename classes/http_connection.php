@@ -93,6 +93,7 @@ class local_data_importer_http_connection {
 
         $headers = ['Authorization' => $apikey];
         try {
+            // TODO - test error when guzzle not installed.
             $this->client = new GuzzleHttp\Client([
                 'base_uri' => $baseuri,
                 'headers' => $headers,

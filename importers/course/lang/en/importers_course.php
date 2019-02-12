@@ -13,4 +13,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-$string['pluginname'] = 'Create Course';
+
+$string['pluginname'] = 'Course importer';
+$string['deletesetting'] = 'Delete courses?';
+$string['deletecourse'] = 'Delete courses that are not in the web services data';
+$string['keepcourses'] = 'Retain courses that are not in the web services data';
+$string['privacy:metadata'] = 'The local_data_importer_importers_course plugin does not store any personal data.';

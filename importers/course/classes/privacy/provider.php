@@ -15,28 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Ajax File to handle fetching of server details through Web Services
+ * Privacy Subsystem implementation for local_data_importer_importers_course.
  *
- * @package    local_data_importer
- * @author     Hittesh Ahuja <ha386@bath.ac.uk>
+ * @package    local/data_importer/importers/course
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
  * @copyright  2018 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace local_data_importer_importers_course\privacy;
 
-define('AJAX_SCRIPT', true);
+defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__) . '/../../config.php');
-require_login();
-
-$openapikey = optional_param('openapikey', '', PARAM_RAW);
-$openapidefinitionurl = optional_param('openapidefinitionurl', '', PARAM_RAW);
-
-try {
-    $httpconnection = new local_data_importer_http_connection($openapidefinitionurl, $openapikey);
-    $httpresponse = $httpconnection->get_response();
-
-    $openapiinspector = new local_data_importer_openapi_inspector($httpresponse);
-    echo json_encode($openapiinspector->servers);
-} catch (\Exception $e) {
-    echo json_encode(["Error fetching servers from Swaggerhub"]);
+/**
+ * The plugin local_data_importer_importers_course does not store any user data.
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
 }
