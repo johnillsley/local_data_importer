@@ -14,6 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 defined('MOODLE_INTERNAL') || die();
-$plugin->version = 2018100206;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version = 2019020700;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires = 2017110800;        // Requires this Moodle version
-$plugin->component = 'importers_bath_create_course'; // Full name of the plugin (used for diagnostics).
+$plugin->component = 'importers_course'; // Full name of the plugin (used for diagnostics).

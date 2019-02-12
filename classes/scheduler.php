@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 defined('MOODLE_INTERNAL') || die();
 
 class local_data_importer_scheduler {
@@ -36,7 +37,7 @@ class local_data_importer_scheduler {
                 $getdata = new local_data_importer_data_fetcher($importer->id);
                 $getdata->get_web_service_data();
             } catch (Exception $e) {
-                
+                // TODO - what sort of exceptions would we get here?
             } finally {
                 $endtime = time();
                 $timetaken = $endtime - $starttime;

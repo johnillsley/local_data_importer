@@ -18,7 +18,6 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Class for event to be triggered when a Moodle course has been created.
  *
- *
  * @package    core
  * @since      Moodle 3.4
  * @copyright  2017 onwards University of Bath
@@ -43,7 +42,6 @@ class course_created extends \core\event\base{
      */
     public static function get_name() {
         return 'New Moodle course created';
-
     }
     /**
      * Returns description of what happened.

@@ -120,8 +120,20 @@ class local_data_importer_data_fetcher {
         }
     }
 
+    protected function transform_external_to_internal($external) {
 
+        $internal = array();
+        // Get response mappings.
+        foreach ($this->responses as $table) {
+            foreach ($table as $field) {
+
+            }
+        }
+        return $internal;
+    }
 }
+
+
 
 
 // Run sample.

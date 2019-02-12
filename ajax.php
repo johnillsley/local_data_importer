@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Ajax File to handle fetching of server details through Web Services
  *
@@ -21,21 +22,21 @@
  * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 define('AJAX_SCRIPT', true);
+
 require_once(dirname(__FILE__) . '/../../config.php');
 require_login();
-$action = optional_param('action', 'logentries', PARAM_RAW);
+
 $openapikey = optional_param('openapikey', '', PARAM_RAW);
 $openapidefinitionurl = optional_param('openapidefinitionurl', '', PARAM_RAW);
-$componentname = optional_param('componentname', '', PARAM_RAW);
-$connectorid = optional_param('connectorid', '', PARAM_INT);
 
 try {
     $httpconnection = new local_data_importer_http_connection($openapidefinitionurl, $openapikey);
     $httpresponse = $httpconnection->get_response();
+
     $openapiinspector = new local_data_importer_openapi_inspector($httpresponse);
     echo json_encode($openapiinspector->servers);
 } catch (\Exception $e) {
-    var_dump($e->getMessage());
     echo json_encode(["Error fetching servers from Swaggerhub"]);
 }
