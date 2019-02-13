@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/data_importer/db" VERSION="2017031201.5" COMMENT="XMLDB file for local/data_importer/importers/course"
+<XMLDB PATH="local/data_importer/importers/course/db" VERSION="2017031201.5" COMMENT="XMLDB file for local/data_importer/importers/course"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
