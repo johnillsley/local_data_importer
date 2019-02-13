@@ -85,10 +85,10 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                                 $pluginlist = array();
                                 // Get sub-plugins .
                                 $plugins = core_plugin_manager::instance()->get_subplugins_of_plugin('local_data_importer');
-                                foreach ($plugins as $component => $info) {
+                                 foreach ($plugins as $component => $info) {
                                     $pluginlist[$component] = $component;
                                 }
-                                $params['subplugin'] = $pluginlist;
+                                 $params['subplugin'] = $pluginlist;
                                 $params['selectedconnector'] = $connectordata;
                                 $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                                 echo $selectconnectorform->display();
@@ -108,10 +108,10 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     try {
                         if ($connector instanceof \local_data_importer_connectorinstance) {
                             // For the selected subplugin , get the params available.
-                            $class = $subplugin . "_subplugin";
-                            $object = new $class();
+                            $class = $subplugin."_importer";
+                             $object = new $class($pathitem);
                             $subpluginresponses = $object->responses;
-                            $subpluginparams = $object->params;
+                            $subpluginparams = $object->parameters;
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
                             $responseparams = $openapiinspector->get_pathitem_responses_selectable($pathitem);
 

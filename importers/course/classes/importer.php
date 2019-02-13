@@ -26,14 +26,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once(__DIR__.'/../entity_importer.php'); // Parent class definition.
+require_once($CFG->dirroot . '/local/data_importer/importers/entity_importer.php'); // Parent class definition.
 require_once($CFG->libdir . '/coursecatlib.php'); // Course category class.
 require_once($CFG->dirroot . '/course/lib.php'); // Course lib functions.
 
 /**
  * Class representing an entity importer to handle courses.
  */
-class data_importer_course_importer extends data_importer_entity_importer {
+class importers_course_importer extends data_importer_entity_importer {
 
     public function __construct($id) {
 
