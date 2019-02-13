@@ -110,21 +110,21 @@ switch ($action) {
         break;
 
     case 'move_up':
-        $connector = new local_data_importer_connectorpathitem;
-        $importer = $connector->get_by_id($connectorid);
-        $importer->reorder_import('up');
+        //$pathitem = new local_data_importer_connectorpathitem;
+        $pathitem = $pathiteminstance->get_by_id($pathitemid);
+        $pathitem->reorder_import('up');
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
-        echo $renderer->importers_page();
+        echo $renderer->index_page($connectorinstance, $pathiteminstance);
         break;
 
     case 'move_down':
-        $connector = new local_data_importer_connectorpathitem;
-        $importer = $connector->get_by_id($connectorid);
-        $importer->reorder_import('down');
+        //$connector = new local_data_importer_connectorpathitem;
+        $pathitem = $pathiteminstance->get_by_id($pathitemid);;
+        $pathitem->reorder_import('down');
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
-        echo $renderer->importers_page();
+        echo $renderer->index_page($connectorinstance, $pathiteminstance);
         break;
 
     default:

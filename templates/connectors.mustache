@@ -52,7 +52,7 @@
             <td>{{http_method}}</td>
             <td>{{plugin_component}}</td>
             <td>{{active}}</td>
-            <td> <a href="edit_importer.php?pathitemid={{pathitemid}}">Edit</a> | <a href="edit_importer.php?action=delete&pathitemid={{pathitemid}}">Delete</a> </td>
+            <td> <a href="edit_importer.php?pathitemid={{pathitemid}}">Edit</a> | <a href="index.php?action=move_up&pathitemid={{pathitemid}}">Move Up</a> | <a href="index.php?action=move_down&pathitemid={{pathitemid}}"> Move Down</a> | <a href="edit_importer.php?action=delete&pathitemid={{pathitemid}}">Delete</a> </td>
             </tr>
             {{/pathitems}}
             </tbody>
