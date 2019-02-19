@@ -55,12 +55,12 @@ abstract class data_importer_entity_importer {
     /**
      * @var array
      */
-    protected $responses = array();
+    public $responses = array();
 
     /**
      * @var array
      */
-    protected $parameters = array();
+    public $parameters = array();
 
     /**
      * @var array
@@ -73,10 +73,15 @@ abstract class data_importer_entity_importer {
     protected $uniquekey;
 
     abstract protected function create_entity($item = array());
+
     abstract protected function update_entity($item = array());
+
     abstract protected function delete_entity($item = array());
+
     abstract protected function sort_items($items = array());
+
     abstract public function provide_web_service_parameters();
+
     abstract public function get_additional_form_elements();
 
     /**
@@ -189,7 +194,7 @@ abstract class data_importer_entity_importer {
         return $item;
     }
 
-    protected function validate_field($table, $field, $value, $required=false, $truncatestrings=false) {
+    protected function validate_field($table, $field, $value, $required = false, $truncatestrings = false) {
 
         $fieldmetadata = $this->databaseproperties[$table][$field];
 
@@ -206,7 +211,7 @@ abstract class data_importer_entity_importer {
             }
         }
 
-        switch($fieldmetadata->data_type) {
+        switch ($fieldmetadata->data_type) {
 
             case 'tinyint':
             case 'smallint':
@@ -221,12 +226,12 @@ abstract class data_importer_entity_importer {
                 }
                 $signed = (strpos($fieldmetadata->column_type, 'unsigned') !== false) ? false : true;
                 $storagebytes = array();
-                $storagebytes['tinyint']    = 1;
-                $storagebytes['smallint']   = 2;
-                $storagebytes['mediumint']  = 3;
-                $storagebytes['int']        = 4;
-                $storagebytes['integer']    = 4;
-                $storagebytes['bigint']     = 8;
+                $storagebytes['tinyint'] = 1;
+                $storagebytes['smallint'] = 2;
+                $storagebytes['mediumint'] = 3;
+                $storagebytes['int'] = 4;
+                $storagebytes['integer'] = 4;
+                $storagebytes['bigint'] = 8;
 
                 if ($signed) {
                     $minvalue = -1 * pow(2, ($storagebytes[$fieldmetadata->data_type] * 8) - 1);
@@ -237,7 +242,7 @@ abstract class data_importer_entity_importer {
                 }
                 if ($value > $maxvalue || $value < $minvalue) {
                     throw new \Exception("DATA VALIDATION ERROR: value is outside allowable range for " .
-                            $fieldmetadata->data_type);
+                        $fieldmetadata->data_type);
                 }
                 return (integer)$value;
                 break;
@@ -252,7 +257,7 @@ abstract class data_importer_entity_importer {
                 if (!is_string($value)) {
                     // Not a string.
                     throw new \Exception("DATA VALIDATION ERROR: db field is type '" . $fieldmetadata->data_type .
-                            "' but value is not a string. Actual data type is ".gettype($value));
+                        "' but value is not a string. Actual data type is " . gettype($value));
                 } else if (strlen($value) > $fieldmetadata->character_maximum_length) {
                     // String too long.
                     if ($truncatestrings == true) {
@@ -260,12 +265,12 @@ abstract class data_importer_entity_importer {
                         return (string)$value; // Return truncated version of string.
                     } else {
                         throw new \Exception("DATA VALIDATION ERROR: string has too many characters for database field " .
-                                $fieldmetadata->data_type . "(" . $fieldmetadata->character_maximum_length . ").");
+                            $fieldmetadata->data_type . "(" . $fieldmetadata->character_maximum_length . ").");
                     }
                 } else if (strlen($value) == 0 && $required == true) {
                     // String empty.
                     throw new \Exception(
-                            "DATA VALIDATION ERROR: empty string for a field that the subplugin specifies as required.");
+                        "DATA VALIDATION ERROR: empty string for a field that the subplugin specifies as required.");
                 } else {
                     return (string)$value;
                 }
@@ -277,7 +282,7 @@ abstract class data_importer_entity_importer {
 
                 if (!preg_match('/^-?(?:\d+|\d*\.\d+)$/', (string)$value)) {
                     throw new \Exception("DATA VALIDATION ERROR: value is not a floating point number but db field is type " .
-                            $fieldmetadata->data_type);
+                        $fieldmetadata->data_type);
                 } else {
                     $value = (float)$value;
                 }
@@ -295,7 +300,7 @@ abstract class data_importer_entity_importer {
 
             default:
                 throw new \Exception("DATA VALIDATION ERROR: field of type '" . $fieldmetadata->data_type .
-                        "' cannot be validated.");
+                    "' cannot be validated.");
                 break;
         }
     }
@@ -321,7 +326,6 @@ abstract class data_importer_entity_importer {
 
     public function save_setting($name, $value) {
         global $DB;
-
         // Check if an existing record needs updating.
         if ($setting = $DB->get_record($this->dbsettingstable, array('pathitemid' => $this->pathitemid, 'name' => $name))) {
             // Already exists.
@@ -331,9 +335,9 @@ abstract class data_importer_entity_importer {
         } else {
             // No existing record.
             $setting = new stdClass();
-            $setting->pathitemid    = $this->pathitemid;
-            $setting->name          = $name;
-            $setting->value         = $value;
+            $setting->pathitemid = $this->pathitemid;
+            $setting->name = $name;
+            $setting->value = $value;
             $id = $DB->insert_record($this->dbsettingstable, $setting);
         }
         return $id;
@@ -349,33 +353,15 @@ abstract class data_importer_entity_importer {
         }
     }
 
-    protected function get_html_additional_setting($settingname, $options) {
-
-        $existingsetting = $this->get_setting($settingname);
-        $selectattributes = array(
-                "id" => "additional_setting[$settingname]",
-                "name" => "additional_setting[$settingname]"
-        );
-
-        $html = html_writer::start_tag('select', $selectattributes);
-        foreach ($options as $k => $v) {
-            $selected = ($existingsetting == $k) ? 'selected' : '';
-            $html .= html_writer::tag('option', $v, array('value' => $k, 'selected' => $selected));
-        }
-        $html .= html_writer::end_tag('select');
-
-        return $html;
-    }
-
     protected function exception_log($action, $e, $data) {
         global $DB;
 
         $exceptionlog = new stdClass();
-        $exceptionlog->pathitemid   = $this->pathitemid;
-        $exceptionlog->action       = $action;
-        $exceptionlog->data         = serialize($data);
-        $exceptionlog->exception    = $e->getMessage();
-        $exceptionlog->time         = time();
+        $exceptionlog->pathitemid = $this->pathitemid;
+        $exceptionlog->action = $action;
+        $exceptionlog->data = serialize($data);
+        $exceptionlog->exception = $e->getMessage();
+        $exceptionlog->time = time();
 
         if ($DB->insert_record("local_data_importer_errors", $exceptionlog)) {
             return true;
