@@ -153,8 +153,11 @@ class local_data_importer_add_importer_form extends moodleform {
 
     }
 
+
     /**
      * Method to display additional form elements for a sub-plugin
+     * @param $mform
+     * @param $additionalfields
      */
     protected function get_html_additional_setting(&$mform, $additionalfields) {
         if (!empty($additionalfields)) {
