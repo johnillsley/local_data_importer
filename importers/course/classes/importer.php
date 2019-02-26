@@ -244,26 +244,26 @@ class importers_course_importer extends data_importer_entity_importer {
 
         $additionalsettings = array();
 
-        // Course Visbility Setting. [ default course created should be visible or hidden ?]
+        // Course Visbility Setting. [ default course created should be visible or hidden ?].
         $additionalsettings['course_visible'] = array(
             'field_label' => 'Course visibility when created ? ',
             'field_type' => 'select',
             'required' => true,
             'options' => [
-                'Show' => 1,
-                'Hide' => 2
+                'Show' => '1',
+                'Hide' => '0'
             ]
         );
 
-        // Course Deletion Setting. [ delete course if deleted from source ? ]
+        // Course Deletion Setting. [ delete course if deleted from source ? ].
 
         $additionalsettings['course_delete'] = array(
             'field_label' => "Delete course from Moodle if deleted from source ?",
             'field_type' => 'select',
             'required' => false,
             'options' => [
-                get_string('keepcourses', 'importers_course') => 1,
-                get_string('deletecourse', 'importers_course') => 0
+                get_string('keepcourses', 'importers_course') => '1',
+                get_string('deletecourse', 'importers_course') => '0'
             ]
         );
 

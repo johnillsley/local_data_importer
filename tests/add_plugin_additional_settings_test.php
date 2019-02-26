@@ -88,10 +88,10 @@ class local_data_importer_add_plugin_additional_settings_test extends advanced_t
      */
     public function test_add_plugin_additional_settings() {
 
-        // Get the sub-plugin
+        // Get the sub-plugin.
         $subplugin = $this->pathitem->get_plugin_component() . "_importer";
         $object = new $subplugin($this->pathitemid);
-        //For the selected subplugin , get the additional form elements (if available).
+        // For the selected subplugin , get the additional form elements (if available).
         $subpluginadditionalfields['course_visible'] = '0';
         foreach ($subpluginadditionalfields as $settingname => $value) {
             $object->save_setting($settingname, $value);
@@ -102,7 +102,7 @@ class local_data_importer_add_plugin_additional_settings_test extends advanced_t
      * Update plugin settings for importer
      */
     public function test_update_plugin_additional_settings() {
-        // Get the sub-plugin
+        // Get the sub-plugin.
         $subplugin = $this->pathitem->get_plugin_component() . "_importer";
         $object = new $subplugin($this->pathitemid);
         $subpluginadditionalfields['course_visible'] = '1';

@@ -67,7 +67,7 @@ class local_data_importer_add_importer_form extends moodleform {
                     $mform->setType('pathitemname', PARAM_RAW);
                 }
             }
-            // Additional Form elements from the selected plugin
+            // Additional Form elements from the selected plugin.
             if (isset($this->_customdata['subpluginadditionalfields'])) {
                 $this->get_html_additional_setting($mform, $this->_customdata['subpluginadditionalfields']);
 
@@ -161,17 +161,19 @@ class local_data_importer_add_importer_form extends moodleform {
      */
     protected function get_html_additional_setting(&$mform, $additionalfields) {
         if (!empty($additionalfields)) {
-            //Display header.
+            // Display header.
             $mform->addElement('header', 'general', 'Additional Plugin Fields');
             foreach ($additionalfields as $subpluginsettingname => $subpluginsetting) {
                 switch ($subpluginsetting['field_type']) {
                     case 'select':
-                        //Get the options.
+                        // Get the options.
                         $options = $subpluginsetting['options'];
-                        $mform->addElement('select', "subpluginadditionalfields[$subpluginsettingname]", $subpluginsetting['field_label'], $options, []);
+                        $mform->addElement('select', "subpluginadditionalfields[$subpluginsettingname]",
+                            $subpluginsetting['field_label'], $options, []);
                         break;
                     case 'text':
-                        $mform->addElement('text', "subpluginadditionalfields[$subpluginsettingname]", $subpluginsetting['field_label'], []);
+                        $mform->addElement('text', "subpluginadditionalfields[$subpluginsettingname]",
+                            $subpluginsetting['field_label'], []);
                         break;
                 }
             }

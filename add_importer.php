@@ -113,7 +113,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $subpluginparams = $object->parameters;
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
                             $responseparams = $openapiinspector->get_pathitem_responses_selectable($pathitem);
-                            //For the selected subplugin , get the additional form elements (if available).
+                            // For the selected subplugin , get the additional form elements (if available).
                             $subpluginadditionalfields = $object->get_additional_form_elements();
                             // Prepare parameters to pass to the form.
                             $params['subpluginparams'] = $subpluginparams;
@@ -146,13 +146,12 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                 try {
                     $pathitemid = $objpathitem->save(true);
 
-                    // 2. SUB-PLUGIN ADDITIONAL SETTINGS
+                    // 2. SUB-PLUGIN ADDITIONAL SETTINGS.
                     if (isset($subpluginadditionalfields) && is_array($subpluginadditionalfields) && isset($subplugin)) {
                         $class = $subplugin . "_importer";
                         $object = new $class($pathitemid);
                         var_dump($subpluginadditionalfields);
                         foreach ($subpluginadditionalfields as $settingname => $settingvalue) {
-                            echo "setting to the subpugin";
                             $object->save_setting($settingname, $settingvalue);
                         }
                     }
