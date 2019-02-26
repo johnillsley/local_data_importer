@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/local/data_importer/vendor/autoload.php');
  * Class local_data_importer_add_plugin_additional_params_test
  * @group local_data_importer
  */
-class local_data_importer_add_plugin_additional_params_test extends advanced_testcase {
+class local_data_importer_add_plugin_additional_settings_test extends advanced_testcase {
     /**
      * @var
      */
