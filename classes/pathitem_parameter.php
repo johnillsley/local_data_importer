@@ -21,48 +21,50 @@ defined('MOODLE_INTERNAL') || die();
  */
 class local_data_importer_pathitem_parameter {
     /**
-     * @var
+     * @var integer
      */
     private $id;
     /**
-     * @var
+     * @var integer
      */
     private $pathitemid;
     /**
-     * @var
+     * @var integer
      */
     private $timecreated;
     /**
-     * @var
+     * @var integer
      */
     private $timemodified;
     /**
-     * @var
+     * @var string
      */
     private $pathitemparameter;
     /**
-     * @var
+     * @var string
      */
-    private $pluginparamtable;
-    /**
-     * @var
-     */
-    private $pluginparamfield;
+    private $subpluginparameter;
     /**
      * @var string
      */
     private $dbtable;
 
+    /**
+     * local_data_importer_pathitem_parameter constructor.
+     */
+    public function __construct() {
+        $this->dbtable = 'local_data_importer_params';
+    }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_pathitem_parameter() {
         return $this->pathitemparameter;
     }
 
     /**
-     * @param mixed $pathitemparameter
+     * @param string $pathitemparameter
      */
     public function set_pathitem_parameter($pathitemparameter) {
         $this->pathitemparameter = $pathitemparameter;
@@ -76,97 +78,74 @@ class local_data_importer_pathitem_parameter {
     }
 
     /**
-     * local_data_importer_pathitem_parameter constructor.
-     */
-    public function __construct() {
-        $this->dbtable = 'pathitem_parameter';
-    }
-
-    /**
-     * @return mixed
+     * @return integer
      */
     public function get_id() {
         return $this->id;
     }
 
     /**
-     * @param mixed $id
+     * @param integer $id
      */
     public function set_id($id) {
         $this->id = $id;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function get_pathitemid(): int {
         return $this->pathitemid;
     }
 
-
     /**
-     * @param int $pathitemid
+     * @param integer $pathitemid
      */
     public function set_pathitemid(int $pathitemid) {
         $this->pathitemid = $pathitemid;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function get_timecreated() {
         return $this->timecreated;
     }
 
     /**
-     * @param mixed $timecreated
+     * @param integer $timecreated
      */
     public function set_timecreated($timecreated) {
         $this->timecreated = $timecreated;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function get_timemodified() {
         return $this->timemodified;
     }
 
     /**
-     * @param mixed $timemodified
+     * @param integer $timemodified
      */
     public function set_timemodified($timemodified) {
         $this->timemodified = $timemodified;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function get_pluginparam_table() {
-        return $this->pluginparamtable;
+    public function get_subplugin_parameter() {
+        return $this->subpluginparameter;
     }
 
     /**
-     * @param mixed $pluginparamtable
+     * @param string $subpluginparameter
      */
-    public function set_pluginparam_table($pluginparamtable) {
-        $this->pluginparamtable = $pluginparamtable;
+    public function set_subplugin_parameter($subpluginparameter) {
+        $this->subpluginparameter = $subpluginparameter;
     }
-
-    /**
-     * @return mixed
-     */
-    public function get_pluginparam_field() {
-        return $this->pluginparamfield;
-    }
-
-    /**
-     * @param mixed $pluginparamfield
-     */
-    public function set_pluginparam_field($pluginparamfield) {
-        $this->pluginparamfield = $pluginparamfield;
-    }
-
 
     /** Retrieve Path Item Parameter by Id.
      * @param int $id
@@ -180,8 +159,7 @@ class local_data_importer_pathitem_parameter {
             $pathitemparaminstance->set_id($recordobject->id);
             $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
             $pathitemparaminstance->set_pathitem_parameter($recordobject->pathitemparameter);
-            $pathitemparaminstance->set_pluginparam_table($recordobject->pluginparamtable);
-            $pathitemparaminstance->set_pluginparam_field($recordobject->pluginparamfield);
+            $pathitemparaminstance->set_subplugin_parameter($recordobject->subpluginparameter);
         } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
@@ -200,11 +178,10 @@ class local_data_importer_pathitem_parameter {
             if ($pathitemparamrecords && is_array($pathitemparamrecords)) {
                 foreach ($pathitemparamrecords as $recordobject) {
                     $pathitemparaminstance = new self();
-                    $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
                     $pathitemparaminstance->set_id($recordobject->id);
+                    $pathitemparaminstance->set_pathitemid($recordobject->pathitemid);
                     $pathitemparaminstance->set_pathitem_parameter($recordobject->pathitemparameter);
-                    $pathitemparaminstance->set_pluginparam_table($recordobject->pluginparamtable);
-                    $pathitemparaminstance->set_pluginparam_field($recordobject->pluginparamfield);
+                    $pathitemparaminstance->set_subplugin_parameter($recordobject->subpluginparameter);
                     $pathitemparams[] = $pathitemparaminstance;
                 }
             }
@@ -224,8 +201,7 @@ class local_data_importer_pathitem_parameter {
         $data = new \stdclass();
         $data->pathitemid = $this->pathitemid;
         $data->pathitemparameter = $this->pathitemparameter;
-        $data->pluginparamtable = $this->pluginparamtable;
-        $data->pluginparamfield = $this->pluginparamfield;
+        $data->subpluginparameter = $this->subpluginparameter;
         $data->timemodified = time();
         if ($this->id) {
             // Its an update.

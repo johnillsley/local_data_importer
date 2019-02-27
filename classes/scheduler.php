@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * A class that gets all enabled pathitems in the prdefined order and initiates
+ * the collection of external data from each.
+ *
+ * @package    local_data_importer
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @copyright  2018 University of Bath
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
 class local_data_importer_scheduler {
@@ -29,13 +39,14 @@ class local_data_importer_scheduler {
     public function start_data_imports() {
 
         $connectorpathitem = new local_data_importer_connectorpathitem;
-        $importers = $connectorpathitem->get_all(true);
-        foreach ($importers as $importer) {
+        $pathitems = $connectorpathitem->get_all(true);
+
+        foreach ($pathitems as $pathitem) {
             $starttime = time();
             // Run importer.
             try {
-                $getdata = new local_data_importer_data_fetcher($importer->id);
-                $getdata->get_web_service_data();
+                $datafetcher = new local_data_importer_data_fetcher($pathitem->id);
+                $datafetcher->update_from_pathitem();
             } catch (Exception $e) {
                 // TODO - what sort of exceptions would we get here?
             } finally {

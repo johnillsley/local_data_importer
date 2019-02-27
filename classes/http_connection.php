@@ -27,10 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/local/data_importer/vendor/autoload.php');
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\RequestException;
+use Guzzle\Http\Client;
+use Guzzle\Http\Psr7\Response;
+use Guzzle\Http\Psr7\Request;
+use Guzzle\Http\Exception\RequestException;
 
 class local_data_importer_http_connection {
 
@@ -95,13 +95,13 @@ class local_data_importer_http_connection {
         try {
             // TODO - test error when guzzle not installed.
             $this->client = new GuzzleHttp\Client([
-                'base_uri' => $baseuri,
-                'headers' => $headers,
-                'proxy' => $proxy,
-                'timeout' => self::HTTP_TIMEOUT,
-                'debug' => false,
+                    'base_uri' => $baseuri,
+                    'headers' => $headers,
+                    'proxy' => $proxy,
+                    'timeout' => self::HTTP_TIMEOUT,
+                    'debug' => false,
                 // TODO : change this to true when going live.
-                'verify' => false
+                    'verify' => false
             ]);
         } catch (Exception $e) {
             throw new \Exception($e->getMessage(), $e->getCode(), $e);

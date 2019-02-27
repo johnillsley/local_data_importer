@@ -42,13 +42,13 @@ $mform = new local_data_importer_connector_form(null, ['id' => $connectorid,
     'serverapikey' => $connectordata->serverapikey]);
 if (!$mform->is_cancelled() && $formdata = $mform->get_data()) {
     if (!empty($formdata)) {
-        $connectorinstance->setid($connectorid);
-        $connectorinstance->setdescription($formdata->description);
-        $connectorinstance->setname($formdata->name);
+        $connectorinstance->set_id($connectorid);
+        $connectorinstance->set_description($formdata->description);
+        $connectorinstance->set_name($formdata->name);
         $connectorinstance->set_openapidefinitionurl($formdata->openapidefinitionurl);
-        $connectorinstance->setopenapikey($formdata->openapikey);
+        $connectorinstance->set_openapi_key($formdata->openapikey);
         $connectorinstance->set_server_apikey($formdata->serverapikey);
-        $connectorinstance->setserver($formdata->apiserver);
+        $connectorinstance->set_server($formdata->apiserver);
         $connectorinstance->save(true);
         // Return to index.
         redirect($returnurl);

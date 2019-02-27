@@ -1,0 +1,52 @@
+{
+  "EXCHANGE": {
+    "STUFF": {
+      "DETAILS": [
+        {
+          "COURSENAME": "Course 101",
+          "REFCODE": "C101",
+          "INSTANCE": "A",
+          "YEAR": "2018/9",
+          "UNITCODE": "1234",
+          "SPR": {
+            "SPR.SRS": [
+              {
+                "ABC": "XYZ",
+                "MORE": {
+                  "DEPT": [
+                    {
+                      "DEPARTMENT": "Engineering",
+                      "DEPTCODE": "Eng"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "COURSENAME": "Health & Safety",
+          "REFCODE": "H&S",
+          "INSTANCE": "B",
+          "YEAR": "2017/8",
+          "UNITCODE": "5678",
+          "SPR": {
+            "SPR.SRS": [
+              {
+                "ABC": "XYZ",
+                "MORE": {
+                  "DEPT": [
+                    {
+                      "DEPARTMENT": "Staff development",
+                      "DEPTCODE": "Staffdev"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -48,12 +48,12 @@ class local_data_importer_edit_connector_testcase extends advanced_testcase {
         $json = file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/swaggerresponse.json');
         $data = json_decode($json);
         $this->connectorinstance = new local_data_importer_connectorinstance();
-        $this->connectorinstance->setdescription("Connector Instance Description");
-        $this->connectorinstance->setname("Connector Instance Name");
+        $this->connectorinstance->set_description("Connector Instance Description");
+        $this->connectorinstance->set_name("Connector Instance Name");
         $this->connectorinstance->set_server_apikey('serverapikey');
-        $this->connectorinstance->setopenapikey('openapikey');
+        $this->connectorinstance->set_openapi_key('openapikey');
         $host = $data->host;
-        $this->connectorinstance->setserver($host);
+        $this->connectorinstance->set_server($host);
         $openapidefinitionurl = "https://api.swaggerhub.com/apis/UniversityofBath/GradesTransferOAS20/1.0.0";
         $this->connectorinstance->set_openapidefinitionurl($openapidefinitionurl);
         $this->connectorinstanceid = $this->connectorinstance->save(true);
@@ -66,8 +66,8 @@ class local_data_importer_edit_connector_testcase extends advanced_testcase {
     public function test_update_connector_instance() {
         $this->resetAfterTest();
         $object = $this->connectorinstance->get_by_id($this->connectorinstanceid);
-        $object->setname('Connector Name2');
-        $object->setdescription('New Description');
+        $object->set_name('Connector Name2');
+        $object->set_description('New Description');
         $object->set_timemodified(time());
         $object->save();
         $object2 = $this->connectorinstance->get_by_id($this->connectorinstanceid);

@@ -350,6 +350,7 @@ class local_data_importer_connectorpathitem {
                 // Log it.
             } catch (\dml_exception $e) {
                 // Log it.
+                print $e->getMessage();
                 throw new Exception($e->getMessage());
             }
         }

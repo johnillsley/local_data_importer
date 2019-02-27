@@ -28,7 +28,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once(__DIR__.'/../entity_importer.php');
 require_once($CFG->libdir . '/coursecatlib.php'); // Course category class.
 require_once($CFG->dirroot . '/course/lib.php'); // Course lib functions.
 
@@ -55,7 +54,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                         "connectorid"       => 1,
                         "pathitem"          => "ABC",
                         "httpmethod"        => "get",
-                        "plugincomponent"   => "course",
+                        "plugincomponent"   => "importers_course",
                         "active"            => 1,
                         "importorder"       => 1,
                         "timecreated"       => 12345
@@ -75,8 +74,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
     public function test_get_database_properties() {
         require_once(__DIR__.'/fixtures/database_properties.php');
 
-        $object = new data_importer_course_importer($this->pathitemid);
-        $class = new ReflectionClass('data_importer_course_importer');
+        $object = new importers_course_importer($this->pathitemid);
+        $class = new ReflectionClass('importers_course_importer');
         $method = $class->getMethod('get_database_properties');
         $method->setAccessible(true);
         $method->invokeArgs($object, array(1));
@@ -89,7 +88,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
 
     public function test_get_plugin_name() {
 
-        $courseimporter = new data_importer_course_importer($this->pathitemid);
+        $courseimporter = new importers_course_importer($this->pathitemid);
         $pluginname = $courseimporter->get_plugin_name();
 
         $this->assertEquals($pluginname, get_string('pluginname', $courseimporter->languagepack));
@@ -97,7 +96,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
 
     public function test_get_additional_form_elements() {
 
-        $courseimporter = new data_importer_course_importer($this->pathitemid);
+        $courseimporter = new importers_course_importer($this->pathitemid);
         $settingsarray = $courseimporter->get_additional_form_elements();
         $html = array_pop($settingsarray); // Only one additional setting to check.
         $expectedhtml = '<select id="additional_setting[delete_courses]" name="additional_setting[delete_courses]"><option value="0" selected="">'.get_string('keepcourses', 'importers_course').'</option><option value="1" selected="selected">'.get_string('deletecourse', 'importers_course').'</option></select>';
@@ -121,7 +120,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
             $this->assertEquals($category->name, $c["course_categories"]["name"]);
 
             // Check that course creation was logged.
-            $logitem = $DB->get_record("local_data_importer_course",
+            $logitem = $DB->get_record($courseimporter->logtable,
                     array("course_idnumber" => $c["course"]["idnumber"], "pathitemid" => $this->pathitemid));
 
             $this->assertEquals($logitem->course_fullname, $c["course"]["fullname"]);
@@ -176,12 +175,12 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         $deleting = $this->courses;
         unset($deleting[0]);
         unset($deleting[2]);
-
+        
         $courseimporter->do_imports($deleting); // Import the data to delete two existing courses.
 
         $coursecountend = $DB->count_records("course");
-
         $this->assertEquals(($coursecountstart - $coursecountend), 2);
+        
         $deletedinlog = $DB->count_records("local_data_importer_course", array("deleted" => 1, "pathitemid" => $this->pathitemid));
         $this->assertEquals($deletedinlog, 2);
 

@@ -20,40 +20,39 @@ defined('MOODLE_INTERNAL') || die();
  */
 class local_data_importer_connectorinstance {
     /**
-     * @var
+     * @var integer
      */
     public $id;
     /**
-     * @var
+     * @var string
      */
     private $description;
     /**
-     * @var
+     * @var string
      */
     private $server;
     /**
-     * @var
+     * @var string
      */
     private $openapikey;
     /**
-     * @var
+     * @var string
      */
     private $serverapikey;
     /**
-     * @var
+     * @var string
      */
     private $name;
-
     /**
-     * @var
+     * @var string
      */
     private $openapidefinitionurl;
     /**
-     * @var
+     * @var integer
      */
     private $timecreated;
     /**
-     * @var
+     * @var integer
      */
     private $timemodified;
     /**
@@ -69,35 +68,35 @@ class local_data_importer_connectorinstance {
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
-    public function getid() {
+    public function get_id() {
         return $this->id;
     }
 
     /**
-     * @param mixed $id
+     * @param integer $id
      */
-    public function setid($id) {
+    public function set_id($id) {
         $this->id = $id;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_openapi_key() {
         return $this->openapikey;
     }
 
     /**
-     * @param mixed $openapikey
+     * @param string $openapikey
      */
-    public function setopenapikey($openapikey) {
+    public function set_openapi_key($openapikey) {
         $this->openapikey = $openapikey;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_name() {
         return $this->name;
@@ -106,104 +105,104 @@ class local_data_importer_connectorinstance {
     /**
      * @return string
      */
-    public function getdbtable() {
+    public function get_dbtable() {
         return $this->dbtable;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      */
-    public function setname($name) {
+    public function set_name($name) {
         $this->name = $name;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getdescription() {
+    public function get_description() {
         return $this->description;
     }
 
     /**
-     * @param mixed $description
+     * @param string $description
      */
-    public function setdescription($description) {
+    public function set_description($description) {
         $this->description = $description;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getserver() {
+    public function get_server() {
         return $this->server;
     }
 
     /**
-     * @param mixed $server
+     * @param string $server
      */
-    public function setserver($server) {
+    public function set_server($server) {
         $this->server = $server;
     }
 
     /**
-     * @return mixed $openapidefinitionurl
+     * @return string $openapidefinitionurl
      */
     public function get_openapidefinitionurl() {
         return $this->openapidefinitionurl;
     }
 
     /**
-     * @param mixed $openapidefinitionurl
+     * @param string $openapidefinitionurl
      */
     public function set_openapidefinitionurl($openapidefinitionurl) {
         $this->openapidefinitionurl = $openapidefinitionurl;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function get_timecreated() {
         return $this->timecreated;
     }
 
     /**
-     * @param mixed $timecreated
+     * @param integer $timecreated
      */
     public function set_timecreated($timecreated) {
         $this->timecreated = $timecreated;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function get_timemodified() {
         return $this->timemodified;
     }
 
     /**
-     * @param mixed $timemodified
+     * @param integer $timemodified
      */
     public function set_timemodified($timemodified) {
         $this->timemodified = $timemodified;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function get_server_apikey() {
         return $this->serverapikey;
     }
 
     /**
-     * @param mixed $serverapikey
+     * @param string $serverapikey
      */
     public function set_server_apikey($serverapikey) {
         $this->serverapikey = $serverapikey;
     }
 
     /**
-     * @param $id
-     * @return local_data_importer_connectorinstance
+     * @param integer $id
+     * @return object local_data_importer_connectorinstance
      * @throws \Exception
      */
     public function get_by_id($id) {
@@ -214,12 +213,12 @@ class local_data_importer_connectorinstance {
             if ($recordobject) {
                 // Take the db object and turn it into this class object.
                 $connectorinstance = new self();
-                $connectorinstance->setid($recordobject->id);
-                $connectorinstance->setname($recordobject->name);
-                $connectorinstance->setdescription($recordobject->description);
-                $connectorinstance->setserver($recordobject->server);
+                $connectorinstance->set_id($recordobject->id);
+                $connectorinstance->set_name($recordobject->name);
+                $connectorinstance->set_description($recordobject->description);
+                $connectorinstance->set_server($recordobject->server);
                 $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
-                $connectorinstance->setopenapikey($recordobject->openapikey);
+                $connectorinstance->set_openapi_key($recordobject->openapikey);
                 $connectorinstance->set_server_apikey($recordobject->serverapikey);
                 $connectorinstance->set_timecreated($recordobject->timecreated);
                 $connectorinstance->set_timemodified($recordobject->timemodified);
@@ -229,13 +228,11 @@ class local_data_importer_connectorinstance {
                 // TODO - This should throw an exception to stop code continuing above.
                 // Surely if you request object with invalid id something went wrong.
             }
-
             return $connectorinstance;
         } catch (\dml_exception $e) {
             echo "catch error";
             throw new \Exception($e);
         }
-
     }
 
     /** Return all connectors from the database
@@ -249,12 +246,12 @@ class local_data_importer_connectorinstance {
             if ($connectorrecords && is_array($connectorrecords)) {
                 foreach ($connectorrecords as $recordobject) {
                     $connectorinstance = new self();
-                    $connectorinstance->setid($recordobject->id);
-                    $connectorinstance->setname($recordobject->name);
-                    $connectorinstance->setdescription($recordobject->description);
-                    $connectorinstance->setserver($recordobject->server);
+                    $connectorinstance->set_id($recordobject->id);
+                    $connectorinstance->set_name($recordobject->name);
+                    $connectorinstance->set_description($recordobject->description);
+                    $connectorinstance->set_server($recordobject->server);
                     $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
-                    $connectorinstance->setopenapikey($recordobject->openapikey);
+                    $connectorinstance->set_openapi_key($recordobject->openapikey);
                     $connectorinstance->set_server_apikey($recordobject->serverapikey);
                     $connectorinstance->set_timemodified($recordobject->timemodified);
                     $connectors[] = $connectorinstance;
@@ -302,7 +299,6 @@ class local_data_importer_connectorinstance {
                 var_dump($e->getmessage());
             }
         }
-
     }
 
     /** Delete the connector instance
