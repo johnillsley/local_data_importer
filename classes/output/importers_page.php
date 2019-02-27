@@ -60,11 +60,11 @@ class importers_page implements templatable, renderable {
         if (is_array($connectors)) {
             foreach ($connectors as $connector) {
                 $data = new stdClass();
-                $data->id = $connector->getid();
+                $data->id = $connector->get_id();
                 $data->name = $connector->get_name();
-                $data->description = $connector->getdescription();
+                $data->description = $connector->get_description();
                 $data->openapikey = $connector->get_openapi_key();
-                $data->server = $connector->getserver();
+                $data->server = $connector->get_server();
                 $data->serverapikey = $connector->get_server_apikey();
                 $data->lastmodified = date('d-m-Y H:i', $connector->get_timemodified());
                 $data->openapidefinitionurl = $connector->get_openapidefinitionurl();
@@ -83,11 +83,11 @@ class importers_page implements templatable, renderable {
         if (is_array($connectors)) {
             foreach ($connectors as $connector) {
                 $data = new stdClass();
-                $data->id = $connector->getid();
+                $data->id = $connector->get_id();
                 $data->name = $connector->get_name();
-                $data->description = $connector->getdescription();
+                $data->description = $connector->get_description();
                 $data->openapikey = $connector->get_openapi_key();
-                $data->server = $connector->getserver();
+                $data->server = $connector->get_server();
                 $data->serverapikey = $connector->get_server_apikey();
                 $data->lastmodified = date('d-m-Y H:i', $connector->get_timemodified());
                 $data->openapidefinitionurl = $connector->get_openapidefinitionurl();
@@ -134,10 +134,10 @@ class importers_page implements templatable, renderable {
         $data = array();
         if ($connector instanceof \local_data_importer_connectorinstance) {
             $data = new stdClass();
-            $data->id = $connector->getid();
+            $data->id = $connector->get_id();
             $data->name = $connector->get_name();
-            $data->description = $connector->getdescription();
-            $data->server = $connector->getserver();
+            $data->description = $connector->get_description();
+            $data->server = $connector->get_server();
             $data->openapikey = $connector->get_openapi_key();
             $data->openapidefinitionurl = $connector->get_openapidefinitionurl();
             $data->serverapikey = $connector->get_server_apikey();
@@ -155,10 +155,10 @@ class importers_page implements templatable, renderable {
         if (is_array($connectors)) {
             foreach ($connectors as $connector) {
                 $data = new stdClass();
-                $data->id = $connector->getid();
+                $data->id = $connector->get_id();
                 $data->name = $connector->get_name();
-                $data->description = $connector->getdescription();
-                $data->server = $connector->getserver();
+                $data->description = $connector->get_description();
+                $data->server = $connector->get_server();
                 $data->openapidefinitionurl = $connector->get_openapidefinitionurl();
                 $connectoritems[] = $data;
             }

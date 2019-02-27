@@ -1,6 +1,6 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
-
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -23,6 +23,11 @@ $string['server_label'] = 'Server ( retrieved automatically)';
 $string['pluginname'] = 'Data Importer';
 $string['connectorlist'] = 'Available Connectors';
 $string['componentlist'] = 'Available Plugins';
+
+$string['nosubpluginparameteroptions'] = 'There are no sub plugin parameters';
+$string['pathitemparameter'] = 'Path item parameter';
+$string['subpluginparameter'] = 'Sub plugin parameter';
+
 
 // Sub-plugin strings.
 $string['subplugintype_importers'] = 'Importer Plugin';

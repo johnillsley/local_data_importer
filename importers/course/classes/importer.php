@@ -35,24 +35,27 @@ require_once($CFG->dirroot . '/course/lib.php'); // Course lib functions.
  */
 class importers_course_importer extends data_importer_entity_importer {
 
-    public function __construct($id) {
+    public function __construct($pathitemid) {
 
-        $this->importerplugin = 'local_data_importer_course';
+        $this->pathitemid   = $pathitemid;
+        $this->logtable     = 'local_data_importer_course';
         $this->languagepack = 'importers_course';
-        $this->pathitemid = $id;
 
         $this->responses = array(
                 'course' => array(
-                        'fullname',
-                        'shortname',
-                        'idnumber'
+                        'fullname'  => array(),
+                        'shortname' => array(),
+                        'idnumber'  => array("unique")
                 ),
                 'course_categories' => array(
-                        'name'
+                        'name'      => array()
                 )
         );
-        $this->uniquekey = 'course' . $this->tablefieldseperator . 'idnumber';
-        $this->parameters = array('sits_mappings' => array('sits_code', 'acyear', 'period_code')); // TODO - check this.
+        // TODO - $this->parameters = null; for this sub plugin.
+        $this->parameters = array(
+                'some_parameter',
+                'another_parameter',
+                'and_yet_another_one');
     }
 
     /**
@@ -96,10 +99,7 @@ class importers_course_importer extends data_importer_entity_importer {
             $course->startdate          = usergetmidnight(time());
 
             if (create_course($course)) {
-                // Save action in data_importer_course_log DB table.
-                $logitem = $this->prepare_for_log($item, $course->timecreated);
-                $logitem->deleted = 0;
-                $this->local_log($logitem);
+                $this->local_log($item, $course->timecreated);
             }
         } catch (\Exception $e) {
             throw $e;
@@ -133,10 +133,7 @@ class importers_course_importer extends data_importer_entity_importer {
 
             // Check update happened ok - as the update_course function does not return anything to indicate success.
             if ($DB->get_record("course", (array)$course)) {
-                // Save action in data_importer_course_log DB table.
-                $logitem = $this->prepare_for_log($item, $course->timemodified);
-                $logitem->deleted = 0;
-                $this->local_log($logitem);
+                $this->local_log($item, $course->timemodified);
             }
         } catch (\Exception $e) {
             throw $e;
@@ -157,75 +154,16 @@ class importers_course_importer extends data_importer_entity_importer {
         if ($this->get_setting('delete_courses') == 1) {
             try {
                 $courseid = $DB->get_field("course", "id", array("idnumber" => $item->course_idnumber));
-
                 if (delete_course($courseid)) {
-                    // Save action in data_importer_course_log DB table.
-                    $logitem = new stdClass();
-                    $logitem->course_idnumber = $item->course_idnumber;
-                    $logitem->deleted = 1;
-                    $this->local_log($logitem);
+                    $this->local_log($item, time(), true);
                 }
             } catch (\Exception $e) {
                 throw $e;
             }
         }
     }
-
-    /**
-     * Sorts all the course items extracted from the external web service into three groups.
-     * Using the local log of previously imported courses the course items are sorted into
-     * either create, update or delete arrays.
-     *
-     * @param array of $items that have been extracted from the external web service
-     * @return object holding separate arrays for create, update and delete items
-     */
-    protected function sort_items($items = array()) {
-        global $DB;
-
-        $action = new stdClass();
-        $action->create = array();
-        $action->update = array();
-        $action->delete = array();
-
-        $k = explode($this->tablefieldseperator, $this->uniquekey);
-        $uniquekeytable = $k[0];
-        $uniquekeyfield = $k[1];
-
-        // Get all existing items imported into Moodle from local log.
-        $records = $DB->get_records($this->importerplugin, array("deleted" => 0, "pathitemid" => $this->pathitemid));
-
-        // Set keys to unique field value.
-        $current = array();
-        foreach ($records as $record) {
-            $current[$record->course_idnumber] = $record;
-            // TODO - check characters in key.
-        }
-
-        foreach ($items as $item) {
-
-            $key = $item[$uniquekeytable][$uniquekeyfield];
-            // TODO - get actual course properties NOT LOGGED as someone could have updated locally!!!!
-            if (array_key_exists($key, $current)) {
-                // Item already exists so check if it needs updating.
-                if ($current[$key]->course_fullname != $item['course']['fullname'] ||
-                        $current[$key]->course_shortname != $item['course']['shortname'] ||
-                        $current[$key]->course_categories_name != $item['course_categories']['name']) {
-
-                    $action->update[] = $item;
-                }
-            } else {
-                // Item needs adding.
-                $action->create[] = $item;
-            }
-            unset($current[$key]); // Take off the list to delete.
-        }
-        // What is left in $current need to be deleted. Note format of $current is different to $item.
-        $action->delete = $current;
-
-        return $action;
-    }
-
-    public function provide_web_service_parameters() {
+    
+    public function get_parameters() {
 
         return null;
     }
@@ -274,25 +212,7 @@ class importers_course_importer extends data_importer_entity_importer {
         // TODO - how about a setting to prevent update of course fullname and/or shortname?
         // TODO - Don't do updates - or only update categories.
     }
-
-    /**
-     * Formats course data from the import ready to be stored in the local log.
-     *
-     * @param array $item - the course data from the external web service.
-     * @param integer $time - the time the course was modified.
-     * @return object $importer that can be written to the local log.
-     */
-    private function prepare_for_log($item, $time) {
-
-        $importer = new stdClass();
-        $importer->course_fullname          = $item['course']['fullname'];
-        $importer->course_shortname         = $item['course']['shortname'];
-        $importer->course_idnumber          = $item['course']['idnumber'];
-        $importer->course_categories_name   = $item['course_categories']['name'];
-        $importer->timemodified             = $time;
-        return $importer;
-    }
-
+    
     /**
      * Return the course category id for the course category name supplied.
      * If the course category name is not found a new course category is created.
