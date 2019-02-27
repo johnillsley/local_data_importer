@@ -171,23 +171,46 @@ class importers_course_importer extends data_importer_entity_importer {
     /**
      * Outputs an array of form elements to create settings that are unique to this type of plugin.
      *
+     * additional field type
+     * additional field name
+     * additional options
+     * additional required or not
+     * additional label
      * @return array of html form elements to be added to the form when an instance of this plugin is created
      */
     public function get_additional_form_elements() {
 
         $additionalsettings = array();
 
-        $settingname = 'delete_courses';
-        $options = array();
-        $options[0] = get_string('keepcourses', 'importers_course');
-        $options[1] = get_string('deletecourse', 'importers_course');
+        // Course Visbility Setting. [ default course created should be visible or hidden ?].
+        $additionalsettings['course_visible'] = array(
+            'field_label' => 'Course visibility when created ? ',
+            'field_type' => 'select',
+            'required' => true,
+            'options' => [
+                'Show' => '1',
+                'Hide' => '0'
+            ]
+        );
 
-        $additionalsettings[] = $this->get_html_additional_setting($settingname, $options);
+        // Course Deletion Setting. [ delete course if deleted from source ? ].
+
+        $additionalsettings['course_delete'] = array(
+            'field_label' => "Delete course from Moodle if deleted from source ?",
+            'field_type' => 'select',
+            'required' => false,
+            'options' => [
+                get_string('keepcourses', 'importers_course') => '1',
+                get_string('deletecourse', 'importers_course') => '0'
+            ]
+        );
+
+        return $additionalsettings;
+
         // TODO - What about the label?
 
         // TODO - how about a setting to prevent update of course fullname and/or shortname?
         // TODO - Don't do updates - or only update categories.
-        return $additionalsettings;
     }
     
     /**

@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 require_once("../../config.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/connector_form.php");
-//require_once($CFG->dirroot . "/local/data_importer/importer_form.php");
 require_once($CFG->dirroot . "/local/data_importer/forms/importer/edit_importer.php");
 $url = new moodle_url('/local/data_importer/index.php');
 $PAGE->set_url($url);
@@ -101,7 +100,6 @@ switch ($action) {
             echo $importereditform->display();
         }
         break;
-        
     case 'deletepathitem':
         $PAGE->set_heading("Delete Pathitem");
         echo $OUTPUT->header();
@@ -110,7 +108,6 @@ switch ($action) {
         break;
 
     case 'move_up':
-        //$pathitem = new local_data_importer_connectorpathitem;
         $pathitem = $pathiteminstance->get_by_id($pathitemid);
         $pathitem->reorder_import('up');
         echo $OUTPUT->header();
@@ -119,7 +116,6 @@ switch ($action) {
         break;
 
     case 'move_down':
-        //$connector = new local_data_importer_connectorpathitem;
         $pathitem = $pathiteminstance->get_by_id($pathitemid);;
         $pathitem->reorder_import('down');
         echo $OUTPUT->header();

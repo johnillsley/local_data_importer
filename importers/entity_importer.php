@@ -346,7 +346,7 @@ abstract class data_importer_entity_importer {
             }
         }
 
-        switch($fieldmetadata->data_type) {
+        switch ($fieldmetadata->data_type) {
 
             case 'tinyint':
             case 'smallint':
@@ -530,24 +530,6 @@ abstract class data_importer_entity_importer {
         } else {
             return null; // So that calling function knows that no setting was found.
         }
-    }
-
-    protected function get_html_additional_setting($settingname, $options) {
-
-        $existingsetting = $this->get_setting($settingname);
-        $selectattributes = array(
-                "id" => "additional_setting[$settingname]",
-                "name" => "additional_setting[$settingname]"
-        );
-
-        $html = html_writer::start_tag('select', $selectattributes);
-        foreach ($options as $k => $v) {
-            $selected = ($existingsetting == $k) ? 'selected' : '';
-            $html .= html_writer::tag('option', $v, array('value' => $k, 'selected' => $selected));
-        }
-        $html .= html_writer::end_tag('select');
-
-        return $html;
     }
 
     /**
