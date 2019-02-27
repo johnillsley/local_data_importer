@@ -75,13 +75,50 @@ class local_data_importer_add_importer_form extends moodleform {
 
             // Path item parameters.
             $mform->addElement('header', 'general', 'Path Item Parameter');
+            $options = array();
             if (isset($this->_customdata['subpluginparams'])) {
                 $subpluginparams = $this->_customdata['subpluginparams'];
+                if (is_array($subpluginparams)) {
+                    // There are subplugin parameters that can be mapped to pathitem parameters.
+                    foreach ($subpluginparams as $subpluginparam) {
+                        $options[$subpluginparam] = $subpluginparam;
+                    }
+                }
+            }
+            if (isset($this->_customdata['pathitemparams'])) {
+                $pathitemparams = $this->_customdata['pathitemparams'];
+                if (is_array($pathitemparams)) {
+                    // There are pathitem parameters that need to be mapped in order to make web service requests.
+                    foreach ($pathitemparams as $pathitemparam) {
+                        $mform->addElement(
+                                'static',
+                                'subpluginparams',
+                                get_string("pathitemparameter", "local_data_importer"),
+                                "<strong>" . $pathitemparam["name"] . "</strong>"
+                        );
+                        if (count($options) > 0) {
+                            $mform->addElement(
+                                    'select',
+                                    "pathitemparams[" . $pathitemparam['name'] . "]",
+                                    get_string("subpluginparameter", "local_data_importer"),
+                                    $options
+                            );
+                        } else {
+                            $mform->addElement(
+                                    'static',
+                                    'subpluginparams',
+                                    get_string("subpluginparameter", "local_data_importer"),
+                                    get_string("nosubpluginparameteroptions", "local_data_importer"));
+                        }
+                    }
+                }
+            }
+
+            /*
                 foreach ($subpluginparams as $paramkey => $arrayparam) {
                     foreach ($arrayparam as $key => $val) {
                         // Display plugin component parameters.
-                        $mform->addElement('static', 'subpluginparams', "Sub plugin param",
-                            "<strong>" . $val . "</strong>");
+                        $mform->addElement('static', 'subpluginparams', "Sub plugin param", "<strong>" . $val . "</strong>");
                         // Add hidden element for form capture.
                         $plugincomponentidentifier = $paramkey . self::TABLE_FIELD_SEPERATOR . $val;
 
@@ -97,26 +134,30 @@ class local_data_importer_add_importer_form extends moodleform {
                         $mform->addElement('select', "pathitemparams[$plugincomponentidentifier]", 'Path item param', $options);
                     }
                 }
-            }
-            $options = null;
+                */
 
+            $options = null;
             $mform->addElement('header', 'general', 'Path Item Response');
 
             if (isset($this->_customdata['subpluginresponses'])) {
                 $subpluginresponses = $this->_customdata['subpluginresponses'];
-                foreach ($subpluginresponses as $paramkey => $arrayparam) {
-                    foreach ($arrayparam as $key => $val) {
-                        $plugincomponentidentifier = $paramkey . self::TABLE_FIELD_SEPERATOR . $val;
-                        $mform->addElement('static', 'subpluginparams', "Sub plugin response", "<strong>" . $val . "</strong>");
+                foreach ($subpluginresponses as $table => $field) {
+                    foreach ($field as $fieldname => $properties) {
+                        $plugincomponentidentifier = $table . self::TABLE_FIELD_SEPERATOR . $fieldname;
+                        $mform->addElement(
+                                'static',
+                                'subpluginparams',
+                                "Sub plugin response",
+                                "<strong>" . $plugincomponentidentifier . "</strong>");
                         $mform->addElement('hidden', 'plugincomponentresponse', $plugincomponentidentifier);
                         $mform->setType('plugincomponentresponse', PARAM_TEXT);
 
-                        if (is_array($this->_customdata['pathitemresponseparams'])) {
-                            foreach ($this->_customdata['pathitemresponseparams'] as $key => $response) {
+                        if (is_array($this->_customdata['pathitemresponses'])) {
+                            foreach ($this->_customdata['pathitemresponses'] as $key => $response) {
                                 $options[$key] = $key;
                             }
                         }
-                        $mform->addElement('select', "pathitemresponseparams[$plugincomponentidentifier]",
+                        $mform->addElement('select', "pathitemresponses[$plugincomponentidentifier]",
                             'Path Item response', $options);
                     }
                 }
