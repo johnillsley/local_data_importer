@@ -226,7 +226,8 @@ class local_data_importer_connectorinstance {
                 // TODO - why do some methods have underscore and some don't?
             } else {
                 $connectorinstance = false;
-                // TODO - This should throw an exception to stop code continuing above. Surely if you request object with invalid id something went wrong.
+                // TODO - This should throw an exception to stop code continuing above.
+                // Surely if you request object with invalid id something went wrong.
             }
 
             return $connectorinstance;
