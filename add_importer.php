@@ -34,8 +34,7 @@ $pathitem = optional_param('pathitem', null, PARAM_RAW);
 $pathitemname = optional_param('pathitemname', null, PARAM_RAW);
 $pathitemparams = optional_param_array('pathitemparams', null, PARAM_RAW);
 $pathitemresponse = optional_param_array('pathitemresponseparams', null, PARAM_RAW);
-
-
+$subpluginadditionalfields = optional_param_array('subpluginadditionalfields', null, PARAM_RAW);
 $renderer = $PAGE->get_renderer('local_data_importer');
 $connectorinstance = new local_data_importer_connectorinstance();
 $openapiinspector = null;
@@ -85,10 +84,10 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                                 $pluginlist = array();
                                 // Get sub-plugins .
                                 $plugins = core_plugin_manager::instance()->get_subplugins_of_plugin('local_data_importer');
-                                 foreach ($plugins as $component => $info) {
+                                foreach ($plugins as $component => $info) {
                                     $pluginlist[$component] = $component;
                                 }
-                                 $params['subplugin'] = $pluginlist;
+                                $params['subplugin'] = $pluginlist;
                                 $params['selectedconnector'] = $connectordata;
                                 $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                                 echo $selectconnectorform->display();
@@ -108,13 +107,14 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     try {
                         if ($connector instanceof \local_data_importer_connectorinstance) {
                             // For the selected subplugin , get the params available.
-                            $class = $subplugin."_importer";
-                             $object = new $class($pathitem);
+                            $class = $subplugin . "_importer";
+                            $object = new $class($pathitem);
                             $subpluginresponses = $object->responses;
                             $subpluginparams = $object->parameters;
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
                             $responseparams = $openapiinspector->get_pathitem_responses_selectable($pathitem);
-
+                            // For the selected subplugin , get the additional form elements (if available).
+                            $subpluginadditionalfields = $object->get_additional_form_elements();
                             // Prepare parameters to pass to the form.
                             $params['subpluginparams'] = $subpluginparams;
                             $params['subpluginresponses'] = $subpluginresponses;
@@ -123,6 +123,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $params['pathitem'] = $pathitem;
                             $params['pathitemname'] = $pathitemname;
                             $params['pathitemresponseparams'] = $responseparams;
+                            $params['subpluginadditionalfields'] = $subpluginadditionalfields;
                             $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                             echo $selectconnectorform->display();
                         }
@@ -145,7 +146,17 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                 try {
                     $pathitemid = $objpathitem->save(true);
 
-                    // 2. PATH ITEM PARAMETER.
+                    // 2. SUB-PLUGIN ADDITIONAL SETTINGS.
+                    if (isset($subpluginadditionalfields) && is_array($subpluginadditionalfields) && isset($subplugin)) {
+                        $class = $subplugin . "_importer";
+                        $object = new $class($pathitemid);
+                        var_dump($subpluginadditionalfields);
+                        foreach ($subpluginadditionalfields as $settingname => $settingvalue) {
+                            $object->save_setting($settingname, $settingvalue);
+                        }
+                    }
+
+                    // 3. PATH ITEM PARAMETER.
 
                     $objpathitemparameter = new local_data_importer_pathitem_parameter();
                     $objpathitemparameter->set_pathitemid($pathitemid);
@@ -161,7 +172,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     }
 
 
-                    // 3. PATH ITEM RESPONSE.
+                    // 4. PATH ITEM RESPONSE.
                     $objpathitemresponse = new local_data_importer_pathitem_response();
                     $objpathitemresponse->set_pathitemid($pathitemid);
 
@@ -188,6 +199,6 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
 
 } else {
     $PAGE->set_heading("Add Importer");
-     echo $selectconnectorform->display();
+    echo $selectconnectorform->display();
 }
 echo $OUTPUT->footer();

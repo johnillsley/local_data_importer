@@ -35,7 +35,7 @@ class local_data_importer_connectorpathitem_test extends advanced_testcase {
     protected $pathitemstest = array();
 
     protected function setUp() {
-        // create 3 records in connector_pathitem table that are ordered.
+        // Create 3 records in connector_pathitem table that are ordered.
         $connectorpathitem = new local_data_importer_connectorpathitem();
         $connectorpathitem->set_name('Path Item 1');
         $connectorpathitem->set_connector_id(1);
