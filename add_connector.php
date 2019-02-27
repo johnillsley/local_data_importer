@@ -36,12 +36,12 @@ if (!$mform->is_cancelled() && $formdata = $mform->get_data()) {
     // Server needs to be retrieved using POST as its fetched through ajax so $mform knows nothing about it.
     $apiserver = $_POST['apiserver'];
     if (!empty($formdata)) {
-        $connectorinstance->setdescription($formdata->description);
-        $connectorinstance->setname($formdata->name);
+        $connectorinstance->set_description($formdata->description);
+        $connectorinstance->set_name($formdata->name);
         $connectorinstance->set_openapidefinitionurl($formdata->openapidefinitionurl);
-        $connectorinstance->setopenapikey($formdata->openapikey);
+        $connectorinstance->set_openapi_key($formdata->openapikey);
         $connectorinstance->set_server_apikey($formdata->serverapikey);
-        $connectorinstance->setserver($apiserver);
+        $connectorinstance->set_server($apiserver);
         $connectorinstance->save(true);
         redirect($returnurl);
     }

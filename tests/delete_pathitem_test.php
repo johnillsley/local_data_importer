@@ -47,12 +47,12 @@ class local_data_importer_pathitem_testcase extends advanced_testcase {
         $json = file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/swaggerresponse.json');
         $data = json_decode($json);
         $this->connectorinstance = new local_data_importer_connectorinstance();
-        $this->connectorinstance->setdescription("Connector Instance Description");
-        $this->connectorinstance->setname("Connector Instance Name");
+        $this->connectorinstance->set_description("Connector Instance Description");
+        $this->connectorinstance->set_name("Connector Instance Name");
         $this->connectorinstance->set_server_apikey('serverapikey');
-        $this->connectorinstance->setopenapikey('openapikey');
+        $this->connectorinstance->set_openapi_key('openapikey');
         $host = $data->host;
-        $this->connectorinstance->setserver($host);
+        $this->connectorinstance->set_server($host);
         $openapidefinitionurl = "https://api.swaggerhub.com/apis/UniversityofBath/GradesTransferOAS20/1.0.0";
         $this->connectorinstance->set_openapidefinitionurl($openapidefinitionurl);
         $this->connectorinstanceid = $this->connectorinstance->save(true);

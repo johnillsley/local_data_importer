@@ -45,14 +45,14 @@ if ($formdata = $importerform->get_data()) {
 
     if (!empty($formdata)) {
         if (isset($_POST['connectorid'])) {
-            $connectorinstance->setid($_POST['connectorid']);
+            $connectorinstance->set_id($_POST['connectorid']);
         }
-        $connectorinstance->setdescription($formdata->connector_description);
-        $connectorinstance->setname($formdata->connector_name);
+        $connectorinstance->set_description($formdata->connector_description);
+        $connectorinstance->set_name($formdata->connector_name);
         $connectorinstance->set_openapidefinitionurl($formdata->openapidefinitionurl);
-        $connectorinstance->setopenapikey($formdata->openapikey);
+        $connectorinstance->set_openapi_key($formdata->openapikey);
         $connectorinstance->set_server_apikey($formdata->serverapikey);
-        $connectorinstance->setserver($server);
+        $connectorinstance->set_server($server);
         try {
             $retid = $connectorinstance->save(true);
             $displaynoticegood = "New connector added with id: $retid";
@@ -135,7 +135,7 @@ switch ($action) {
         if ($confirmdelete == 1) {
             // Delete connector.
             if (isset($connectorid)) {
-                $connectorinstance->setid($connectorid);
+                $connectorinstance->set_id($connectorid);
                 try {
                     $connectorinstance->delete();
                 } catch (\Exception $e) {

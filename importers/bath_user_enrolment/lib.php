@@ -36,7 +36,7 @@ function sync_enrolment_cron_task() {
             if (isset($connectorid)) {
                 $objconnector = $connector->get_by_id($connectorid);
                 $connectordata = new stdClass();
-                $connectordata->server = $objconnector->getserver();
+                $connectordata->server = $objconnector->get_server();
                 $connectordata->serverapikey = $objconnector->get_server_apikey();
                 try {
 

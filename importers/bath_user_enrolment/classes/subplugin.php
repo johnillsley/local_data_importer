@@ -82,7 +82,7 @@ class importers_bath_user_enrolment_subplugin extends local_data_importer_subplu
                 if (isset($connectorid)) {
                     $objconnector = $connector->get_by_id($connectorid);
                     $connectordata = new stdClass();
-                    $connectordata->server = $objconnector->getserver();
+                    $connectordata->server = $objconnector->get_server();
                     $connectordata->serverapikey = $objconnector->get_server_apikey();
                     try {
 

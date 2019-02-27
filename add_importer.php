@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 require_once("../../config.php");
 global $OUTPUT;
 require_once($CFG->dirroot . "/local/data_importer/forms/importer/add_importer.php");
@@ -33,8 +34,7 @@ $subplugin = optional_param('subplugin', null, PARAM_RAW);
 $pathitem = optional_param('pathitem', null, PARAM_RAW);
 $pathitemname = optional_param('pathitemname', null, PARAM_RAW);
 $pathitemparams = optional_param_array('pathitemparams', null, PARAM_RAW);
-$pathitemresponse = optional_param_array('pathitemresponseparams', null, PARAM_RAW);
-
+$pathitemresponse = optional_param_array('pathitemresponses', null, PARAM_RAW);
 
 $renderer = $PAGE->get_renderer('local_data_importer');
 $connectorinstance = new local_data_importer_connectorinstance();
@@ -45,7 +45,7 @@ if (isset($connectorid)) {
     $connectordata = new stdClass();
     $connectordata->openapidefinitionurl = $connector->get_openapidefinitionurl();
     $connectordata->openapikey = $connector->get_openapi_key();
-    $connectordata->id = $connector->getid();
+    $connectordata->id = $connector->get_id();
     $connectordata->name = $connector->get_name();
     try {
         $httpconnection = new local_data_importer_http_connection($connectordata->openapidefinitionurl
@@ -85,10 +85,10 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                                 $pluginlist = array();
                                 // Get sub-plugins .
                                 $plugins = core_plugin_manager::instance()->get_subplugins_of_plugin('local_data_importer');
-                                 foreach ($plugins as $component => $info) {
+                                foreach ($plugins as $component => $info) {
                                     $pluginlist[$component] = $component;
                                 }
-                                 $params['subplugin'] = $pluginlist;
+                                $params['subplugin'] = $pluginlist;
                                 $params['selectedconnector'] = $connectordata;
                                 $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                                 echo $selectconnectorform->display();
@@ -109,7 +109,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                         if ($connector instanceof \local_data_importer_connectorinstance) {
                             // For the selected subplugin , get the params available.
                             $class = $subplugin."_importer";
-                             $object = new $class($pathitem);
+                            $object = new $class($pathitem);
                             $subpluginresponses = $object->responses;
                             $subpluginparams = $object->parameters;
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
@@ -122,7 +122,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $params['selectedconnector'] = $connectordata;
                             $params['pathitem'] = $pathitem;
                             $params['pathitemname'] = $pathitemname;
-                            $params['pathitemresponseparams'] = $responseparams;
+                            $params['pathitemresponses'] = $responseparams;
                             $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                             echo $selectconnectorform->display();
                         }
@@ -132,6 +132,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                 }
                 break;
             case 'save':
+
                 // Add them to the database.
                 // 1. PATH ITEM.
                 $objpathitem = new local_data_importer_connectorpathitem();
@@ -140,27 +141,23 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                 $objpathitem->set_path_item($pathitem);
                 $objpathitem->set_active(true);
                 $objpathitem->set_http_method('GET');
-                $objpathitem->set_plugin_component($subplugin . "_subplugin");
+                $objpathitem->set_plugin_component($subplugin);
 
                 try {
                     $pathitemid = $objpathitem->save(true);
 
                     // 2. PATH ITEM PARAMETER.
-
                     $objpathitemparameter = new local_data_importer_pathitem_parameter();
                     $objpathitemparameter->set_pathitemid($pathitemid);
 
                     if (isset($pathitemparams) && is_array($pathitemparams)) {
-                        foreach ($pathitemparams as $pip => $pcp) {
-                            $pip = explode("-", $pip);
-                            $objpathitemparameter->set_pluginparam_table($pip[0]);
-                            $objpathitemparameter->set_pluginparam_field($pip[1]);
-                            $objpathitemparameter->set_pathitem_parameter($pcp);
+                        foreach ($pathitemparams as $pip => $sbp) {
+                            $objpathitemparameter->set_subplugin_parameter($sbp);
+                            $objpathitemparameter->set_pathitem_parameter($pip);
                             $objpathitemparameter->save();
                         }
                     }
-
-
+                    
                     // 3. PATH ITEM RESPONSE.
                     $objpathitemresponse = new local_data_importer_pathitem_response();
                     $objpathitemresponse->set_pathitemid($pathitemid);
@@ -176,8 +173,6 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                         // All Saved OK.
                         redirect($returnurl);
                     }
-
-
                 } catch (\Exception $e) {
                     var_dump($e->getMessage());
                 }
