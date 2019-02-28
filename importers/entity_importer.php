@@ -28,6 +28,11 @@ defined('MOODLE_INTERNAL') || die();
 abstract class data_importer_entity_importer {
 
     /**
+     * @const integer
+     */
+    const DB_MAX_COLUMN_LENGTH = 30;
+
+    /**
      * @var string
      */
     public $logtable;
@@ -199,7 +204,8 @@ abstract class data_importer_entity_importer {
             // Check if unique key values from $item already exist in log table.
             $conditions = array("deleted" => 0, "pathitemid" => $this->pathitemid);
             foreach ($uniquefields as $uniquefield) {
-                $conditions[$uniquefield->table . '_' . $uniquefield->field] = $item[$uniquefield->table][$uniquefield->field];
+                $logtablefield = $this->get_log_field($uniquefield->table, $uniquefield->field);
+                $conditions[$logtablefield] = $item[$uniquefield->table][$uniquefield->field];
             }
             $record = $DB->get_record($this->logtable, $conditions);
 
@@ -207,7 +213,7 @@ abstract class data_importer_entity_importer {
                 // Item has already been imported so check all fields for updates.
                 foreach ($this->responses as $table => $field) {
                     foreach ($field as $fieldname => $fieldoptions) {
-                        $logtablefield = $table . '_' . $fieldname;
+                        $logtablefield = $this->get_log_field($table, $fieldname);
                         if ($item[$table][$fieldname] != $record->{$logtablefield}) {
                             // A field has been updated so add to update list and get out of loop.
                             $action->update[] = $item;
@@ -463,7 +469,7 @@ abstract class data_importer_entity_importer {
             // Convert $item information to field names in the log to create $logitem.
             foreach ($item as $table => $field) {
                 foreach ($field as $fieldname => $value) {
-                    $logitemfield = $table . '_' . $fieldname;
+                    $logitemfield = $this->get_log_field($table, $fieldname);
                     $logitem->$logitemfield = $item[$table][$fieldname];
                 }
             }
@@ -476,7 +482,7 @@ abstract class data_importer_entity_importer {
 
         $conditions = array();
         foreach ($uniquefields as $uniquefield) {
-            $logitemfield = $uniquefield->table . '_' . $uniquefield->field;
+            $logitemfield = $this->get_log_field($uniquefield->table, $uniquefield->field);
             $conditions[$logitemfield] = $logitem->{$logitemfield};
         }
 
@@ -530,6 +536,20 @@ abstract class data_importer_entity_importer {
         } else {
             return null; // So that calling function knows that no setting was found.
         }
+    }
+
+    /**
+     * Ensures the valid field name is used the local log.
+     *
+     * @param string $table
+     * @param string $field
+     * @return string local log field name
+     */
+    private function get_log_field($table, $field) {
+
+        $logfield = substr($table . "_" . $field, 0, self::DB_MAX_COLUMN_LENGTH);
+
+        return $logfield;
     }
 
     /**
