@@ -58,4 +58,30 @@ class local_data_importer_edit_pathitem_testcase extends advanced_testcase {
         $object2 = $this->pathitem->get_by_id($this->pathitemid);
         $this->assertEquals("NewPathItemName", $object2->get_name());
     }
+
+    /**
+     * Test Hide Path Item
+     */
+    public function test_hide_pathitem() {
+        $this->resetAfterTest();
+        $object = $this->pathitem->get_by_id($this->pathitemid);
+        $object->set_name("NewPathItemName");
+        $object->set_active(false);
+        $object->save(true);
+        $object2 = $this->pathitem->get_by_id($this->pathitemid);
+        $this->assertEquals(0, $object2->get_active());
+    }
+
+    /**
+     * Test Show Path Item
+     */
+    public function test_show_pathitem() {
+        $this->resetAfterTest();
+        $object = $this->pathitem->get_by_id($this->pathitemid);
+        $object->set_name("NewPathItemName");
+        $object->set_active(true);
+        $object->save(true);
+        $object2 = $this->pathitem->get_by_id($this->pathitemid);
+        $this->assertEquals(1, $object2->get_active());
+    }
 }
