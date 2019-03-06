@@ -92,7 +92,7 @@ class local_data_importer_importerinstance {
     private function get_pathitem() {
         $pathitem = new local_data_importer_connectorpathitem();
         $this->pathiteminstance = $pathitem->get_by_id($this->pathitemid);
-        return $this->pathiteminstance; // TODO - No need to return this - should be @return void
+        return $this->pathiteminstance; // TODO - No need to return this - should be @return void.
     }
 
     /**
@@ -101,7 +101,7 @@ class local_data_importer_importerinstance {
     private function get_pathitem_parameter() {
         $pathitemparameter = new local_data_importer_pathitem_parameter();
         $this->pathitemparameterinstance = $pathitemparameter->get_by_pathitem_id($this->pathitemid);
-        return $this->pathitemparameterinstance; // TODO - No need to return this - should be @return void
+        return $this->pathitemparameterinstance; // TODO - No need to return this - should be @return void.
 
     }
 
@@ -111,7 +111,7 @@ class local_data_importer_importerinstance {
     private function get_pathitem_response() {
         $pathitemresponse = new local_data_importer_pathitem_response();
         $this->pathitemresponseinstance = $pathitemresponse->get_by_pathitem_id($this->pathitemid);
-        return $this->pathitemresponseinstance; // TODO - No need to return this - should be @return void
+        return $this->pathitemresponseinstance; // TODO - No need to return this - should be @return void.
     }
 
 

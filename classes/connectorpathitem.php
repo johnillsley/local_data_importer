@@ -191,7 +191,6 @@ class local_data_importer_connectorpathitem {
     public function set_time_created($timecreated) {
         $this->timecreated = $timecreated;
     }
-    
     /**
      * @param integer
      */

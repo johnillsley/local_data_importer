@@ -66,6 +66,9 @@ if (!empty($displaynoticegood)) {
 } else if (!empty($displaynoticebad)) {
     echo $OUTPUT->notification($displaynoticebad);                     // Bad (usuually red).
 }
+if (isset($pathitem)) {
+    $pathitem = $pathiteminstance->get_by_id($pathitemid);
+}
 switch ($action) {
     case 'add_connector':
         $PAGE->set_heading("Add a new connector");
@@ -108,7 +111,6 @@ switch ($action) {
         break;
 
     case 'move_up':
-        $pathitem = $pathiteminstance->get_by_id($pathitemid);
         $pathitem->reorder_import('up');
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
@@ -116,13 +118,40 @@ switch ($action) {
         break;
 
     case 'move_down':
-        $pathitem = $pathiteminstance->get_by_id($pathitemid);;
         $pathitem->reorder_import('down');
         echo $OUTPUT->header();
         $renderer = $PAGE->get_renderer('local_data_importer');
         echo $renderer->index_page($connectorinstance, $pathiteminstance);
         break;
-
+    case 'hideimporter':
+        $pathitem->set_active(0);
+        $pathitem->save();
+        echo $OUTPUT->header();
+        $renderer = $PAGE->get_renderer('local_data_importer');
+        echo $renderer->index_page($connectorinstance, $pathiteminstance);
+        break;
+    case 'showimporter':
+        $pathitem->set_active(1);
+        $pathitem->save();
+        echo $OUTPUT->header();
+        $renderer = $PAGE->get_renderer('local_data_importer');
+        echo $renderer->index_page($connectorinstance, $pathiteminstance);
+        break;
+    case 'run':
+        $starttime = time();
+        // Run importer.
+        try {
+            $datafetcher = new local_data_importer_data_fetcher($pathitem->id);
+            $datafetcher->update_from_pathitem();
+        } catch (Exception $e) {
+            // TODO - what sort of exceptions would we get here?
+        } finally {
+            $endtime = time();
+            $timetaken = $endtime - $starttime;
+            // Log stuff.
+        }
+        echo $OUTPUT->header();
+        break;
     default:
         // LIST ALL.
         echo $OUTPUT->header();
