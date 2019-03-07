@@ -64,7 +64,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                 array(
                         "pathitemid"        => $this->pathitemid,
                         "name"              => 'delete_courses',
-                        "value"             => 1 // Do course deletes for this test.
+                        "value"             => get_string('deletecourse', 'importers_course') // Do course deletes for this test.
                 )
         );
 
@@ -97,11 +97,26 @@ class local_data_importer_importers_course_test extends advanced_testcase {
     public function test_get_additional_form_elements() {
 
         $courseimporter = new importers_course_importer($this->pathitemid);
-        $settingsarray = $courseimporter->get_additional_form_elements();
-        $html = array_pop($settingsarray); // Only one additional setting to check.
-        $expectedhtml = '<select id="additional_setting[delete_courses]" name="additional_setting[delete_courses]"><option value="0" selected="">'.get_string('keepcourses', 'importers_course').'</option><option value="1" selected="selected">'.get_string('deletecourse', 'importers_course').'</option></select>';
+        $form_data = $courseimporter->get_additional_form_elements();
+        
+        $expected = array(
+                'course_visible' => array(
+                        'field_label' => get_string('settinghidecourse', 'importers_course'),
+                        'field_type' => 'select',
+                        'options' => [
+                                get_string('show') => get_string('show'),
+                                get_string('hide') => get_string('hide')
+                        ]),
+                'course_delete' => array(
+                        'field_label' => get_string('settingdeletecourse', 'importers_course'),
+                        'field_type' => 'select',
+                        'options' => [
+                                get_string('keepcourses', 'importers_course') => get_string('keepcourses', 'importers_course'),
+                                get_string('deletecourse', 'importers_course') => get_string('deletecourse', 'importers_course')
+                        ])
+        );
 
-        $this->assertEquals($expectedhtml, $html);
+        $this->assertEquals($expected, $form_data);
     }
 
     public function test_create_courses() {
