@@ -66,7 +66,7 @@ if (!empty($displaynoticegood)) {
 } else if (!empty($displaynoticebad)) {
     echo $OUTPUT->notification($displaynoticebad);                     // Bad (usuually red).
 }
-if (isset($pathitem)) {
+if (isset($pathitemid)) {
     $pathitem = $pathiteminstance->get_by_id($pathitemid);
 }
 switch ($action) {
