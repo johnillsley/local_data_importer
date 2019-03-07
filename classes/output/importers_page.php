@@ -104,7 +104,7 @@ class importers_page implements templatable, renderable {
                 $data->name = $pathitem->get_name();
                 $data->http_method = $pathitem->get_http_method();
                 $data->plugin_component = $pathitem->get_plugin_component();
-                $data->active = ($pathitem->get_active() == 1 ? 'Yes' : 'No');
+                $data->active = $pathitem->get_active();
                 $data->pathitem = $pathitem->get_path_item();
                 $data->time_created = date('d-m-Y H:i', $pathitem->get_time_created());
                 try {

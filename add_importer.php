@@ -152,8 +152,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     if (isset($subpluginadditionalfields) && is_array($subpluginadditionalfields) && isset($subplugin)) {
                         $class = $subplugin . "_importer";
                         $object = new $class($pathitemid);
-                        var_dump($subpluginadditionalfields);
-                        foreach ($subpluginadditionalfields as $settingname => $settingvalue) {
+                         foreach ($subpluginadditionalfields as $settingname => $settingvalue) {
                             $object->save_setting($settingname, $settingvalue);
                         }
                     }
