@@ -14,8 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$string['pluginname'] = 'Course importer';
-$string['deletesetting'] = 'Delete courses?';
 $string['deletecourse'] = 'Delete courses that are not in the web services data';
 $string['keepcourses'] = 'Retain courses that are not in the web services data';
+$string['pluginname'] = 'Course importer';
 $string['privacy:metadata'] = 'The local_data_importer_importers_course plugin does not store any personal data.';
+$string['settingdeletecourse'] = 'Delete course from Moodle if deleted from source?';
+$string['settinghidecourse'] = 'Course visibility when created?';
+
+
+

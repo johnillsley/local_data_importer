@@ -80,7 +80,7 @@ class importers_course_importer extends data_importer_entity_importer {
             $course->timecreated = time();
             $course->category    = $categoryid;
             // TODO - visible is set + review other settings
-            // https://moodle.bath.ac.uk/admin/settings.php?section=coursesettings .
+            // https://moodle.bath.ac.uk/admin/settings.php?section=coursesettings.
 
             // Apply course default settings.
             $courseconfig = get_config('moodlecourse');
@@ -151,7 +151,7 @@ class importers_course_importer extends data_importer_entity_importer {
     protected function delete_entity($item = array()) {
         global $DB;
 
-        if ($this->get_setting('delete_courses') == 1) {
+        if ($this->get_setting('delete_courses') == get_string('deletecourse', 'importers_course')) {
             try {
                 $courseid = $DB->get_field("course", "id", array("idnumber" => $item->course_idnumber));
                 if (delete_course($courseid)) {
@@ -184,33 +184,27 @@ class importers_course_importer extends data_importer_entity_importer {
 
         // Course Visbility Setting. [ default course created should be visible or hidden ?].
         $additionalsettings['course_visible'] = array(
-            'field_label' => 'Course visibility when created ? ',
+            'field_label' => get_string('settinghidecourse', 'importers_course'),
             'field_type' => 'select',
-            'required' => true,
             'options' => [
-                'Show' => '1',
-                'Hide' => '0'
+                get_string('show') => get_string('show'), 
+                get_string('hide') => get_string('hide')
             ]
         );
 
         // Course Deletion Setting. [ delete course if deleted from source ? ].
-
         $additionalsettings['course_delete'] = array(
-            'field_label' => "Delete course from Moodle if deleted from source ?",
+            'field_label' => get_string('settingdeletecourse', 'importers_course'),
             'field_type' => 'select',
-            'required' => false,
             'options' => [
-                get_string('keepcourses', 'importers_course') => '1',
-                get_string('deletecourse', 'importers_course') => '0'
+                get_string('keepcourses', 'importers_course') => get_string('keepcourses', 'importers_course'),
+                get_string('deletecourse', 'importers_course') => get_string('deletecourse', 'importers_course')
             ]
         );
 
         return $additionalsettings;
 
-        // TODO - What about the label?
-
         // TODO - how about a setting to prevent update of course fullname and/or shortname?
-        // TODO - Don't do updates - or only update categories.
     }
     
     /**
