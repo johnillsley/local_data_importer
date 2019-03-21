@@ -265,14 +265,15 @@ class local_data_importer_pathitem_response {
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
-                return $DB->insert_record($this->dbtable, $data, $returnid);
+                $id = $DB->insert_record($this->dbtable, $data, $returnid);
+                $this->id = $id;
+                return $id;
                 // TODO Log it.
             } catch (\exception $e) {
                 // TODO Log it.
                 var_dump($e->getmessage());
             }
         }
-
     }
 
     /**

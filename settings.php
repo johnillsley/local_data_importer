@@ -20,11 +20,12 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
-    $ADMIN->add('root', new admin_category('local_data_importer',
-            get_string('pluginname', 'local_data_importer')
-    ));
     $settings = new admin_settingpage('local_data_importer', get_string('pluginname', 'local_data_importer'));
-    // $ADMIN->add('localplugins', $settings);
+    $ADMIN->add('localplugins', $settings);
+
+    $settings->add(new admin_setting_configtext('local_data_importer/http_timeout',
+            get_string('httptimeout', 'local_data_importer'),
+            get_string('httptimeout_desc', 'local_data_importer'), 30));
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_table',
             get_string('dateintervaltable', 'local_data_importer'),
@@ -48,7 +49,7 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configtext('local_data_importer/academic_year_format',
             get_string('academicyearformat', 'local_data_importer'),
-            get_string('academicyearformat_desc', 'local_data_importer'), 'YYYY/Y'));
+            get_string('academicyearformat_desc', 'local_data_importer'), 'YYYY-Y'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/academic_year_first_day',
             get_string('academicyearfirstday', 'local_data_importer'),

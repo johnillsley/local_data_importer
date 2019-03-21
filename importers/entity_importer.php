@@ -35,7 +35,7 @@ abstract class data_importer_entity_importer {
     /**
      * @var string
      */
-    public $logtable;
+    protected $logtable;
 
     /**
      * @var string
@@ -50,7 +50,7 @@ abstract class data_importer_entity_importer {
     /**
      * @var string
      */
-    protected $dbsettingstable = "local_data_importer_settings";
+    private $dbsettingstable = "local_data_importer_settings";
 
     /**
      * @var array
@@ -137,6 +137,23 @@ abstract class data_importer_entity_importer {
     }
 
     /**
+     * Gets sub-plugin parameter mapping options and then adds global parameter mapping options
+     *
+     * @return array of parameter names that can be mapped
+     */
+    public function get_parameter_options() {
+
+        $parameters = $this->parameters;
+        // Now add global parameter options.
+        $globalparametermethods = get_class_methods("local_data_importer_global_parameters");
+        foreach ($globalparametermethods as $method) {
+            $parameters[] = 'global_' . $method;
+        }
+
+        return $parameters;
+    }
+
+    /**
      * This is the top level function which accepts raw data used to create and update entities in Moodle
      * Firstly the raw data is sorted into create, update and delete lists.
      * Each item in the lists is then actioned. create and update items are validated first.
@@ -145,14 +162,11 @@ abstract class data_importer_entity_importer {
      * @param array $data contains all the raw data
      * @return void
      */
-    public function do_imports($data) {
+    public function do_imports($sorteddata) {
 
-        $this->get_database_properties();
+        $this->get_database_properties(); // For validation of data.
 
-        // Sort items into create, update and delete.
-        $actions = $this->sort_items($data);
-
-        foreach ($actions->create as $create) {
+        foreach ($sorteddata->create as $create) {
             try {
                 $create = $this->validate_item($create);
                 $this->create_entity($create);
@@ -161,7 +175,7 @@ abstract class data_importer_entity_importer {
             }
         }
 
-        foreach ($actions->update as $update) {
+        foreach ($sorteddata->update as $update) {
             try {
                 $update = $this->validate_item($update);
                 $this->update_entity($update);
@@ -170,7 +184,7 @@ abstract class data_importer_entity_importer {
             }
         }
 
-        foreach ($actions->delete as $delete) {
+        foreach ($sorteddata->delete as $delete) {
             try {
                 $this->delete_entity($delete);
             } catch (\Exception $e) {
@@ -187,7 +201,7 @@ abstract class data_importer_entity_importer {
      * @param array of $items that have been extracted from the external web service
      * @return object holding separate arrays for create, update and delete items
      */
-    private function sort_items($items = array()) {
+    public function sort_items($items = array()) {
         global $DB;
 
         $action = new stdClass();
@@ -217,7 +231,7 @@ abstract class data_importer_entity_importer {
                         if ($item[$table][$fieldname] != $record->{$logtablefield}) {
                             // A field has been updated so add to update list and get out of loop.
                             $action->update[] = $item;
-                            break 2;
+                            break 2; // Move onto next item.
                         }
                     }
                 }
@@ -226,26 +240,8 @@ abstract class data_importer_entity_importer {
                 // Item needs adding.
                 $action->create[] = $item;
             }
-
         }
-            /*
-            $key = $item[$uniquekeytable][$uniquekeyfield];
-            // TODO - get actual course properties NOT LOGGED as someone could have updated locally!!!!
-            if (array_key_exists($key, $current)) {
-                // Item already exists so check if it needs updating.
-                if ($current[$key]->course_fullname != $item['course']['fullname'] ||
-                        $current[$key]->course_shortname != $item['course']['shortname'] ||
-                        $current[$key]->course_categories_name != $item['course_categories']['name']) {
-
-                    $action->update[] = $item;
-                }
-            } else {
-
-            }
-            unset($current[$key]); // Take off the list to delete.
-        }
-            */
-        // What is left in $current need to be deleted. Note format of $current is different to $item.
+        // What is left in $current need to be deleted. Note format of $currentlog is different to $item.
         $action->delete = $currentlog;
 
         return $action;
@@ -255,7 +251,7 @@ abstract class data_importer_entity_importer {
      * From the sub plugin responses definition identify the unique key fields and create references to the plugin log table fields.
      * @return $array of unique fields in the log table.
      */
-    protected function get_unique_fields() {
+    private function get_unique_fields() {
         $uniquefields = array();
         foreach ($this->responses as $table => $field) {
             foreach ($field as $fieldname => $fieldproperties) {
@@ -275,7 +271,7 @@ abstract class data_importer_entity_importer {
      * Adds database info to databaseproperties class property
      * @return void
      */
-    protected function get_database_properties() {
+    private function get_database_properties() {
         global $CFG, $DB;
 
         $params = array();
@@ -311,13 +307,18 @@ abstract class data_importer_entity_importer {
      * @throws Exception if the $item fails to validate and cannot be imported into Moodle.
      * @return array $item with any fields truncated/rounded if allowed
      */
-    protected function validate_item($item = array()) {
+    private function validate_item($item = array()) {
 
         // TODO - check if primary key is not null.
         foreach ($item as $table => $fields) {
             foreach ($fields as $field => $value) {
                 try {
-                    $item[$table][$field] = $this->validate_field($table, $field, $value);
+                    if (!isset($this->databaseproperties[$table][$field])) {
+                        throw new \Exception("SUBPLUGIN ERROR: a table/field combination defined in the subplugin does not exist in Moodle");
+                    } else {
+                        $fieldmetadata = $this->databaseproperties[$table][$field];
+                    }
+                    $item[$table][$field] = $this->validate_field($fieldmetadata, $value);
                 } catch (Exception $e) {
                     throw $e;
                 }
@@ -327,17 +328,15 @@ abstract class data_importer_entity_importer {
     }
 
     /**
-     * Takes a single field
-     * @param array $item
+     * Takes a single value and checks if it can be written to the Moodle database.
+     * @param object $fieldmetadata contains the database properties for the field where $value is to be written.
+     * @param mixed $value to be written to Moodle database.
+     * @param boolean $required enforces that the value must be set (for future development).
+     * @param boolean $truncatestrings allows the value to be truncated (for future development).
      * @throws Exception if the $item fails to validate and cannot be imported into Moodle.
-     * @return array $item with any fields truncated/rounded if allowed
+     * @return mixed value truncated/rounded if allowed.
      */
-    protected function validate_field($table, $field, $value, $required=false, $truncatestrings=false) {
-
-        if (!$fieldmetadata = $this->databaseproperties[$table][$field]) {
-            // The table/field combination defined in the subplugin responses parameter does not exist in Moodle.
-            throw new \Exception("SUBPLUGIN ERROR: a table/fireld combination defined in the subplugin does not exist in Moodle");
-        };
+    private function validate_field($fieldmetadata, $value, $required=false, $truncatestrings=false) {
 
         // Check if value is null.
         if (is_null($value)) {
@@ -348,7 +347,7 @@ abstract class data_importer_entity_importer {
                 return $value;
             } else {
                 // DB field defines value can't be null.
-                throw new \Exception("DATA VALIDATION ERROR: value is null but db field does not allow null values and has no default value to use instead.");
+                throw new \Exception("DATA VALIDATION ERROR: value is null but db field does not allow null values.");
             }
         }
 
@@ -451,12 +450,12 @@ abstract class data_importer_entity_importer {
      * Each sub plugin has its our database table to keep track of what has been dealt with automatically
      * This prevents the data_importer affecting entities that have been created manually or other means.
      *
-     * @param object $item is a summary of the data from the external source after it has been transformed for import
+     * @param array $item is a summary of the data from the external source after it has been transformed for import
      * @param integer $time the exact time that has been set for the entity timecreated and/or timemodified
      * @param boolean $delete indicate that $item is in a different format and that deleted flag needs setting in the local log
      * @return void
      */
-    public function local_log($item, $time, $delete = false) {
+    protected function local_log($item, $time, $delete = false) {
         global $DB;
 
         if ($delete == true) {
@@ -539,7 +538,7 @@ abstract class data_importer_entity_importer {
     }
 
     /**
-     * Ensures the valid field name is used the local log.
+     * Ensures the valid field name is used the local log. Moodle maximum field name length is 30 characters.
      *
      * @param string $table
      * @param string $field
@@ -547,6 +546,7 @@ abstract class data_importer_entity_importer {
      */
     private function get_log_field($table, $field) {
 
+        // Can't have field names longer than 30 characters in Moodle.
         $logfield = substr($table . "_" . $field, 0, self::DB_MAX_COLUMN_LENGTH);
 
         return $logfield;
@@ -560,7 +560,7 @@ abstract class data_importer_entity_importer {
      * @param object $data with additional information retrieved from the exception
      * @return boolean indication if logging the exception was successful
      */
-    protected function exception_log($action, $e, $data) {
+    public function exception_log($action, $e, $data) {
         global $DB;
 
         $exceptionlog = new stdClass();

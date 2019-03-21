@@ -18,16 +18,11 @@ $string['academicyearformat'] = 'Academic year format';
 $string['academicyearformat_desc'] = 'Academic year format';
 $string['academicyearfirstday'] = 'First day of academic year';
 $string['academicyearfirstday_desc'] = 'First day of academic year in MM/DD format (note month first)';
+$string['apikey_label'] = 'API Key';
+$string['componentlist'] = 'Available Plugins';
+$string['connectorlist'] = 'Available Connectors';
 $string['connector_name'] = 'Connector Name';
 $string['connector_description'] = 'Connector Description';
-$string['openapidefinitionurl_label'] = 'Open API URL';
-$string['apikey_label'] = 'API Key';
-$string['serverapikey_label'] = ' Server API Key';
-$string['server_label'] = 'Server ( retrieved automatically)';
-$string['pluginname'] = 'Data Importer';
-$string['connectorlist'] = 'Available Connectors';
-$string['componentlist'] = 'Available Plugins';
-
 $string['dateintervalacademicyearfield'] = 'Date interval academic year field';
 $string['dateintervalacademicyearfield_desc'] = 'The database field that holds the date interval academic year (optional)';
 $string['dateintervalenddatefield'] = 'Date interval end date field';
@@ -38,11 +33,13 @@ $string['dateintervalstartdatefield'] = 'Date interval start date field';
 $string['dateintervalstartdatefield_desc'] = 'The database field that holds the date interval start date in unixtime format';
 $string['dateintervaltable'] = 'Date intervals table';
 $string['dateintervaltable_desc'] = 'The Moodle database table that holds date intervals (do not include the prefix).';
-
+$string['httptimeout'] = 'HTTP timeout';
+$string['httptimeout_desc'] = 'Timeout in seconds that will be used by the Guzzle HTTP client library ';
 $string['nosubpluginparameteroptions'] = 'There are no sub plugin parameters';
+$string['openapidefinitionurl_label'] = 'Open API URL';
 $string['pathitemparameter'] = 'Path item parameter';
+$string['pluginname'] = 'Data Importer';
+$string['serverapikey_label'] = ' Server API Key';
+$string['server_label'] = 'Server ( retrieved automatically)';
 $string['subpluginparameter'] = 'Sub plugin parameter';
-
-
-// Sub-plugin strings.
 $string['subplugintype_importers'] = 'Importer Plugin';

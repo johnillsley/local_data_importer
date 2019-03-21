@@ -60,12 +60,18 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                         "timecreated"       => 12345
                 )
         );
-        $DB->insert_record("local_data_importer_settings",
+        $DB->insert_records("local_data_importer_settings", array(
                 array(
                         "pathitemid"        => $this->pathitemid,
                         "name"              => 'delete_courses',
                         "value"             => get_string('deletecourse', 'importers_course') // Do course deletes for this test.
+                ),
+                array(
+                        "pathitemid"        => $this->pathitemid,
+                        "name"              => 'course_visible',
+                        "value"             => get_string('show') // Set course to visible when created.
                 )
+            )
         );
 
         $this->resetAfterTest();
@@ -97,8 +103,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
     public function test_get_additional_form_elements() {
 
         $courseimporter = new importers_course_importer($this->pathitemid);
-        $form_data = $courseimporter->get_additional_form_elements();
-        
+        $formdata = $courseimporter->get_additional_form_elements();
+
         $expected = array(
                 'course_visible' => array(
                         'field_label' => get_string('settinghidecourse', 'importers_course'),
@@ -116,7 +122,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                         ])
         );
 
-        $this->assertEquals($expected, $form_data);
+        $this->assertEquals($expected, $formdata);
     }
 
     public function test_create_courses() {
@@ -132,6 +138,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
             $category = $DB->get_record("course_categories", array("id" => $importedcourse->category));
             $this->assertEquals($importedcourse->fullname, $c["course"]["fullname"]);
             $this->assertEquals($importedcourse->shortname, $c["course"]["shortname"]);
+            $this->assertEquals($importedcourse->visible, 1);
             $this->assertEquals($category->name, $c["course_categories"]["name"]);
 
             // Check that course creation was logged.
@@ -142,6 +149,28 @@ class local_data_importer_importers_course_test extends advanced_testcase {
             $this->assertEquals($logitem->course_shortname, $c["course"]["shortname"]);
             $this->assertEquals($logitem->course_categories_name, $c["course_categories"]["name"]);
         }
+
+        // Update visible default and test that the course is hidden.
+        $visibledefault = $DB->get_record("local_data_importer_settings",
+                array("pathitemid" => $this->pathitemid, "name" => 'course_visible'));
+        $visibledefault->value = get_string('hide');
+        $DB->update_record("local_data_importer_settings", $visibledefault);
+        // Create another course with new setting.
+        $anothercourse = array();
+        $anothercourse[] = array(
+                'course' => array(
+                        'fullname' => 'XYZ full',
+                        'shortname' => 'XYZ short',
+                        'idnumber' => 'XYZ idnumber'
+                ),
+                'course_categories' => array(
+                        'name' => 'XYZ cat'
+                )
+        );
+        $courseimporter->do_imports($anothercourse);
+
+        $importedcourse = $DB->get_record("course", array("idnumber" => 'XYZ idnumber'));
+        $this->assertEquals($importedcourse->visible, 0);
     }
 
     public function test_update_courses() {
@@ -190,12 +219,12 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         $deleting = $this->courses;
         unset($deleting[0]);
         unset($deleting[2]);
-        
+
         $courseimporter->do_imports($deleting); // Import the data to delete two existing courses.
 
         $coursecountend = $DB->count_records("course");
         $this->assertEquals(($coursecountstart - $coursecountend), 2);
-        
+
         $deletedinlog = $DB->count_records("local_data_importer_course", array("deleted" => 1, "pathitemid" => $this->pathitemid));
         $this->assertEquals($deletedinlog, 2);
 

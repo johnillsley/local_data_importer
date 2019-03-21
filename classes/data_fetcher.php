@@ -31,6 +31,11 @@ require_once($CFG->dirroot . "/local/data_importer/importers/entity_importer.php
 class local_data_importer_data_fetcher {
 
     /**
+     * @const string prefix used for parameter mappings at global level
+     */
+    const GLOBALPREFIX = 'global_';
+
+    /**
      * @var object of class extended from data_importer_entity_importer
      */
     private $importer;
@@ -79,24 +84,28 @@ class local_data_importer_data_fetcher {
     }
 
     /**
-     * Method to process a single pathitem web service call and update Moodle accordingly.
+     * Method to process a single importer update Moodle accordingly. This may consist of more than one web service calls
+     * depending on what parameters need to be sent.
      * Catches any exceptions thrown by other classes and writes to the central exception log
      *
+     * @throws Exception if any update fails.
      * @return void
      */
     public function update_from_pathitem() {
 
-        $parameterslist = $this->map_to_web_service_parameters();
+        $transform = $this->get_parameter_mappings();
+        $parameterslist = $this->transform_parameters($transform);
 
         foreach ($parameterslist as $parameters) {
             try {
                 $relativeuri = $this->build_relativeuri($this->uritemplate, $parameters);
                 $externaldata = $this->httpclient->get_response($relativeuri);
-                $internaldata = $this->transform_data($externaldata);
-                $this->importer->do_imports($internaldata);
+                $internaldata = $this->transform_response($externaldata);
+                $sortedinternaldata = $this->importer->sort_items($internaldata);
+                $this->importer->do_imports($sortedinternaldata);
             } catch (Exception $e) {
-                // TODO - Log failure for web service level.
-                // pathitemid, time, url, error message.
+                print "\r\n" . $e->getMessage();
+                $this->importer->exception_log("data_fetcher", $e, "");
             }
         }
     }
@@ -105,35 +114,75 @@ class local_data_importer_data_fetcher {
      * Takes the parameters from the subplugin and transforms them using parameter mappings so that they can be used in
      * web service requests.
      *
-     * @return array of parameter record to be used to populate web service URL requests.
+     * @return array of parameter records to be used to populate web service URL requests.
      */
-    public function map_to_web_service_parameters() {
+    public function transform_parameters($transform) {
 
         $internalparameters = $this->importer->get_parameters();
+        $externalparameters = array();
+        $externalsubplugin = array();
 
-        if ($internalparameters == null) {
-            return array(null);
-        }
-        $parammapper = new local_data_importer_pathitem_parameter();
-        $mappings = $parammapper->get_by_pathitem_id($this->pathitem->id);
-        foreach ($mappings as $mapping) {
-            $transform[$mapping->get_subplugin_parameter()] = $mapping->get_pathitem_parameter();
-        }
-
-        foreach ($internalparameters as $internalitem) {
-            $externalitem = array();
-            foreach ($internalitem as $key => $value) {
-                // Check if the internal parameter has been mapped.
-                if (array_key_exists($key, $transform)) {
-                    $externalitem[$transform[$key]] = $value;
+        if (count($internalparameters) > 0) {
+            foreach ($internalparameters as $internalitem) {
+                $externalitem = array();
+                foreach ($internalitem as $key => $value) {
+                    // Check if the internal parameter has been mapped.
+                    if (array_key_exists($key, $transform->subpluginparams)) {
+                        $externalitem[$transform->subpluginparams[$key]] = $value;
+                    }
                 }
+                $externalsubplugin[] = $externalitem;
             }
-            $externalparameters[] = $externalitem;
+            if (count($transform->globalparams) > 0) {
+                // Now add on the global parameters.
+                foreach ($externalsubplugin as $extsubplugin) {
+                    foreach ($transform->globalparams as $globalparams) {
+                        $externalparameters[] = array_merge($extsubplugin, $globalparams);
+                    }
+                }
+            } else {
+                // No global parameters to add.
+                $externalparameters = $externalsubplugin;
+            }
+        } else if (count($transform->globalparams) > 0) {
+            // No sub-plugin parameters but there are globals.
+            $externalparameters = $transform->globalparams;
         }
-        // Make final array values unique.
+        // Make final array elements unique.
         $externalparameters = array_map("unserialize", array_unique(array_map("serialize", $externalparameters)));
 
         return $externalparameters;
+    }
+
+    /**
+     * Takes one or more global parameter option arrays and combines all the combinations from each array.
+     * This allows for multiple global parameters to be mapped to pathitems and all combinations of these will be used.
+     * https://stackoverflow.com/questions/8567082/how-to-generate-in-php-all-combinations-of-items-in-multiple-arrays
+     *
+     * @param array of global parameter option arrays
+     * @return array of combinations
+     */
+    private function get_global_param_combinations($arrays) {
+
+        // TODO - Need to remove any second level empty arrays - causes divided by zero error.
+        $counts = array_map("count", $arrays);
+        $total = array_product($counts); // Total number of combinations.
+        $result = array();
+
+        $combinations = array();
+        $currentcombinations = $total;
+
+        foreach ($arrays as $field => $vals) {
+            $currentcombinations = $currentcombinations / $counts[$field];
+            $combinations[$field] = $currentcombinations;
+        }
+
+        for ($i = 0; $i < $total; $i++) {
+            foreach ($arrays as $field => $vals) {
+                $result[$i][$field] = $vals[($i / $combinations[$field]) % $counts[$field]];
+            }
+        }
+        return $result;
     }
 
     /**
@@ -143,9 +192,6 @@ class local_data_importer_data_fetcher {
      * @return string relative url ready for the web service request
      */
     private function build_relativeuri($relativeuri, $parameters) {
-
-        $pathitemparameter = new local_data_importer_pathitem_parameter();
-        $parammappings = $pathitemparameter->get_by_pathitem_id($this->pathitem->id);
 
         if (is_array($parameters)) {
             foreach ($parameters as $name => $value) {
@@ -159,6 +205,40 @@ class local_data_importer_data_fetcher {
             throw new Exception('The relative URI has missing values.');
         }
         return $relativeuri;
+    }
+
+    /**
+     * Produces a transform that is used to translate internal parameters to web service parameters.
+     *
+     * @throws Exception if the relative uri has not had all values substituted
+     * @return object $transform containing two arrays one for sub plugin parameters the other for global parameters
+     */
+    private function get_parameter_mappings() {
+
+        $parammapper = new local_data_importer_pathitem_parameter();
+        $mappings = $parammapper->get_by_pathitem_id($this->pathitem->id);
+
+        $transform = new stdClass();
+        $transform->subpluginparams = array();
+        $transform->globalparams = array();
+        $globalparams = array();
+
+        foreach ($mappings as $mapping) {
+            $subpluginparam = $mapping->get_subplugin_parameter();
+            $pathitemparam = $mapping->get_pathitem_parameter();
+
+            // Check if the parameter is global.
+            if (strpos($subpluginparam, self::GLOBALPREFIX) === 0) {
+                $globalmethod = substr($subpluginparam, strlen(self::GLOBALPREFIX));
+                $globalparams[$pathitemparam] = local_data_importer_global_parameters::$globalmethod();
+            } else {
+                $transform->subpluginparams[$subpluginparam] = $pathitemparam;
+            }
+        }
+        if (count($globalparams) > 0) {
+            $transform->globalparams = $this->get_global_param_combinations($globalparams);
+        }
+        return $transform;
     }
 
     /**
@@ -179,13 +259,13 @@ class local_data_importer_data_fetcher {
     }
 
     /**
-     * Takes data extracted from the web service request and transforms it using mappings created when the pathitem was configured
+     * Takes data extracted from the web service response and transforms it using mappings created when the pathitem was configured
      * The transformed data is then in a format that can be excepted by the sub plugin.
      *
      * @param array $externaldata
      * @return array $internaldata ready to be consumed by the sub plugin
      */
-    private function transform_data($externaldata) {
+    private function transform_response($externaldata) {
 
         $internaldata = array();
         $externaldata = $this->array_flatten($externaldata);
@@ -201,6 +281,9 @@ class local_data_importer_data_fetcher {
             }
             $internaldata[] = $internalitem;
         }
+        // Make final array elements unique.
+        $internaldata = array_map("unserialize", array_unique(array_map("serialize", $internaldata)));
+
         return $internaldata;
     }
 
@@ -242,84 +325,8 @@ class local_data_importer_data_fetcher {
         }
         return $records;
     }
-    /*
-    public function get_web_service_data() {
 
-        // Get the importer.
-        try {
-            $this->importer = new local_data_importer_importerinstance($this->pathitemid);
-            if ($this->importer instanceof local_data_importer_importerinstance) {
-                // TODO - What is supposed to happen on else? What is this checking for?
-                // TODO - Better for constructor to throw an exception
-                // https://softwareengineering.stackexchange.com/questions/137581/should-i-throw-exception-from-constructor
-
-                // Get the base uri and api-key to connect to the web service.
-                $baseuri = $this->importer->connectorinstance->get_server();
-                $serverapikey = $this->importer->connectorinstance->get_server_apikey();
-                $this->httpclient = new local_data_importer_http_connection("https://" . $baseuri, $serverapikey);
-
-                // Use the importer to call the relevant web service functions.
-                $beforepathitemstring = $this->importer->pathiteminstance->get_path_item();
-                $subpluginclass = $this->importer->pathiteminstance->get_plugin_component();
-                $this->initialise_subplugin($subpluginclass);
-                $subpluginparameterdata = $this->subplugin->get_parameters_for_ws();
-
-                // Get path item parameters for a given path item.
-                foreach ($this->importer->pathitemparameterinstance as $pathitemparameter) {
-                    foreach ($subpluginparameterdata as $key => $objparam) {
-                        $field = $pathitemparameter->get_pluginparam_field();
-                        $pathitemvalue = $objparam->$field;
-                        // Replace pathitem_parameter with an actual value.
-                        $afterpathitemstring = str_replace(
-                            "{" . $pathitemparameter->get_pathitem_parameter() . "}",
-                            $pathitemvalue, $beforepathitemstring);
-                        // Do one by one on the pathitem call , give it back to subplugin and then do the next.
-                        try {
-                            $response[] = $this->httpclient->get_response($afterpathitemstring);
-                            // TODO - why is this called multiple times before the URL is completely formed? This is wrong.
-                            // If got a positive response, pass the data back to the subplugin
-                            // for consumption.
-                            $wsresponse = $this->extract_response($response);
-                            $this->subplugin->consume_data($wsresponse);
-                        }
-                        catch (\Exception $e) {
-                            // TODO Log it.
-                        }
-                    }
-                }
-            }
-        }
-        catch (\Exception $e) {
-        }
-
-
-        // Now I have everything I want,
-        // I call the sub-plugin's method to consume that data any which
-        // way it wants.
-
-
-        //$this->subplugin->consume_data($wsresponse);
-
-    }
-
-    protected function extract_response($response) {
-        foreach ($this->importer->pathitemresponseinstance as $pathitemresponse) {
-            //var_dump($pathitemresponse->get_pluginresponse_table());
-            //var_dump($pathitemresponse->get_pluginresponse_field());
-            //var_dump($pathitemresponse->get_pathitem_response());
-
-            $wsresponse[] = $this->recursive_find($response, $pathitemresponse->get_pathitem_response());
-            return $wsresponse;
-        }
-    }
-
-    protected function initialise_subplugin($subpluginclass) {
-
-        if (!empty($subpluginclass)) {
-            $this->subplugin = new $subpluginclass();
-        }
-    }
-
+    // TODO - Currently not used but this function could replace array_flatten() with some further work.
     private function recursive_find(array $haystack, $needle) {
         $iterator = new RecursiveArrayIterator($haystack);
         $recursive = new RecursiveIteratorIterator(
@@ -332,17 +339,4 @@ class local_data_importer_data_fetcher {
             }
         }
     }
-
-    protected function transform_external_to_internal($external) {
-
-        $internal = array();
-        // Get response mappings.
-        foreach ($this->responses as $table) {
-            foreach ($table as $field) {
-
-            }
-        }
-        return $internal;
-    }
-    */
 }

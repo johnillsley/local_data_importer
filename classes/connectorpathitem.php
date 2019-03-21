@@ -192,7 +192,7 @@ class local_data_importer_connectorpathitem {
         $this->timecreated = $timecreated;
     }
     /**
-     * @param integer
+     * @return integer
      */
     public function get_import_order() : int {
         return $this->importorder;
@@ -308,6 +308,23 @@ class local_data_importer_connectorpathitem {
         try {
             if ($DB->record_exists($this->dbtable, ['id' => $this->id])) {
                 $deleted = $DB->delete_records($this->dbtable, ['id' => $this->id]);
+
+                // Delete associated pathitem parameter mappings.
+                $pathitemparameters = new local_data_importer_pathitem_parameter();
+                $parameters = $pathitemparameters->get_by_pathitem_id($this->id);
+                foreach ($parameters as $parameter) {
+                    $parameter->delete();
+                }
+
+                // Delete associated pathitem response mappings.
+                $pathitemresponses = new local_data_importer_pathitem_response();
+                $responses = $pathitemresponses->get_by_pathitem_id($this->id);
+                foreach ($responses as $response) {
+                    $response->delete();
+                }
+
+                // Delete associated additional settings for this pathitem.
+                $DB->delete_records('local_data_importer_settings', ['pathitemid' => $this->id]);
             }
         } catch (\dml_exception $e) {
             echo $e->getMessage();
@@ -345,7 +362,9 @@ class local_data_importer_connectorpathitem {
             $data->timecreated = time();
             $data->importorder = $this->get_next_importorder();
             try {
-                return $DB->insert_record($this->dbtable, $data, $returnid);
+                $id = $DB->insert_record($this->dbtable, $data, $returnid);
+                $this->id = $id;
+                return $id;
                 // Log it.
             } catch (\dml_exception $e) {
                 // Log it.

@@ -53,7 +53,7 @@ class local_data_importer_pathitem_parameter {
      * local_data_importer_pathitem_parameter constructor.
      */
     public function __construct() {
-        $this->dbtable = 'local_data_importer_params';
+        $this->dbtable = 'local_data_importer_param';
     }
 
     /**
@@ -189,7 +189,6 @@ class local_data_importer_pathitem_parameter {
             echo $e->getmessage();
         }
         return $pathitemparams;
-
     }
 
     /** Save a path item parameter instance
@@ -214,16 +213,17 @@ class local_data_importer_pathitem_parameter {
                 var_dump($e->getmessage());
             }
         } else {
-            $data->timecreated = $data->timemodified = time();
+            $data->timecreated = $data->timemodified;
             try {
-                return $DB->insert_record($this->dbtable, $data, $returnid);
+                $id = $DB->insert_record($this->dbtable, $data, $returnid);
+                $this->id = $id;
+                return $id;
                 // Log it.
             } catch (\exception $e) {
                 // Log it.
                 var_dump($e->getmessage());
             }
         }
-
     }
 
     /**

@@ -17,6 +17,7 @@
 /**
  * A class that provides parameters that can be utilised by all sub plugins
  * to populate web service urls
+ * All methods in this class must be static and return an array even if only one value is being returned.
  *
  * @package    local_data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
@@ -32,13 +33,25 @@ class local_data_importer_global_parameters {
      * Returns the current academic year.
      * Uses plugin admin settings for academic_year_format & academic_year_first_day
      *
-     * @return string current academic year
+     * @throws Exception if admin settings are missing so academic year cannot be derived.
+     * @return array of one string containing current academic year
      */
     public static function current_academic_year() {
 
         $yearformat = get_config('local_data_importer', 'academic_year_format');
         $yearstart = get_config('local_data_importer', 'academic_year_first_day');
-        $yearformatparts = explode("/", $yearformat);
+        if (empty($yearformat) || empty($yearstart)) {
+            throw new Exception('Admin plugin settings academic_year_format and academic_year_first_day are not set');
+        }
+        // Find delimiter in format.
+        for ($i = 0; $i < strlen($yearformat); $i++) {
+            $char = substr($yearformat, $i, 1);
+            if (strtoupper($char) != "Y") {
+                $delimiter = $char;
+                break;
+            }
+        }
+        $yearformatparts = explode($delimiter, $yearformat);
         $year1length = strlen($yearformatparts[0]);
         $year2length = strlen($yearformatparts[1]);
 
@@ -47,12 +60,12 @@ class local_data_importer_global_parameters {
 
         if ($today >= $yearstart) {
             // Current year is first part of academic year.
-            $acadyear = substr($currentyear, -1 * $year1length) . '/' . substr(($currentyear + 1), -1 * $year2length);
+            $acadyear = substr($currentyear, -1 * $year1length) . $delimiter . substr(($currentyear + 1), -1 * $year2length);
         } else {
             // Last year is first part of academic year.
-            $acadyear = substr(($currentyear - 1), -1 * $year1length) . '/' . substr($currentyear, -1 * $year2length);
+            $acadyear = substr(($currentyear - 1), -1 * $year1length) . $delimiter . substr($currentyear, -1 * $year2length);
         }
-        return $acadyear;
+        return array($acadyear);
     }
 
     /**
@@ -60,11 +73,15 @@ class local_data_importer_global_parameters {
      * The table that has the date intervals must have a unique id column
      *
      * @param integer $time unixtime
+     * @throws Exception if admin settings are missing and therefore can't access db data.
      * @return boolean|array of objects defining date intervals
      */
-    public static function date_interval_codes($time) {
+    public static function date_interval_codes($time = null) {
         global $DB;
 
+        if (is_null($time)) {
+            $time = time();
+        }
         $table          = get_config('local_data_importer', 'date_interval_table');
         $namefield      = get_config('local_data_importer', 'date_interval_code_field');
         $startdatefield = get_config('local_data_importer', 'date_interval_start_date_field');
@@ -78,7 +95,7 @@ class local_data_importer_global_parameters {
                 CAST(' . $startdatefield . ' AS DATE) startdate,
                 CAST(' . $enddatefield . ' AS DATE) enddate';
         } else {
-            return false;
+            throw new Exception('Admin plugin settings are missing for global parameter date_interval_codes');
         }
         if (!empty($acadyear)) {
             $select .= ', ' . $acadyear . ' acadyear';
@@ -94,6 +111,10 @@ class local_data_importer_global_parameters {
                 AND CAST($enddatefield AS DATE) >= :date2
                 ", $params);
 
-        return $dateintervals;
+        $codes = array();
+        foreach ($dateintervals as $dateinterval) {
+            $codes[] = $dateinterval->code;
+        }
+        return $codes;
     }
 }

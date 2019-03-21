@@ -240,7 +240,7 @@ class local_data_importer_connectorinstance {
      */
     public function get_all() {
         global $DB;
-        $connectors = null;
+        $connectors = array();
         try {
             $connectorrecords = $DB->get_records($this->dbtable);
             if ($connectorrecords && is_array($connectorrecords)) {
@@ -253,6 +253,7 @@ class local_data_importer_connectorinstance {
                     $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
                     $connectorinstance->set_openapi_key($recordobject->openapikey);
                     $connectorinstance->set_server_apikey($recordobject->serverapikey);
+                    $connectorinstance->set_timecreated($recordobject->timecreated);
                     $connectorinstance->set_timemodified($recordobject->timemodified);
                     $connectors[] = $connectorinstance;
                 }
@@ -291,7 +292,9 @@ class local_data_importer_connectorinstance {
         } else {
             $data->timecreated = $data->timemodified = time();
             try {
-                return $DB->insert_record($this->dbtable, $data, $returnid);
+                $id = $DB->insert_record($this->dbtable, $data, $returnid);
+                $this->id = $id;
+                return $id;
                 // Log it.
             } catch (\exception $e) {
                 // Log it.

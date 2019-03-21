@@ -71,19 +71,17 @@ class importers_course_importer extends data_importer_entity_importer {
 
         try {
             $categoryid = $this->get_course_category_id($item);
+            $courseconfig = get_config('moodlecourse');
+            $coursevisible = $this->get_setting('course_visible');
+            $courseconfig->visible = ($coursevisible == get_string('show')) ? 1 : 0;
 
             // Create course.
             $course = new stdClass();
-            $course->fullname    = $item['course']['fullname'];
-            $course->shortname   = $item['course']['shortname'];
-            $course->idnumber    = $item['course']['idnumber'];
-            $course->timecreated = time();
-            $course->category    = $categoryid;
-            // TODO - visible is set + review other settings
-            // https://moodle.bath.ac.uk/admin/settings.php?section=coursesettings.
-
-            // Apply course default settings.
-            $courseconfig = get_config('moodlecourse');
+            $course->fullname           = $item['course']['fullname'];
+            $course->shortname          = $item['course']['shortname'];
+            $course->idnumber           = $item['course']['idnumber'];
+            $course->timecreated        = time();
+            $course->category           = $categoryid;
             $course->format             = $courseconfig->format;
             $course->newsitems          = $courseconfig->newsitems;
             $course->showgrades         = $courseconfig->showgrades;
@@ -102,6 +100,7 @@ class importers_course_importer extends data_importer_entity_importer {
                 $this->local_log($item, $course->timecreated);
             }
         } catch (\Exception $e) {
+            print "\r\n" . $e->getMessage();
             throw $e;
         }
     }
@@ -136,6 +135,7 @@ class importers_course_importer extends data_importer_entity_importer {
                 $this->local_log($item, $course->timemodified);
             }
         } catch (\Exception $e) {
+            print "\r\n" . $e->getMessage();
             throw $e;
         }
     }
@@ -151,21 +151,31 @@ class importers_course_importer extends data_importer_entity_importer {
     protected function delete_entity($item = array()) {
         global $DB;
 
-        if ($this->get_setting('delete_courses') == get_string('deletecourse', 'importers_course')) {
+        if ($this->get_setting('course_delete') == get_string('deletecourse', 'importers_course')) {
             try {
                 $courseid = $DB->get_field("course", "id", array("idnumber" => $item->course_idnumber));
                 if (delete_course($courseid)) {
                     $this->local_log($item, time(), true);
                 }
             } catch (\Exception $e) {
+                print "\r\n" . $e->getMessage();
                 throw $e;
             }
         }
     }
-    
+
     public function get_parameters() {
 
-        return null;
+        $parameters = array();
+        // TODO - Remove settings below they are for testing only - should return array().
+        $parameters = array(
+                array('some_parameter' => 'X1', 'another_parameter' => 'Y1'),
+                array('some_parameter' => 'X1', 'another_parameter' => 'Y2'),
+                array('some_parameter' => 'X2', 'another_parameter' => 'Y1'),
+                array('some_parameter' => 'X2', 'another_parameter' => 'Y2'),
+        );
+
+        return $parameters;
     }
 
     /**
@@ -187,7 +197,7 @@ class importers_course_importer extends data_importer_entity_importer {
             'field_label' => get_string('settinghidecourse', 'importers_course'),
             'field_type' => 'select',
             'options' => [
-                get_string('show') => get_string('show'), 
+                get_string('show') => get_string('show'),
                 get_string('hide') => get_string('hide')
             ]
         );
@@ -206,7 +216,7 @@ class importers_course_importer extends data_importer_entity_importer {
 
         // TODO - how about a setting to prevent update of course fullname and/or shortname?
     }
-    
+
     /**
      * Return the course category id for the course category name supplied.
      * If the course category name is not found a new course category is created.
@@ -218,8 +228,11 @@ class importers_course_importer extends data_importer_entity_importer {
     private function get_course_category_id($item) {
         global $DB;
         // TODO - What happens if more than one course category has the same name?
-        if (!$category = $DB->get_record("course_categories", array("name" => $item['course_categories']['name']))) {
-            if (!$category = coursecat::create(array("name" => $item['course_categories']['name']))) {
+        if (!$category = $DB->get_record("course_categories", array("idnumber" => $item['course_categories']['name']))) {
+            if (!$category = coursecat::create(array(
+                    "name" => $item['course_categories']['name'],
+                    "idnumber" => $item['course_categories']['name'],
+            ))) {
                 throw new \Exception("Cannot get a valid course category id to create a course");
             }
         }

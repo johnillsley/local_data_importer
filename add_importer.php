@@ -34,7 +34,7 @@ $subplugin = optional_param('subplugin', null, PARAM_RAW);
 $pathitem = optional_param('pathitem', null, PARAM_RAW);
 $pathitemname = optional_param('pathitemname', null, PARAM_RAW);
 $pathitemparams = optional_param_array('pathitemparams', null, PARAM_RAW);
-$pathitemresponse = optional_param_array('pathitemresponseparams', null, PARAM_RAW);
+$pathitemresponse = optional_param_array('pathitemresponses', null, PARAM_RAW);
 $subpluginadditionalfields = optional_param_array('subpluginadditionalfields', null, PARAM_RAW);
 $renderer = $PAGE->get_renderer('local_data_importer');
 $connectorinstance = new local_data_importer_connectorinstance();
@@ -111,7 +111,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $class = $subplugin . "_importer";
                             $object = new $class($pathitem);
                             $subpluginresponses = $object->responses;
-                            $subpluginparams = $object->parameters;
+                            $subpluginparams = $object->get_parameter_options();
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
                             $responseparams = $openapiinspector->get_pathitem_responses_selectable($pathitem);
                             // For the selected subplugin , get the additional form elements (if available).
@@ -152,32 +152,28 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     if (isset($subpluginadditionalfields) && is_array($subpluginadditionalfields) && isset($subplugin)) {
                         $class = $subplugin . "_importer";
                         $object = new $class($pathitemid);
-                         foreach ($subpluginadditionalfields as $settingname => $settingvalue) {
+                        foreach ($subpluginadditionalfields as $settingname => $settingvalue) {
                             $object->save_setting($settingname, $settingvalue);
                         }
                     }
 
                     // 3. PATH ITEM PARAMETER.
-
-                    $objpathitemparameter = new local_data_importer_pathitem_parameter();
-                    $objpathitemparameter->set_pathitemid($pathitemid);
-
                     if (isset($pathitemparams) && is_array($pathitemparams)) {
                         foreach ($pathitemparams as $pip => $sbp) {
+                            $objpathitemparameter = new local_data_importer_pathitem_parameter();
+                            $objpathitemparameter->set_pathitemid($pathitemid);
                             $objpathitemparameter->set_subplugin_parameter($sbp);
                             $objpathitemparameter->set_pathitem_parameter($pip);
                             $objpathitemparameter->save();
                         }
                     }
 
-
                     // 4. PATH ITEM RESPONSE.
-                    $objpathitemresponse = new local_data_importer_pathitem_response();
-                    $objpathitemresponse->set_pathitemid($pathitemid);
-
                     if (isset($pathitemresponse) && is_array($pathitemresponse)) {
                         foreach ($pathitemresponse as $pir => $pcr) {
                             $pir = explode("-", $pir);
+                            $objpathitemresponse = new local_data_importer_pathitem_response();
+                            $objpathitemresponse->set_pathitemid($pathitemid);
                             $objpathitemresponse->set_pathitem_response($pcr);
                             $objpathitemresponse->set_pluginresponse_table($pir[0]);
                             $objpathitemresponse->set_pluginresponse_field($pir[1]);

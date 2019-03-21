@@ -43,12 +43,12 @@ class local_data_importer_scheduler {
 
         foreach ($pathitems as $pathitem) {
             $starttime = time();
-            // Run importer.
             try {
                 $datafetcher = new local_data_importer_data_fetcher($pathitem->id);
                 $datafetcher->update_from_pathitem();
             } catch (Exception $e) {
                 // TODO - what sort of exceptions would we get here?
+                print $e->getMessage();
             } finally {
                 $endtime = time();
                 $timetaken = $endtime - $starttime;

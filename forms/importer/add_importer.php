@@ -114,28 +114,6 @@ class local_data_importer_add_importer_form extends moodleform {
                 }
             }
 
-            /*
-                foreach ($subpluginparams as $paramkey => $arrayparam) {
-                    foreach ($arrayparam as $key => $val) {
-                        // Display plugin component parameters.
-                        $mform->addElement('static', 'subpluginparams', "Sub plugin param", "<strong>" . $val . "</strong>");
-                        // Add hidden element for form capture.
-                        $plugincomponentidentifier = $paramkey . self::TABLE_FIELD_SEPERATOR . $val;
-
-                        $mform->addElement('hidden', 'plugincomponentparam', $plugincomponentidentifier);
-                        $mform->setType('plugincomponentparam', PARAM_TEXT);
-                        if (is_array($this->_customdata['pathitemparams'])) {
-                            foreach ($this->_customdata['pathitemparams'] as $key => $arraypathitemparams) {
-                                $options[$arraypathitemparams["name"]] =
-                                    $arraypathitemparams["name"] . " [" . $arraypathitemparams["type"] . "]";
-                            }
-                        }
-                        // Display the path item parameters fetched from the web service.
-                        $mform->addElement('select', "pathitemparams[$plugincomponentidentifier]", 'Path item param', $options);
-                    }
-                }
-                */
-
             $options = null;
             $mform->addElement('header', 'general', 'Path Item Response');
 
