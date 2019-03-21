@@ -13,83 +13,160 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
-global $CFG;
 
 /**
- * Class local_data_importer_pathitem_parameter_testcase
- * @group local_data_importer
+ * Unit tests for the local/data_importer/classes/pathitem_parameter.php.
+ *
+ * @group      local_data_importer
+ * @group      bath
+ * @package    local/data_importer
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @copyright  2018 University of Bath
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Class local_data_importer_pathitem_response_testcase
  */
 class local_data_importer_pathitem_parameter_testcase extends advanced_testcase {
-    /**
-     * @var
-     */
-    public $pathitemparameter;
-    /**
-     * @var
-     */
-    public $pathitemparameterid;
-    public $pathitem;
-    public $pathitemid;
 
     /**
-     *
+     * @var integer
+     */
+    private $pathitemid;
+
+    /**
+     * Create a pathitem and store the id.
      */
     public function setUp() {
-        global $DB, $CFG;
-        $this->resetAfterTest(false);
 
-        // Path-item instance.
-        $this->pathitem = new local_data_importer_connectorpathitem();
-        $this->pathitem->set_name("Get Assessments");
-        $this->pathitem->set_connector_id(1); // No need to create a new connector instance (?).
-        $this->pathitem->set_path_item("/MABS/MOD_CODE/{modcode}");
-        $this->pathitem->set_active(true);
-        $this->pathitem->set_http_method('GET');
-        $this->pathitem->set_plugin_component('local_create_course');
-        $this->pathitemid = $this->pathitem->save(true);
+        $this->resetAfterTest();
 
+        // Create a pathitem instance.
+        $pathitem = new local_data_importer_connectorpathitem();
+        $pathitem->set_name("Get Assessments");
+        $pathitem->set_connector_id(1); // No need to create a new connector instance (?).
+        $pathitem->set_path_item("/MABS/MOD_CODE/{modcode}");
+        $pathitem->set_active(true);
+        $pathitem->set_http_method('GET');
+        $pathitem->set_plugin_component('test');
+        $this->pathitemid = $pathitem->save(true);
     }
 
     /**
-     * Add new path item parameter
+     * Test for method local_data_importer_pathitem_parameter->save().
      */
-    public function test_add_pathitem_parameter() {
-        $this->resetAfterTest();
-        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
-        $this->pathitemparameter = new local_data_importer_pathitem_parameter();
-        $this->pathitemparameter->set_pathitemid($pathitemobject->get_id());
-        $this->pathitemparameter->set_pathitem_parameter("mod_code");
-        $this->pathitemparameter->set_pluginparam_table("course");
-        $this->pathitemparameter->set_pluginparam_field("idnumber");
-        $this->pathitemparameterid = $this->pathitemparameter->save(true);
-        $pathitemparameter = $this->pathitemparameter->get_by_id($this->pathitemparameterid);
-        $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $pathitemparameter);
+    public function test_save() {
+        global $DB;
+
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $pathitemparameter->set_pathitemid($this->pathitemid);
+        $pathitemparameter->set_pathitem_parameter('PRS_EMAD.PRS.CAMS');
+        $pathitemparameter->set_subplugin_parameter('user');
+        $id = $pathitemparameter->save(true);
+
+        $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
+        $this->assertEquals(count($parameterrecords), 1);
+
+        $parameterrecord = array_pop($parameterrecords);
+        $this->assertEquals($parameterrecord->pathitemparameter, 'PRS_EMAD.PRS.CAMS');
+        $this->assertEquals($parameterrecord->subpluginparameter, 'user');
+        $this->assertEquals($parameterrecord->id, $id);
+
+        // Now try an update.
+        $pathitemparameter->set_pathitem_parameter('coursecode');
+        $pathitemparameter->set_subplugin_parameter('course');
+        $id = $pathitemparameter->save(true);
+
+        $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
+        $this->assertEquals(count($parameterrecords), 1);
+
+        $parameterrecord = array_pop($parameterrecords);
+        $this->assertEquals($parameterrecord->pathitemparameter, 'coursecode');
+        $this->assertEquals($parameterrecord->subpluginparameter, 'course');
     }
 
     /**
-     * Add new path item parameter
+     * Test for method local_data_importer_pathitem_parameter->delete().
      */
-    public function test_update_pathitem_parameter() {
-        $this->resetAfterTest();
-        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
+    public function test_delete() {
+        global $DB;
 
-        // Add.
-        $this->pathitemparameter = new local_data_importer_pathitem_parameter();
-        $this->pathitemparameter->set_pathitemid($pathitemobject->get_id());
-        $this->pathitemparameter->set_pathitem_parameter("mod_code");
-        $this->pathitemparameter->set_pluginparam_table("course");
-        $this->pathitemparameter->set_pluginparam_field("idnumber");
-        $this->pathitemparameterid = $this->pathitemparameter->save(true);
+        // Create two parameter mappings.
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $pathitemparameter->set_pathitemid($this->pathitemid);
+        $pathitemparameter->set_pathitem_parameter('PRS_EMAD.PRS.CAMS');
+        $pathitemparameter->set_subplugin_parameter('user');
+        $id1 = $pathitemparameter->save(true);
 
-        // Update.
-        $this->pathitemparameter = new local_data_importer_pathitem_parameter();
-        $this->pathitemparameter->set_pathitemid($pathitemobject->get_id());
-        $this->pathitemparameter->set_pathitem_parameter("mod_code");
-        $this->pathitemparameter->set_pluginparam_table("course");
-        $this->pathitemparameter->set_pluginparam_field("idnumber");
-        $this->pathitemparameterid = $this->pathitemparameter->save(true);
-        $pathitemparameter = $this->pathitemparameter->get_by_id($this->pathitemparameterid);
-        $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $pathitemparameter);
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $pathitemparameter->set_pathitemid($this->pathitemid);
+        $pathitemparameter->set_pathitem_parameter('COURSE');
+        $pathitemparameter->set_subplugin_parameter('crs');
+        $id2 = $pathitemparameter->save(true);
+
+        // Delete first parameter mapping.
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $parameter = $pathitemparameter->get_by_id($id1);
+        $parameter->delete();
+
+        $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
+        $this->assertEquals(count($parameterrecords), 1);
+
+        // Delete second parameter mapping.
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $parameter = $pathitemparameter->get_by_id($id2);
+        $parameter->delete();
+
+        $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
+        $this->assertEquals(count($parameterrecords), 0);
+    }
+
+    /**
+     * Test for method local_data_importer_pathitem_parameter->get_by_id().
+     */
+    public function test_get_by_id() {
+
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $pathitemparameter->set_pathitemid($this->pathitemid);
+        $pathitemparameter->set_pathitem_parameter('PRS_EMAD.PRS.CAMS');
+        $pathitemparameter->set_subplugin_parameter('user');
+        $id = $pathitemparameter->save(true);
+
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $parameter = $pathitemparameter->get_by_id($id);
+        $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $parameter);
+        $this->assertEquals($parameter->get_pathitem_parameter(), 'PRS_EMAD.PRS.CAMS');
+        $this->assertEquals($parameter->get_subplugin_parameter(), 'user');
+        $this->assertEquals($parameter->get_pathitemid(), $this->pathitemid);
+    }
+
+    /**
+     * Test for method local_data_importer_pathitem_parameter->get_by_pathitem_id().
+     */
+    public function test_get_by_pathitem_id() {
+
+        // Create two parameter mappings.
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $pathitemparameter->set_pathitemid($this->pathitemid);
+        $pathitemparameter->set_pathitem_parameter('PRS_EMAD.PRS.CAMS');
+        $pathitemparameter->set_subplugin_parameter('user');
+        $id1 = $pathitemparameter->save(true);
+
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $pathitemparameter->set_pathitemid($this->pathitemid);
+        $pathitemparameter->set_pathitem_parameter('COURSE');
+        $pathitemparameter->set_subplugin_parameter('crs');
+        $id2 = $pathitemparameter->save(true);
+
+        $pathitemparameter = new local_data_importer_pathitem_parameter();
+        $parameters = $pathitemparameter->get_by_pathitem_id($this->pathitemid);
+        $this->assertEquals(count($parameters), 2);
+
+        foreach ($parameters as $parameter) {
+            $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $parameter);
+        }
     }
 }

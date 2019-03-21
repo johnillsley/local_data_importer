@@ -37,8 +37,14 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\RequestException;
 
-class local_data_importer_http_connection_test extends advanced_testcase {
+/**
+ * Class local_data_importer_http_connection_testcase
+ */
+class local_data_importer_http_connection_testcase extends advanced_testcase {
 
+    /**
+     * Test for method local_data_importer_http_connection->__construct().
+     */
     public function test_instantiate() {
         $this->resetAfterTest(true);
 
@@ -47,6 +53,9 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         $this->assertInstanceOf('local_data_importer_http_connection', $httpconnect);
     }
 
+    /**
+     * Test for method local_data_importer_http_connection->create_client().
+     */
     public function test_create_client() {
         $this->resetAfterTest(true);
 
@@ -58,7 +67,11 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         $this->assertInstanceOf('GuzzleHttp\Client', $httpconnect->client);
     }
 
+    /**
+     * Test for method local_data_importer_http_connection->get_response().
+     */
     public function test_get_response() {
+        global $DB;
         $this->resetAfterTest(true);
 
         $validjson = '[
@@ -100,8 +113,8 @@ class local_data_importer_http_connection_test extends advanced_testcase {
                 new Response(200, ['Content-Type' => 'application/xml'], $validxml),
                 new Response(200, ['Content-Type' => 'application/xml'], $brokenxml),
                 new Response(200, ['Content-Type' => 'text/html']),
-                new Response(403),
-                new Response(504),
+                new Response(403, ['Content-Type' => 'text/html']),
+                new Response(504, ['Content-Type' => 'text/html']),
                 new RequestException("Error Communicating with Server", new Request('GET', 'test'))
         ]);
 
@@ -114,6 +127,8 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         try {
             $content = $httpconnect->get_response();
         } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
             $this->assertEquals('JSON decode error', $e->getMessage());
             $this->assertEquals(4, $e->getCode());
         }
@@ -124,6 +139,8 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         try {
             $content = $httpconnect->get_response();
         } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
             $this->assertEquals(
                     'simplexml_load_string(): Entity: line 7: parser error : Opening and ending tag mismatch: c line 6 and row',
                     $e->getMessage());
@@ -133,12 +150,16 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         try {
             $content = $httpconnect->get_response();
         } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
             $this->assertEquals('Content type is incorrect (text/html). It must be either JSON or XML.', $e->getMessage());
         }
 
         try {
             $content = $httpconnect->get_response();
         } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
             $this->assertEquals('Client error: `GET ` resulted in a `403 Forbidden` response', $e->getMessage());
             $this->assertEquals(403, $e->getCode());
         }
@@ -146,6 +167,8 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         try {
             $content = $httpconnect->get_response();
         } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
             $this->assertEquals('Server error: `GET ` resulted in a `504 Gateway Time-out` response', $e->getMessage());
             $this->assertEquals(504, $e->getCode());
         }
@@ -153,8 +176,13 @@ class local_data_importer_http_connection_test extends advanced_testcase {
         try {
             $content = $httpconnect->get_response();
         } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
             $this->assertEquals('Error Communicating with Server', $e->getMessage());
         }
+
+        $logentries = $DB->get_records('local_data_importer_httplog');
+        $this->assertEquals(count($logentries), 8);
     }
 
     public function test_test_connection() {

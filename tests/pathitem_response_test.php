@@ -13,86 +13,207 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
-global $CFG;
+
+/**
+ * Unit tests for the local/data_importer/classes/pathitem_response.php.
+ *
+ * @group      local_data_importer
+ * @group      bath
+ * @package    local/data_importer
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
+ * @copyright  2018 University of Bath
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class local_data_importer_pathitem_response_testcase
- * @group local_data_importer
  */
 class local_data_importer_pathitem_response_testcase extends advanced_testcase {
-    /**
-     * @var
-     */
-    public $pathitemresponse;
-    /**
-     * @var
-     */
-    public $pathitemresponseid;
-    /**
-     * @var
-     */
-    public $pathitem;
-    /**
-     * @var
-     */
-    public $pathitemid;
 
     /**
-     * @throws Exception
+     * @var integer
+     */
+    private $pathitemid;
+
+    /**
+     * Create a pathitem and store the id.
      */
     public function setUp() {
-        global $DB, $CFG;
-        $this->resetAfterTest(false);
-        // Path-item instance.
-        $this->pathitem = new local_data_importer_connectorpathitem();
-        $this->pathitem->set_name("Get Assessments");
-        $this->pathitem->set_connector_id(1); // No need to create a new connector instance (?).
-        $this->pathitem->set_path_item("/MABS/MOD_CODE/{modcode}");
-        $this->pathitem->set_active(true);
-        $this->pathitem->set_http_method('GET');
-        $this->pathitem->set_plugin_component('local_create_course');
-        $this->pathitemid = $this->pathitem->save(true);
+
+        $this->resetAfterTest();
+
+        // Create a pathitem instance.
+        $pathitem = new local_data_importer_connectorpathitem();
+        $pathitem->set_name("Get Assessments");
+        $pathitem->set_connector_id(1); // No need to create a new connector instance (?).
+        $pathitem->set_path_item("/MABS/MOD_CODE/{modcode}");
+        $pathitem->set_active(true);
+        $pathitem->set_http_method('GET');
+        $pathitem->set_plugin_component('test');
+        $this->pathitemid = $pathitem->save(true);
     }
 
     /**
-     * Add a new path item response to the database
+     * Test for method local_data_importer_pathitem_response->save().
      */
-    public function test_add_pathitem_response() {
-        $this->resetAfterTest();
-        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
-        $this->pathitemresponse = new local_data_importer_pathitem_response();
-        $this->pathitemresponse->set_pathitemid($pathitemobject->get_id());
-        $this->pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
-        $this->pathitemresponse->set_pluginresponse_table('user');
-        $this->pathitemresponse->set_pluginresponse_field('username');
-        $this->pathitemresponseid = $this->pathitemresponse->save(true);
-        $pathitemresponse = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
-        $this->assertInstanceOf(\local_data_importer_pathitem_response::class, $pathitemresponse);
+    public function test_save() {
+        global $DB;
 
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $pathitemresponse->set_pluginresponse_table('user');
+        $pathitemresponse->set_pluginresponse_field('username');
+        $id = $pathitemresponse->save(true);
+
+        $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
+        $this->assertEquals(count($responserecords), 1);
+
+        $responserecord = array_pop($responserecords);
+        $this->assertEquals($responserecord->pathitemresponse, 'PRS_EMAD.PRS.CAMS');
+        $this->assertEquals($responserecord->pluginresponsetable, 'user');
+        $this->assertEquals($responserecord->pluginresponsefield, 'username');
+        $this->assertEquals($responserecord->id, $id);
+
+        // Now try an update.
+        $pathitemresponse->set_pathitem_response('coursecode');
+        $pathitemresponse->set_pluginresponse_table('course');
+        $pathitemresponse->set_pluginresponse_field('idnumber');
+        $id = $pathitemresponse->save(true);
+
+        $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
+        $this->assertEquals(count($responserecords), 1);
+
+        $responserecord = array_pop($responserecords);
+        $this->assertEquals($responserecord->pathitemresponse, 'coursecode');
+        $this->assertEquals($responserecord->pluginresponsetable, 'course');
+        $this->assertEquals($responserecord->pluginresponsefield, 'idnumber');
     }
 
     /**
-     * Test update of path item response entities
+     * Test for method local_data_importer_pathitem_response->get_by_id().
      */
-    public function test_update_pathitem_response() {
-        $this->resetAfterTest();
-        // Add again.
-        $pathitemobject = $this->pathitem->get_by_id($this->pathitemid);
-        $this->pathitemresponse = new local_data_importer_pathitem_response();
-        $this->pathitemresponse->set_pathitemid($pathitemobject->get_id());
-        $this->pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
-        $this->pathitemresponse->set_pluginresponse_table('user');
-        $this->pathitemresponse->set_pluginresponse_field('username');
-        $this->pathitemresponseid = $this->pathitemresponse->save(true);
-        // Update.
-        $pathitemresponse = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
-        $pathitemresponse->set_pluginresponse_table('user2');
-        $pathitemresponse->set_pluginresponse_field('username2');
-        $pathitemresponse->save(true);
-        $pathitemresponse = $this->pathitemresponse->get_by_id($this->pathitemresponseid);
-        // Confirm.
-        $this->assertEquals("username2", $pathitemresponse->get_pluginresponse_field());
-        $this->assertEquals("user2", $pathitemresponse->get_pluginresponse_table());
+    public function test_get_by_id() {
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $pathitemresponse->set_pluginresponse_table('user');
+        $pathitemresponse->set_pluginresponse_field('username');
+        $id = $pathitemresponse->save(true);
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $response = $pathitemresponse->get_by_id($id);
+        $this->assertInstanceOf(\local_data_importer_pathitem_response::class, $response);
+        $this->assertEquals($response->get_pathitem_response(), 'PRS_EMAD.PRS.CAMS');
+        $this->assertEquals($response->get_pluginresponse_table(), 'user');
+        $this->assertEquals($response->get_pluginresponse_field(), 'username');
+        $this->assertEquals($response->get_pathitemid(), $this->pathitemid);
+    }
+
+    /**
+     * Test for method local_data_importer_pathitem_response->get_by_pathitem_id().
+     */
+    public function test_get_by_pathitem_id() {
+
+        // Create two response mappings.
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $pathitemresponse->set_pluginresponse_table('user');
+        $pathitemresponse->set_pluginresponse_field('username');
+        $id = $pathitemresponse->save(true);
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('coursecode');
+        $pathitemresponse->set_pluginresponse_table('course');
+        $pathitemresponse->set_pluginresponse_field('idnumber');
+        $id = $pathitemresponse->save(true);
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $responses = $pathitemresponse->get_by_pathitem_id($this->pathitemid);
+        $this->assertEquals(count($responses), 2);
+
+        foreach ($responses as $response) {
+            $this->assertInstanceOf(\local_data_importer_pathitem_response::class, $response);
+        }
+    }
+
+    /**
+     * Test for method local_data_importer_pathitem_response->get_lookups_for_pathitem().
+     */
+    public function test_get_lookups_for_pathitem() {
+
+        // Create two response mappings.
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $pathitemresponse->set_pluginresponse_table('user');
+        $pathitemresponse->set_pluginresponse_field('username');
+        $id = $pathitemresponse->save(true);
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('coursecode');
+        $pathitemresponse->set_pluginresponse_table('course');
+        $pathitemresponse->set_pluginresponse_field('idnumber');
+        $id = $pathitemresponse->save(true);
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $lookups = $pathitemresponse->get_lookups_for_pathitem($this->pathitemid);
+
+        $expected = array(
+                'user' =>
+                        array(
+                                'username' => 'PRS_EMAD.PRS.CAMS'
+                        ),
+                'course' =>
+                        array(
+                                'idnumber' => 'coursecode'
+                        ),
+        );
+
+        $this->assertEquals($lookups, $expected);
+    }
+
+    /**
+     * Test for method local_data_importer_pathitem_response->delete().
+     */
+    public function test_delete() {
+        global $DB;
+
+        // Create two response mappings.
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('PRS_EMAD.PRS.CAMS');
+        $pathitemresponse->set_pluginresponse_table('user');
+        $pathitemresponse->set_pluginresponse_field('username');
+        $id1 = $pathitemresponse->save(true);
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $pathitemresponse->set_pathitemid($this->pathitemid);
+        $pathitemresponse->set_pathitem_response('coursecode');
+        $pathitemresponse->set_pluginresponse_table('course');
+        $pathitemresponse->set_pluginresponse_field('idnumber');
+        $id2 = $pathitemresponse->save(true);
+
+        // Delete first response mapping.
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $response = $pathitemresponse->get_by_id($id1);
+        $response->delete();
+
+        $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
+        $this->assertEquals(count($responserecords), 1);
+
+        // Delete second response mapping.
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $response = $pathitemresponse->get_by_id($id2);
+        $response->delete();
+
+        $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
+        $this->assertEquals(count($responserecords), 0);
     }
 }

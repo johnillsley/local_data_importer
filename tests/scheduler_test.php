@@ -16,9 +16,6 @@
 
 /**
  * Unit tests for the local/data_importer/classes/scheduler.php.
- * Moodle code checker does not like some lines of code with spaces at the end.
- * Do not remove these spaces or the phpunit tests will fail.
- * Also be careful that your text/code editor does not automatically strip these trailing spaces when saving.
  *
  * @group      local_data_importer
  * @group      bath
@@ -30,23 +27,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_data_importer_scheduler_test extends advanced_testcase {
+/**
+ * Class local_data_importer_scheduler_testcase
+ */
+class local_data_importer_scheduler_testcase extends advanced_testcase {
 
-    public function test_move_item_up() {
-
-    }
-
-    public function test_move_item_down() {
-
-    }
-
-    public function test_get_last_id() {
-        // Is this name right?
-
-        // Get biggest order number.
-    }
-
+    /**
+     * Test for method local_data_importer_scheduler->start_data_imports().
+     */
     public function test_start_data_imports() {
 
+        // TODO - What is best approach here?
     }
 }

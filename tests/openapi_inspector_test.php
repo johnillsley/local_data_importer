@@ -30,8 +30,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_data_importer_openapi_inspector_test extends advanced_testcase {
+/**
+ * Class local_data_importer_openapi_inspector_testcase
+ */
+class local_data_importer_openapi_inspector_testcase extends advanced_testcase {
 
+    /**
+     * Test for method local_data_importer_openapi_inspector->__construct().
+     */
     public function test_instantiate() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -47,6 +53,9 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
                 );
     }
 
+    /**
+     * Test for method local_data_importer_openapi_inspector->get_pathitems().
+     */
     public function test_get_pathitems() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -87,6 +96,9 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
         $this->assertSame($expected, var_export($pathitems, true));
     }
 
+    /**
+     * Test for method local_data_importer_openapi_inspector->get_pathitem_parameters().
+     */
     public function test_get_pathitem_parameters() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -110,6 +122,9 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
         $this->assertSame($expected, var_export($parameters, true));
     }
 
+    /**
+     * Test for method local_data_importer_openapi_inspector->get_pathitem_responses().
+     */
     public function test_get_pathitem_responses() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -186,6 +201,9 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
         $this->assertSame($expected, var_export($responses, true));
     }
 
+    /**
+     * Test for method local_data_importer_openapi_inspector->get_pathitem_responses_selectable().
+     */
     public function test_get_pathitem_responses_selectable() {
         global $CFG;
         $this->resetAfterTest(true);
@@ -209,6 +227,9 @@ class local_data_importer_openapi_inspector_test extends advanced_testcase {
         $this->assertSame($expected, var_export($responses, true));
     }
 
+    /**
+     * Test for method local_data_importer_openapi_inspector->debug().
+     */
     public function test_debug() {
         global $CFG;
         $this->resetAfterTest(true);

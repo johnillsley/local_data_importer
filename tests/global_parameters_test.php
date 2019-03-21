@@ -29,8 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-class local_data_importer_global_parameters_test extends advanced_testcase {
+/**
+ * Class local_data_importer_global_parameters_testcase
+ */
+class local_data_importer_global_parameters_testcase extends advanced_testcase {
 
+    /**
+     * Test for method local_data_importer_global_parameters::current_academic_year().
+     */
     public function test_current_academic_year() {
 
         $this->resetAfterTest();
@@ -41,15 +47,19 @@ class local_data_importer_global_parameters_test extends advanced_testcase {
         set_config('academic_year_format', 'YYYY/Y', 'local_data_importer');
         set_config('academic_year_first_day', $testfirstday, 'local_data_importer');
         $currentacadyear = local_data_importer_global_parameters::current_academic_year();
-        $this->assertEquals($currentacadyear, $currentyear . '/' . substr(($currentyear + 1), -1));
+        $this->assertEquals(array_pop($currentacadyear), $currentyear . '/' . substr(($currentyear + 1), -1));
 
+        // Different deliminator and format.
         $testfirstday = date('m/d', time() + 60 * 60 * 24); // Set first day of academic year to tomorrow.
-        set_config('academic_year_format', 'YYYY/YY', 'local_data_importer');
+        set_config('academic_year_format', 'yyyy-yy', 'local_data_importer');
         set_config('academic_year_first_day', $testfirstday, 'local_data_importer');
         $currentacadyear = local_data_importer_global_parameters::current_academic_year();
-        $this->assertEquals($currentacadyear, ($currentyear - 1) . '/' . substr($currentyear, -2));
+        $this->assertEquals(array_pop($currentacadyear), ($currentyear - 1) . '-' . substr($currentyear, -2));
     }
 
+    /**
+     * Test for method local_data_importer_global_parameters::date_interval_codes().
+     */
     public function test_date_interval_codes() {
         global $DB;
         $this->resetAfterTest();
@@ -77,19 +87,17 @@ class local_data_importer_global_parameters_test extends advanced_testcase {
         set_config('date_interval_start_date_field', 'start_date', 'local_data_importer');
         set_config('date_interval_end_date_field', 'end_date', 'local_data_importer');
 
-        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1549591200); // Time 2019-02-08T02:00:00+00:00.
+        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1549591200); // This is 2019-02-08.
         $this->assertEquals(count($dateintervals), 3);
-        $this->assertFalse(isset(array_pop($dateintervals)->acadyear));
 
-        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1569808800); // Time 2019-09-30T02:00:00+00:00.
+        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1569808800); // This is 2019-09-30.
         $this->assertEquals(count($dateintervals), 2);
 
-        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1536544800); // Time 2018-09-10T02:00:00+00:00.
+        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1536544800); // This is 2018-09-10.
         $this->assertEquals(count($dateintervals), 1);
 
         set_config('date_interval_academic_year_field', 'acyear', 'local_data_importer');
-        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1549591200); // Time 2019-02-08T02:00:00+00:00.
+        $dateintervals = local_data_importer_global_parameters::date_interval_codes(1549591200); // This is 2019-02-08.
         $this->assertEquals(count($dateintervals), 3);
-        $this->assertTrue(isset(array_pop($dateintervals)->acadyear));
     }
 }

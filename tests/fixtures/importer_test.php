@@ -43,10 +43,10 @@ class importers_test_importer extends data_importer_entity_importer {
                 'course' => array(
                         'fullname' => array(),
                         'shortname' => array(),
-                        'idnumber' => array()
+                        'idnumber' => array('unique')
                 ),
                 'course_categories' => array(
-                        'name' => array()
+                        'name' => array('unique')
                 )
         );
         
@@ -54,19 +54,18 @@ class importers_test_importer extends data_importer_entity_importer {
     }
 
     protected function create_entity($item = array()) {
-        
+
+        $this->local_log($item, time());
     }
 
     protected function update_entity($item = array()) {
 
+        $this->local_log($item, time());
     }
 
     protected function delete_entity($item = array()) {
-
-    }
-
-    protected function sort_items($items = array()) {
-
+        
+        $this->local_log($item, time(), true);
     }
 
     public function get_parameters() {
@@ -111,9 +110,5 @@ class importers_test_importer extends data_importer_entity_importer {
         // TODO - how about a setting to prevent update of course fullname and/or shortname?
         // TODO - Don't do updates - or only update categories.
         return $additionalsettings;
-    }
-    
-    private function prepare_for_log($item, $time) {
-        
     }
 }
