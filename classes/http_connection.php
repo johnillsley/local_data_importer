@@ -105,21 +105,17 @@ class local_data_importer_http_connection {
         }
 
         $headers = ['Authorization' => $apikey];
-        $httptimeout = get_config('local_data_importer', 'local_data_importer/http_timeout');
-        try {
-            // TODO - test error when guzzle not installed.
-            $this->client = new GuzzleHttp\Client([
-                    'base_uri' => $baseuri,
-                    'headers' => $headers,
-                    'proxy' => $proxy,
-                    'timeout' => $httptimeout,
-                    'debug' => false,
-                // TODO : change this to true when going live.
-                    'verify' => false
-            ]);
-        } catch (Exception $e) {
-            throw new \Exception($e->getMessage(), $e->getCode(), $e);
-        }
+        $httptimeout = get_config('local_data_importer', 'http_timeout');
+
+        // TODO - test error when guzzle not installed.
+        $this->client = new GuzzleHttp\Client([
+                'base_uri' => $baseuri,
+                'headers' => $headers,
+                'proxy' => $proxy,
+                'timeout' => $httptimeout,
+                'debug' => false,
+                'verify' => true
+        ]);
     }
 
     /**
@@ -170,15 +166,15 @@ class local_data_importer_http_connection {
                     throw new \Exception("Content type is incorrect (" . $contenttype . "). It must be either JSON or XML.");
             }
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $errorcode = $e->getCode();
             $errormessage = "(" . $e->getCode() . ") " . $e->getMessage();
-            throw new \Exception($e->getMessage(), $e->getCode(), $e); // Unit tests need this line to check exceptions.
+            throw $e; // Unit tests need this line to check exceptions.
 
         } finally {
             // Log the http connection outcome.
             if (!isset($contenttype)) {
-                $contenttype = 'Cannot determine content type';
+                $contenttype = 'N/A';
             }
             if (isset($response)) {
                 $responsecode = $response->getStatusCode();
@@ -216,8 +212,8 @@ class local_data_importer_http_connection {
                 return false;
             }
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            echo $e->getMessage();
-            echo $e->getCode();
+            print $e->getMessage();
+            local_data_importer_error_handler::log($e);
         }
     }
 }

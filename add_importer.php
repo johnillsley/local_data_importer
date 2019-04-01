@@ -70,6 +70,7 @@ $importerformdata[] = $params;
 if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted() && confirm_sesskey()) {
     if (!is_null($openapiinspector)) {
         switch ($action) {
+
             case 'fetch_path_items':
                 $PAGE->set_heading("Select Path Items");
                 if (isset($connectorid)) {
@@ -102,6 +103,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     }
                 }
                 break;
+
             case 'fetch_response_params':
                 $PAGE->set_heading("Add Response Params");
                 if (isset($connectorid) && isset($pathitem) && isset($subplugin) && isset($pathitemname)) {
@@ -113,7 +115,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $subpluginresponses = $object->responses;
                             $subpluginparams = $object->get_parameter_options();
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
-                            $responseparams = $openapiinspector->get_pathitem_responses_selectable($pathitem);
+                            $pathitemresponses = $openapiinspector->get_pathitem_responses_selectable($pathitem);
                             // For the selected subplugin , get the additional form elements (if available).
                             $subpluginadditionalfields = $object->get_additional_form_elements();
                             // Prepare parameters to pass to the form.
@@ -123,7 +125,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $params['selectedconnector'] = $connectordata;
                             $params['pathitem'] = $pathitem;
                             $params['pathitemname'] = $pathitemname;
-                            $params['pathitemresponses'] = $responseparams;
+                            $params['pathitemresponses'] = $pathitemresponses;
                             $params['subpluginadditionalfields'] = $subpluginadditionalfields;
                             $selectconnectorform = new local_data_importer_add_importer_form(null, $params);
                             echo $selectconnectorform->display();
@@ -133,8 +135,8 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     }
                 }
                 break;
-            case 'save':
 
+            case 'save':
                 // Add them to the database.
                 // 1. PATH ITEM.
                 $objpathitem = new local_data_importer_connectorpathitem();

@@ -29,23 +29,23 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_table',
             get_string('dateintervaltable', 'local_data_importer'),
-            get_string('dateintervaltable_desc', 'local_data_importer'), ''));
+            get_string('dateintervaltable_desc', 'local_data_importer'), 'data_importer_dates'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_code_field',
             get_string('dateintervalcodefield', 'local_data_importer'),
-            get_string('dateintervalcodefield_desc', 'local_data_importer'), ''));
+            get_string('dateintervalcodefield_desc', 'local_data_importer'), 'period_code'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_start_date_field',
             get_string('dateintervalstartdatefield', 'local_data_importer'),
-            get_string('dateintervalstartdatefield_desc', 'local_data_importer'), ''));
+            get_string('dateintervalstartdatefield_desc', 'local_data_importer'), 'start_date'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_end_date_field',
             get_string('dateintervalenddatefield', 'local_data_importer'),
-            get_string('dateintervalenddatefield_desc', 'local_data_importer'), ''));
+            get_string('dateintervalenddatefield_desc', 'local_data_importer'), 'end_date'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_academic_year_field',
             get_string('dateintervalacademicyearfield', 'local_data_importer'),
-            get_string('dateintervalacademicyearfield_desc', 'local_data_importer'), ''));
+            get_string('dateintervalacademicyearfield_desc', 'local_data_importer'), 'acyear'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/academic_year_format',
             get_string('academicyearformat', 'local_data_importer'),

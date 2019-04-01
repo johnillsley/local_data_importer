@@ -37,8 +37,9 @@ class importers_course_importer extends data_importer_entity_importer {
 
     public function __construct($pathitemid) {
 
-        $this->pathitemid   = $pathitemid;
-        $this->logtable     = 'local_data_importer_course';
+        parent::__construct($pathitemid);
+
+        $this->logtable     = 'importers_course';
         $this->languagepack = 'importers_course';
 
         $this->responses = array(
@@ -69,39 +70,34 @@ class importers_course_importer extends data_importer_entity_importer {
      */
     protected function create_entity($item = array()) {
 
-        try {
-            $categoryid = $this->get_course_category_id($item);
-            $courseconfig = get_config('moodlecourse');
-            $coursevisible = $this->get_setting('course_visible');
-            $courseconfig->visible = ($coursevisible == get_string('show')) ? 1 : 0;
+        $categoryid = $this->get_course_category_id($item);
+        $courseconfig = get_config('moodlecourse');
+        $coursevisible = $this->get_setting('course_visible');
+        $courseconfig->visible = ($coursevisible == get_string('show')) ? 1 : 0;
 
-            // Create course.
-            $course = new stdClass();
-            $course->fullname           = $item['course']['fullname'];
-            $course->shortname          = $item['course']['shortname'];
-            $course->idnumber           = $item['course']['idnumber'];
-            $course->timecreated        = time();
-            $course->category           = $categoryid;
-            $course->format             = $courseconfig->format;
-            $course->newsitems          = $courseconfig->newsitems;
-            $course->showgrades         = $courseconfig->showgrades;
-            $course->showreports        = $courseconfig->showreports;
-            $course->maxbytes           = $courseconfig->maxbytes;
-            $course->groupmode          = $courseconfig->groupmode;
-            $course->groupmodeforce     = $courseconfig->groupmodeforce;
-            $course->visible            = $courseconfig->visible;
-            $course->visibleold         = $courseconfig->visible;
-            $course->lang               = $courseconfig->lang;
-            $course->enablecompletion   = $courseconfig->enablecompletion;
-            $course->numsections        = $courseconfig->numsections;
-            $course->startdate          = usergetmidnight(time());
+        // Create course.
+        $course = new stdClass();
+        $course->fullname           = $item['course']['fullname'];
+        $course->shortname          = $item['course']['shortname'];
+        $course->idnumber           = $item['course']['idnumber'];
+        $course->timecreated        = time();
+        $course->category           = $categoryid;
+        $course->format             = $courseconfig->format;
+        $course->newsitems          = $courseconfig->newsitems;
+        $course->showgrades         = $courseconfig->showgrades;
+        $course->showreports        = $courseconfig->showreports;
+        $course->maxbytes           = $courseconfig->maxbytes;
+        $course->groupmode          = $courseconfig->groupmode;
+        $course->groupmodeforce     = $courseconfig->groupmodeforce;
+        $course->visible            = $courseconfig->visible;
+        $course->visibleold         = $courseconfig->visible;
+        $course->lang               = $courseconfig->lang;
+        $course->enablecompletion   = $courseconfig->enablecompletion;
+        $course->numsections        = $courseconfig->numsections;
+        $course->startdate          = usergetmidnight(time());
 
-            if (create_course($course)) {
-                $this->local_log($item, $course->timecreated);
-            }
-        } catch (\Exception $e) {
-            print "\r\n" . $e->getMessage();
-            throw $e;
+        if (create_course($course)) {
+            $this->local_log($item, $course->timecreated, 'created');
         }
     }
 
@@ -116,27 +112,21 @@ class importers_course_importer extends data_importer_entity_importer {
     protected function update_entity($item = array()) {
         global $DB;
 
-        // TODO - check an additional setting to decide whether course get updated.
-        try {
-            $current = $DB->get_record("course", array("idnumber" => $item['course']['idnumber']));
+        $current = $DB->get_record("course", array("idnumber" => $item['course']['idnumber']));
 
-            $categoryid = $this->get_course_category_id($item);
+        $categoryid = $this->get_course_category_id($item);
 
-            $course = new stdClass();
-            $course->id             = $current->id;
-            $course->fullname       = $item["course"]["fullname"];
-            $course->shortname      = $item["course"]["shortname"];
-            $course->category       = $categoryid;
-            $course->timemodified   = time();
-            update_course(clone($course)); // Need to clone as update_course changes $course which breaks the check below.
+        $course = new stdClass();
+        $course->id             = $current->id;
+        $course->fullname       = $item["course"]["fullname"];
+        $course->shortname      = $item["course"]["shortname"];
+        $course->category       = $categoryid;
+        $course->timemodified   = time();
+        update_course(clone($course)); // Need to clone as update_course changes $course which breaks the check below.
 
-            // Check update happened ok - as the update_course function does not return anything to indicate success.
-            if ($DB->get_record("course", (array)$course)) {
-                $this->local_log($item, $course->timemodified);
-            }
-        } catch (\Exception $e) {
-            print "\r\n" . $e->getMessage();
-            throw $e;
+        // Check update happened ok - as the update_course function does not return anything to indicate success.
+        if ($DB->get_record("course", (array)$course)) {
+            $this->local_log($item, $course->timemodified, 'updated');
         }
     }
 
@@ -152,15 +142,12 @@ class importers_course_importer extends data_importer_entity_importer {
         global $DB;
 
         if ($this->get_setting('course_delete') == get_string('deletecourse', 'importers_course')) {
-            try {
-                $courseid = $DB->get_field("course", "id", array("idnumber" => $item->course_idnumber));
-                if (delete_course($courseid)) {
-                    $this->local_log($item, time(), true);
-                }
-            } catch (\Exception $e) {
-                print "\r\n" . $e->getMessage();
-                throw $e;
+            $courseid = $DB->get_field("course", "id", array("idnumber" => $item->course_idnumber));
+            ob_start();
+            if (delete_course($courseid)) {
+                $this->local_log($item, time(), 'deleted');
             }
+            ob_end_clean();
         }
     }
 

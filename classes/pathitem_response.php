@@ -58,7 +58,7 @@ class local_data_importer_pathitem_response {
      * local_data_importer_pathitem_response constructor.
      */
     public function __construct() {
-        $this->dbtable = 'pathitem_response';
+        $this->dbtable = 'local_data_importer_resp';
     }
 
     /**
@@ -172,18 +172,18 @@ class local_data_importer_pathitem_response {
      */
     public function get_by_id($id): local_data_importer_pathitem_response {
         global $DB;
-        $responseparaminstance = new self();
+        $responseinstance = new self();
         try {
             $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
-            $responseparaminstance->set_id($recordobject->id);
-            $responseparaminstance->set_pathitemid($recordobject->pathitemid);
-            $responseparaminstance->set_pathitem_response($recordobject->pathitemresponse);
-            $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
-            $responseparaminstance->set_pluginresponse_field($recordobject->pluginresponsefield);
+            $responseinstance->set_id($recordobject->id);
+            $responseinstance->set_pathitemid($recordobject->pathitemid);
+            $responseinstance->set_pathitem_response($recordobject->pathitemresponse);
+            $responseinstance->set_pluginresponse_table($recordobject->pluginresponsetable);
+            $responseinstance->set_pluginresponse_field($recordobject->pluginresponsefield);
         } catch (\dml_exception $e) {
             echo $e->getmessage();
         }
-        return $responseparaminstance;
+        return $responseinstance;
     }
 
     /**
@@ -193,48 +193,44 @@ class local_data_importer_pathitem_response {
      */
     public function get_by_pathitem_id($id) {
         global $DB;
-        $responseparams = array();
-        try {
-            $responseparamrecords = $DB->get_records($this->dbtable, ['pathitemid' => $id]);
-            if ($responseparamrecords && is_array($responseparamrecords)) {
-                foreach ($responseparamrecords as $recordobject) {
-                    $responseparaminstance = new self();
-                    $responseparaminstance->set_id($recordobject->id);
-                    $responseparaminstance->set_pathitemid($recordobject->pathitemid);
-                    $responseparaminstance->set_pathitem_response($recordobject->pathitemresponse);
-                    $responseparaminstance->set_pluginresponse_table($recordobject->pluginresponsetable);
-                    $responseparaminstance->set_pluginresponse_field($recordobject->pluginresponsefield);
-                    $responseparams[] = $responseparaminstance;
-                }
+        $responses = array();
+
+        $responserecords = $DB->get_records($this->dbtable, ['pathitemid' => $id]);
+        if ($responserecords && is_array($responserecords)) {
+            foreach ($responserecords as $recordobject) {
+                $responseinstance = new self();
+                $responseinstance->set_id($recordobject->id);
+                $responseinstance->set_pathitemid($recordobject->pathitemid);
+                $responseinstance->set_pathitem_response($recordobject->pathitemresponse);
+                $responseinstance->set_pluginresponse_table($recordobject->pluginresponsetable);
+                $responseinstance->set_pluginresponse_field($recordobject->pluginresponsefield);
+                $responses[] = $responseinstance;
             }
-        } catch (\dml_exception $e) {
-            echo $e->getmessage();
         }
-        return $responseparams;
+
+        return $responses;
     }
 
-
     /**
-     * Get Path Item response by Path Item ID.
-     * @param $id
+     * Get Path Item response mappings for use in transforming received data.
+     * @param integer $pathitemid specifies the importer/path item
+     * @throws Exception if there are no response mappings.
      * @return array
      */
     public function get_lookups_for_pathitem($pathitemid) {
         global $DB;
 
         $responselookups = array();
-        try {
-            $responseparamrecords = $DB->get_records($this->dbtable, ['pathitemid' => $pathitemid]);
-            if (is_array($responseparamrecords)) {
-                foreach ($responseparamrecords as $param) {
-                    $table      = $param->pluginresponsetable;
-                    $field      = $param->pluginresponsefield;
-                    $pathitem   = $param->pathitemresponse;
-                    $responselookups[$table][$field] = $pathitem;
-                }
+        $responserecords = $DB->get_records($this->dbtable, ['pathitemid' => $pathitemid]);
+        if (is_array($responserecords) && count($responserecords) > 0) {
+            foreach ($responserecords as $param) {
+                $table      = $param->pluginresponsetable;
+                $field      = $param->pluginresponsefield;
+                $pathitem   = $param->pathitemresponse;
+                $responselookups[$table][$field] = $pathitem;
             }
-        } catch (\dml_exception $e) {
-            echo $e->getmessage();
+        } else {
+            throw new Exception('There are no response mappings for this path item. The data importer will not be able to tranform external data.');
         }
         return $responselookups;
     }

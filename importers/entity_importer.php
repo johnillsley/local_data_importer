@@ -35,7 +35,7 @@ abstract class data_importer_entity_importer {
     /**
      * @var string
      */
-    protected $logtable;
+    public $logtable;
 
     /**
      * @var string
@@ -50,7 +50,7 @@ abstract class data_importer_entity_importer {
     /**
      * @var string
      */
-    private $dbsettingstable = "local_data_importer_settings";
+    private $dbsettingstable = "local_data_importer_setting";
 
     /**
      * @var array
@@ -63,12 +63,27 @@ abstract class data_importer_entity_importer {
     public $parameters = array();
 
     /**
+     * @var object
+     */
+    public $summary;
+
+    /**
      * @var array
      */
     protected $databaseproperties = array();
 
-    protected function __construct() {
+    protected function __construct($pathitemid) {
 
+        $this->pathitemid   = $pathitemid;
+
+        $this->summary = new stdClass();
+        $this->summary->new         = 0;
+        $this->summary->changed     = 0;
+        $this->summary->unchanged   = 0;
+        $this->summary->removed     = 0;
+        $this->summary->created     = 0;
+        $this->summary->updated     = 0;
+        $this->summary->deleted     = 0;
     }
 
     /**
@@ -170,8 +185,8 @@ abstract class data_importer_entity_importer {
             try {
                 $create = $this->validate_item($create);
                 $this->create_entity($create);
-            } catch (\Exception $e) {
-                $this->exception_log('create', $e, $create);
+            } catch (\Throwable $e) {
+                local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }
 
@@ -179,16 +194,16 @@ abstract class data_importer_entity_importer {
             try {
                 $update = $this->validate_item($update);
                 $this->update_entity($update);
-            } catch (\Exception $e) {
-                $this->exception_log('update', $e, $update);
+            } catch (\Throwable $e) {
+                local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }
 
         foreach ($sorteddata->delete as $delete) {
             try {
                 $this->delete_entity($delete);
-            } catch (\Exception $e) {
-                $this->exception_log('delete', $e, $delete);
+            } catch (\Throwable $e) {
+                local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }
     }
@@ -231,18 +246,24 @@ abstract class data_importer_entity_importer {
                         if ($item[$table][$fieldname] != $record->{$logtablefield}) {
                             // A field has been updated so add to update list and get out of loop.
                             $action->update[] = $item;
+                            $this->summary->changed++;
+                            unset($currentlog[$record->id]); // Remove item from check list.
                             break 2; // Move onto next item.
                         }
                     }
                 }
+                $this->summary->unchanged++;
                 unset($currentlog[$record->id]); // Remove item from check list.
+
             } else {
                 // Item needs adding.
                 $action->create[] = $item;
+                $this->summary->new++;
             }
         }
         // What is left in $current need to be deleted. Note format of $currentlog is different to $item.
         $action->delete = $currentlog;
+        $this->summary->removed = count($currentlog);
 
         return $action;
     }
@@ -312,16 +333,12 @@ abstract class data_importer_entity_importer {
         // TODO - check if primary key is not null.
         foreach ($item as $table => $fields) {
             foreach ($fields as $field => $value) {
-                try {
-                    if (!isset($this->databaseproperties[$table][$field])) {
-                        throw new \Exception("SUBPLUGIN ERROR: a table/field combination defined in the subplugin does not exist in Moodle");
-                    } else {
-                        $fieldmetadata = $this->databaseproperties[$table][$field];
-                    }
-                    $item[$table][$field] = $this->validate_field($fieldmetadata, $value);
-                } catch (Exception $e) {
-                    throw $e;
+                if (!isset($this->databaseproperties[$table][$field])) {
+                    throw new \Exception("SUBPLUGIN ERROR: a table/field combination defined in the subplugin does not exist in Moodle");
+                } else {
+                    $fieldmetadata = $this->databaseproperties[$table][$field];
                 }
+                $item[$table][$field] = $this->validate_field($fieldmetadata, $value);
             }
         }
         return $item;
@@ -455,10 +472,12 @@ abstract class data_importer_entity_importer {
      * @param boolean $delete indicate that $item is in a different format and that deleted flag needs setting in the local log
      * @return void
      */
-    protected function local_log($item, $time, $delete = false) {
+    protected function local_log($item, $time, $action) {
         global $DB;
 
-        if ($delete == true) {
+        $this->summary->{$action}++;
+
+        if ($action == 'deleted') {
             // Parameter $item is already in logitem format.
             $logitem = $item;
             $logitem->deleted = 1;

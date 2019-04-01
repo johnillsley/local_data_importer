@@ -42,6 +42,8 @@ use GuzzleHttp\Exception\RequestException;
  */
 class local_data_importer_http_connection_testcase extends advanced_testcase {
 
+    const DB_HTTP_LOG = 'local_data_importer_httplog';
+
     /**
      * Test for method local_data_importer_http_connection->__construct().
      */
@@ -181,7 +183,7 @@ class local_data_importer_http_connection_testcase extends advanced_testcase {
             $this->assertEquals('Error Communicating with Server', $e->getMessage());
         }
 
-        $logentries = $DB->get_records('local_data_importer_httplog');
+        $logentries = $DB->get_records(self::DB_HTTP_LOG);
         $this->assertEquals(count($logentries), 8);
     }
 

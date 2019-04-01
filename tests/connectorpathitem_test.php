@@ -32,6 +32,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
 
+    const DB_SETTINGS = 'local_data_importer_setting';
+
     /**
      * @var object local_data_importer_connectorpathitem
      */
@@ -181,8 +183,8 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
         $setting2->pathitemid   = $this->pathitemid;
         $setting2->name         = 'name2';
         $setting2->value        = 'value2';
-        $DB->insert_records('local_data_importer_settings', array($setting1, $setting2));
-        $records = $DB->get_records('local_data_importer_settings', array('pathitemid' => $this->pathitemid));
+        $DB->insert_records(self::DB_SETTINGS, array($setting1, $setting2));
+        $records = $DB->get_records(self::DB_SETTINGS, array('pathitemid' => $this->pathitemid));
         $this->assertEquals(count($records), 2);
 
         $responses = $response->get_by_pathitem_id($this->pathitemid);
@@ -202,7 +204,7 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
         $this->assertEquals(count($responses), 0);
 
         // Check additional settings have been deleted.
-        $records = $DB->get_records('local_data_importer_settings', array('pathitemid' => $this->pathitemid));
+        $records = $DB->get_records(self::DB_SETTINGS, array('pathitemid' => $this->pathitemid));
         $this->assertEquals(count($records), 0);
     }
 
@@ -214,7 +216,7 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
         // Also tests private method "get_next_importorder" when creating new pathitems.
 
         $pathitemtest = array();
-        // Create 3 records in connector_pathitem table that are ordered.
+        // Create 3 records in local_data_importer_path table that are ordered.
         $connectorpathitem = new local_data_importer_connectorpathitem();
         $connectorpathitem->set_name('Path Item 1');
         $connectorpathitem->set_connector_id(1);

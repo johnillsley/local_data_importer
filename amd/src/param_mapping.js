@@ -30,8 +30,8 @@ define(['jquery', 'core/ajax', 'core/config', 'core/templates'],
                         var form = importer_form();
                         form.append(html);
                     }).fail(function (ex) {
-                    console.log(ex);
-                });
+                        console.log(ex);
+                    });
             });
         };
         return {

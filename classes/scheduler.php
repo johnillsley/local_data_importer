@@ -38,23 +38,45 @@ class local_data_importer_scheduler {
      */
     public function start_data_imports() {
 
-        $connectorpathitem = new local_data_importer_connectorpathitem;
-        $pathitems = $connectorpathitem->get_all(true);
+        try {
+            $connectorpathitem = new local_data_importer_connectorpathitem;
+            $pathitems = $connectorpathitem->get_all(true);
+            if (is_array($pathitems) && count($pathitems) > 0) {
 
-        foreach ($pathitems as $pathitem) {
-            $starttime = time();
-            try {
-                $datafetcher = new local_data_importer_data_fetcher($pathitem->id);
-                $datafetcher->update_from_pathitem();
-            } catch (Exception $e) {
-                // TODO - what sort of exceptions would we get here?
-                print $e->getMessage();
-            } finally {
-                $endtime = time();
-                $timetaken = $endtime - $starttime;
+                foreach ($pathitems as $pathitem) {
+                    $starttime = time();
+                    mtrace("Started pathitem id = " . $pathitem->get_id() . " at " . date("H:i:s", $starttime));
+                    mtrace("   - importer name: " . $pathitem->get_name());
+                    try {
+                        $datafetcher = new local_data_importer_data_fetcher($pathitem->id);
+                        $summary = $datafetcher->update_from_pathitem();
+                    } catch (\Throwable $e) {
+                        print $e->getMessage();
+                        local_data_importer_error_handler::log($e, $pathitem->id);
+                    } finally {
+                        $endtime = time();
+                        $timetaken = $endtime - $starttime;
+                        if (isset($summary)) {
+                            mtrace("   - web service new records: "
+                                    . $summary->new . " (" . $summary->created . " created into Moodle)");
+                            mtrace("   - web service changed records: "
+                                    . $summary->changed . " (" . $summary->updated . " updated in Moodle)");
+                            mtrace("   - web service unchanged records: "
+                                    . $summary->unchanged);
+                            mtrace("   - web service removed records: "
+                                    . $summary->removed . " (" . $summary->deleted . " deleted from Moodle)");
+                        }
+                        mtrace("   - finished at " . date("H:i:s", $endtime) . " (time taken = " . $timetaken . " seconds)");
+                        // Log stuff.
 
-                // Log stuff.
+                    }
+                }
+            } else {
+                throw new Exception("There are no path items to run.");
             }
+        } catch (\Throwable $e) {
+            print $e->getMessage();
+            local_data_importer_error_handler::log($e);
         }
     }
 }

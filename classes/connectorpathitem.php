@@ -22,6 +22,9 @@ defined('MOODLE_INTERNAL') || die();
  * @package local\moodle_data_importer
  */
 class local_data_importer_connectorpathitem {
+
+    const DB_SETTINGS = 'local_data_importer_setting';
+
     /**
      * @var integer
      */
@@ -68,7 +71,7 @@ class local_data_importer_connectorpathitem {
      * @param $dbtable
      */
     public function __construct() {
-        $this->dbtable = 'connector_pathitem';
+        $this->dbtable = 'local_data_importer_path';
     }
 
     /**
@@ -207,35 +210,35 @@ class local_data_importer_connectorpathitem {
 
     /**
      * Get all available Path Items from the database table
-     * @return array|null
+     * @throws Exception if there are no path items to return.
+     * @return array of importers/path items
      */
     public function get_all($activeonly = false) {
         global $DB;
+
         $pathitems = array();
         if ($activeonly == true) {
             $conditions = array("active" => 1);
         } else {
             $conditions = null;
         }
-        try {
-            $pathitemrecords = $DB->get_records($this->dbtable, $conditions, 'importorder ASC');
-            if ($pathitemrecords && is_array($pathitemrecords)) {
-                foreach ($pathitemrecords as $recordobject) {
-                    $pathiteminstance = new self();
-                    $pathiteminstance->set_id($recordobject->id);
-                    $pathiteminstance->set_name($recordobject->name);
-                    $pathiteminstance->set_plugin_component($recordobject->plugincomponent);
-                    $pathiteminstance->set_active($recordobject->active);
-                    $pathiteminstance->set_http_method($recordobject->httpmethod);
-                    $pathiteminstance->set_path_item($recordobject->pathitem);
-                    $pathiteminstance->set_connector_id($recordobject->connectorid);
-                    $pathiteminstance->set_time_created($recordobject->timecreated);
-                    $pathiteminstance->set_import_order($recordobject->importorder);
-                    $pathitems[] = $pathiteminstance;
-                }
+
+        $pathitemrecords = $DB->get_records($this->dbtable, $conditions, 'importorder ASC');
+
+        if (is_array($pathitemrecords) && count($pathitemrecords) > 0) {
+            foreach ($pathitemrecords as $recordobject) {
+                $pathiteminstance = new self();
+                $pathiteminstance->set_id($recordobject->id);
+                $pathiteminstance->set_name($recordobject->name);
+                $pathiteminstance->set_plugin_component($recordobject->plugincomponent);
+                $pathiteminstance->set_active($recordobject->active);
+                $pathiteminstance->set_http_method($recordobject->httpmethod);
+                $pathiteminstance->set_path_item($recordobject->pathitem);
+                $pathiteminstance->set_connector_id($recordobject->connectorid);
+                $pathiteminstance->set_time_created($recordobject->timecreated);
+                $pathiteminstance->set_import_order($recordobject->importorder);
+                $pathitems[] = $pathiteminstance;
             }
-        } catch (\dml_exception $e) {
-            echo $e->getmessage();
         }
         return $pathitems;
     }
@@ -247,24 +250,22 @@ class local_data_importer_connectorpathitem {
      */
     public function get_by_id($id) {
         global $DB;
-        try {
-            $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
-            // TODO - what happens if id not found? - should it throw exception as not expected
-            // Take the db object and turn it into this class object.
-            $pathitem = new self();
-            $pathitem->set_id($recordobject->id);
-            $pathitem->set_name($recordobject->name);
-            $pathitem->set_connector_id($recordobject->connectorid);
-            $pathitem->set_active($recordobject->active);
-            $pathitem->set_plugin_component($recordobject->plugincomponent);
-            $pathitem->set_http_method($recordobject->httpmethod);
-            $pathitem->set_path_item($recordobject->pathitem);
-            $pathitem->set_import_order($recordobject->importorder);
-            $pathitem->set_time_created($recordobject->timecreated);
-            return $pathitem;
-        } catch (\dml_exception $e) {
-            throw $e->getmessage();
-        }
+
+        $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
+        // TODO - what happens if id not found? - should it throw exception as not expected
+        // Take the db object and turn it into this class object.
+        $pathitem = new self();
+        $pathitem->set_id($recordobject->id);
+        $pathitem->set_name($recordobject->name);
+        $pathitem->set_connector_id($recordobject->connectorid);
+        $pathitem->set_active($recordobject->active);
+        $pathitem->set_plugin_component($recordobject->plugincomponent);
+        $pathitem->set_http_method($recordobject->httpmethod);
+        $pathitem->set_path_item($recordobject->pathitem);
+        $pathitem->set_import_order($recordobject->importorder);
+        $pathitem->set_time_created($recordobject->timecreated);
+
+        return $pathitem;
     }
 
     /**
@@ -324,7 +325,7 @@ class local_data_importer_connectorpathitem {
                 }
 
                 // Delete associated additional settings for this pathitem.
-                $DB->delete_records('local_data_importer_settings', ['pathitemid' => $this->id]);
+                $DB->delete_records(self::DB_SETTINGS, ['pathitemid' => $this->id]);
             }
         } catch (\dml_exception $e) {
             echo $e->getMessage();
@@ -398,7 +399,7 @@ class local_data_importer_connectorpathitem {
 
         $target = $DB->get_record_sql("
                 SELECT id, importorder
-                FROM {connector_pathitem}
+                FROM {" . $this->dbtable . "}
                 WHERE " . $sqlwhere . "
                 ORDER BY importorder " . $sqlorder . "
                 LIMIT 1
@@ -435,12 +436,40 @@ class local_data_importer_connectorpathitem {
     private function get_next_importorder(): int {
         global $DB;
 
-        $maxorder = $DB->get_field_sql("SELECT MAX(importorder) FROM {connector_pathitem}");
+        $maxorder = $DB->get_field_sql("SELECT MAX(importorder) FROM {" . $this->dbtable . "}");
         if (is_null($maxorder)) {
             $importorder = 1;
         } else {
             $importorder = $maxorder + 1;
         }
         return $importorder;
+    }
+
+    /**
+     * Sets the start time for an importer when it runs.
+     * @param $time
+     * @return void
+     */
+    public function set_start_time($time) {
+        global $DB;
+
+        $update = new stdClass();
+        $update->id = $this->id;
+        $update->timelastrun = $time;
+        $DB->update_record($this->dbtable, $update);
+    }
+
+    /**
+     * Sets the duration the pathitem took to run.
+     * @param $duration
+     * @return void
+     */
+    public function set_duration_time($duration) {
+        global $DB;
+
+        $update = new stdClass();
+        $update->id = $this->id;
+        $update->timelasttaken = $duration;
+        $DB->update_record($this->dbtable, $update);
     }
 }

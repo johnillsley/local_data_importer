@@ -39,6 +39,7 @@ $string['nosubpluginparameteroptions'] = 'There are no sub plugin parameters';
 $string['openapidefinitionurl_label'] = 'Open API URL';
 $string['pathitemparameter'] = 'Path item parameter';
 $string['pluginname'] = 'Data Importer';
+$string['privacy:metadata'] = 'The plugin does not store personal data';
 $string['serverapikey_label'] = ' Server API Key';
 $string['server_label'] = 'Server ( retrieved automatically)';
 $string['subpluginparameter'] = 'Sub plugin parameter';

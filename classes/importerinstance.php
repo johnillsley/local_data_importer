@@ -54,20 +54,15 @@ class local_data_importer_importerinstance {
      * @throws Exception
      */
     public function __construct($pathitemid) {
+
         $this->pathitemid = $pathitemid;
-        try {
-            $this->get_pathitem();
-            $this->get_pathitem_parameter();
-            $this->get_pathitem_response();
-            if ($this->pathiteminstance instanceof local_data_importer_connectorpathitem) {
-                $connectorid = $this->pathiteminstance->get_connector_id();
-                $this->get_connector($connectorid);
-            }
-
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+        $this->get_pathitem();
+        $this->get_pathitem_parameter();
+        $this->get_pathitem_response();
+        if ($this->pathiteminstance instanceof local_data_importer_connectorpathitem) {
+            $connectorid = $this->pathiteminstance->get_connector_id();
+            $this->get_connector($connectorid);
         }
-
     }
 
 
@@ -77,13 +72,10 @@ class local_data_importer_importerinstance {
      * @throws Exception
      */
     private function get_connector($connectorid) {
+
         $connector = new local_data_importer_connectorinstance();
-        try {
-            $this->connectorinstance = $connector->get_by_id($connectorid);
-            return $this->connectorinstance;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $this->connectorinstance = $connector->get_by_id($connectorid);
+        return $this->connectorinstance;
     }
 
     /**

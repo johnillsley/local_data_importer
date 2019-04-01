@@ -35,6 +35,8 @@ require_once($CFG->dirroot.'/local/data_importer/tests/fixtures/importer_test.ph
  */
 class local_data_importer_entity_importer_testcase extends advanced_testcase {
 
+    const DB_SETTINGS = 'local_data_importer_setting';
+
     /**
      * @var string
      */
@@ -58,9 +60,19 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
 
         $this->resetAfterTest(true);
 
+        $connectorinstance = new local_data_importer_connectorinstance();
+        $connectorinstance->set_description('Connector Instance Description');
+        $connectorinstance->set_name('Connector Instance Name');
+        $connectorinstance->set_server_apikey('serverapikey');
+        $connectorinstance->set_openapi_key('openapikey');
+        $connectorinstance->set_server('virtserver.swaggerhub.com');
+        $openapidefinitionurl = 'https://api.swaggerhub.com/apis/UniversityofBath/GradesTransferOAS20/1.0.0';
+        $connectorinstance->set_openapidefinitionurl($openapidefinitionurl);
+        $connectorid = $connectorinstance->save(true);
+
         $connectorpathitem = new local_data_importer_connectorpathitem();
         $connectorpathitem->set_name('Path Item 1');
-        $connectorpathitem->set_connector_id(1);
+        $connectorpathitem->set_connector_id($connectorid);
         $connectorpathitem->set_path_item('/pathitem1');
         $connectorpathitem->set_active(true);
         $connectorpathitem->set_http_method('GET');
@@ -476,7 +488,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $settingvalue = "do this";
         $importer->save_setting($settingname, $settingvalue);
 
-        $records = $DB->get_records("local_data_importer_settings");
+        $records = $DB->get_records(self::DB_SETTINGS);
         $this->assertEquals(count($records), 1);
         $saved = array_pop($records);
         $this->assertEquals($saved->pathitemid, $this->pathitemid);

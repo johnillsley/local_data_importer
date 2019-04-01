@@ -64,7 +64,7 @@ class local_data_importer_connectorinstance {
      * connectorinstance constructor.
      */
     public function __construct() {
-        $this->dbtable = 'connector_instance';
+        $this->dbtable = 'local_data_importer_connect';
     }
 
     /**
@@ -208,31 +208,25 @@ class local_data_importer_connectorinstance {
     public function get_by_id($id) {
 
         global $DB;
-        try {
-            $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
-            if ($recordobject) {
-                // Take the db object and turn it into this class object.
-                $connectorinstance = new self();
-                $connectorinstance->set_id($recordobject->id);
-                $connectorinstance->set_name($recordobject->name);
-                $connectorinstance->set_description($recordobject->description);
-                $connectorinstance->set_server($recordobject->server);
-                $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
-                $connectorinstance->set_openapi_key($recordobject->openapikey);
-                $connectorinstance->set_server_apikey($recordobject->serverapikey);
-                $connectorinstance->set_timecreated($recordobject->timecreated);
-                $connectorinstance->set_timemodified($recordobject->timemodified);
-                // TODO - why do some methods have underscore and some don't?
-            } else {
-                $connectorinstance = false;
-                // TODO - This should throw an exception to stop code continuing above.
-                // Surely if you request object with invalid id something went wrong.
-            }
-            return $connectorinstance;
-        } catch (\dml_exception $e) {
-            echo "catch error";
-            throw new \Exception($e);
+
+        $recordobject = $DB->get_record($this->dbtable, ['id' => $id]);
+        if ($recordobject) {
+            // Take the db object and turn it into this class object.
+            $connectorinstance = new self();
+            $connectorinstance->set_id($recordobject->id);
+            $connectorinstance->set_name($recordobject->name);
+            $connectorinstance->set_description($recordobject->description);
+            $connectorinstance->set_server($recordobject->server);
+            $connectorinstance->set_openapidefinitionurl($recordobject->openapidefinitionurl);
+            $connectorinstance->set_openapi_key($recordobject->openapikey);
+            $connectorinstance->set_server_apikey($recordobject->serverapikey);
+            $connectorinstance->set_timecreated($recordobject->timecreated);
+            $connectorinstance->set_timemodified($recordobject->timemodified);
+        } else {
+            throw new Exception("Could not get connector with id = " . $id );
         }
+
+        return $connectorinstance;
     }
 
     /** Return all connectors from the database

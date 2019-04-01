@@ -13,7 +13,7 @@ define(['jquery', 'core/ajax', 'core/config', 'core/templates'],
             if (connectorid == 0) {
                 return;
             }
-             $.ajax({
+            $.ajax({
                 type: 'POST',
                 dataType: 'json',
                 data: {'connectorid': connectorid, 'action': 'fetchpathitems'},
@@ -23,12 +23,12 @@ define(['jquery', 'core/ajax', 'core/config', 'core/templates'],
                 templates.render('local_data_importer/select_path_item',
                     {'pathitems': pathitems})
                     .then(function (html) {
-                        // show the options
+                        // Show the options.
                         pathitemshtml = html;
                         var form = importer_form();
                         form.append(html);
                     }).fail(function (ex) {
-                });
+                    });
             });
         };
         return {

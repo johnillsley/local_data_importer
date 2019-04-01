@@ -1,7 +1,4 @@
-define(['jquery', 'core/ajax', 'core/config',
-    'local_data_importer/fetch_api_definition'
-    , 'core/templates'], function ($, ajax, config, fetch_api_definition, templates) {
-
+define(['jquery', 'core/ajax', 'core/config', 'local_data_importer/fetch_api_definition', 'core/templates'], function ($, ajax, config, fetch_api_definition, templates) {
     var getSubPluginParams = function (component) {
         if (component == 0) {
             return;
@@ -25,8 +22,8 @@ define(['jquery', 'core/ajax', 'core/config',
                     .then(function (html) {
                         yuiDialogue.set('bodyContent', html);
                     }).fail(function (ex) {
-                    yuiDialogue.set('bodyContent', '');
-                });
+                        yuiDialogue.set('bodyContent', '');
+                    });
             });
         }
     };

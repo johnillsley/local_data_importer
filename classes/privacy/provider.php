@@ -13,15 +13,30 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * contains the version information for Data Importer Plugin
+ * Privacy Subsystem implementation for local_data_importer
  *
- * @package local_moodle_data_importer
+ * @package    local/data_importer
+ * @author     John Illsley <j.s.illsley@bath.ac.uk>
  * @copyright  2018 University of Bath
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace local_data_importer\privacy;
 
 defined('MOODLE_INTERNAL') || die();
-$plugin->version = 2019032900;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires = 2015111600;        // Requires this Moodle version
-$plugin->component = 'local_data_importer'; // Full name of the plugin (used for diagnostics).
+
+/**
+ * The plugin local_data_importer_importers_course does not store any user data.
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}

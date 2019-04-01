@@ -35,7 +35,8 @@ class importers_test_importer extends data_importer_entity_importer {
 
     public function __construct($pathitemid) {
 
-        $this->pathitemid = $pathitemid;
+        parent::__construct($pathitemid);
+
         $this->logtable = 'local_data_importer_test';
         $this->languagepack = 'importers_test';
 
@@ -55,17 +56,17 @@ class importers_test_importer extends data_importer_entity_importer {
 
     protected function create_entity($item = array()) {
 
-        $this->local_log($item, time());
+        $this->local_log($item, time(), 'created');
     }
 
     protected function update_entity($item = array()) {
 
-        $this->local_log($item, time());
+        $this->local_log($item, time(), 'updated');
     }
 
     protected function delete_entity($item = array()) {
         
-        $this->local_log($item, time(), true);
+        $this->local_log($item, time(), 'deleted');
     }
 
     public function get_parameters() {

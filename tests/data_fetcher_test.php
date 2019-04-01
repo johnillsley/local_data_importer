@@ -36,6 +36,10 @@ require_once($CFG->dirroot . '/local/data_importer/tests/fixtures/importer_test.
  */
 class local_data_importer_data_fetcher_testcase extends advanced_testcase {
 
+    const DB_PATHITEM_RESPONSE = 'local_data_importer_resp';
+    const DB_PATHITEM_PARAMS = 'local_data_importer_param';
+    const DB_PERIOD_DATES = 'local_data_importer_dates';
+
     /**
      * @var integer
      */
@@ -274,7 +278,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
 
         $yesterday = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m"), date("d") - 1, date("Y")));
         $tomorrow = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m"), date("d") + 1, date("Y")));
-        $DB->insert_records("local_data_importer_dates", array(
+        $DB->insert_records(self::DB_PERIOD_DATES, array(
                         ['period_code' => 'AY',
                                 'acyear' => '2018/9',
                                 'start_date' => $yesterday,
@@ -322,7 +326,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         $mapping4->timecreated = 1234;
         $mapping4->timemodified = 1234;
 
-        $DB->insert_records('local_data_importer_params', array($mapping1, $mapping2, $mapping3, $mapping4));
+        $DB->insert_records(self::DB_PATHITEM_PARAMS, array($mapping1, $mapping2, $mapping3, $mapping4));
 
         $datafetcher = new local_data_importer_data_fetcher($this->pathitemid);
         $mappings = $method->invoke($datafetcher);
@@ -393,7 +397,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 "timecreated" => $time,
                 "timemodified" => $time
         );
-        $DB->insert_records("pathitem_response", $inserts);
+        $DB->insert_records(self::DB_PATHITEM_RESPONSE, $inserts);
 
         $externaldata = json_decode(file_get_contents($CFG->dirroot . '/local/data_importer/tests/fixtures/courses.json'));
 

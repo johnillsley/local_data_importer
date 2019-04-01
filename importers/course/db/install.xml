@@ -4,7 +4,7 @@
        xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
     <TABLES>
-        <TABLE NAME="local_data_importer_course" COMMENT="">
+        <TABLE NAME="importers_course" COMMENT="">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="pathitemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

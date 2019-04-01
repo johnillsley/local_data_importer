@@ -89,13 +89,15 @@ class local_data_importer_data_fetcher {
      * Catches any exceptions thrown by other classes and writes to the central exception log
      *
      * @throws Exception if any update fails.
-     * @return void
+     * @return object summary of sorted items
      */
     public function update_from_pathitem() {
 
+        $starttime = time();
+        $this->pathitem->set_start_time($starttime);
         $transform = $this->get_parameter_mappings();
         $parameterslist = $this->transform_parameters($transform);
-
+        // TODO - what happens if paramterlist is an empty array?
         foreach ($parameterslist as $parameters) {
             try {
                 $relativeuri = $this->build_relativeuri($this->uritemplate, $parameters);
@@ -104,10 +106,14 @@ class local_data_importer_data_fetcher {
                 $sortedinternaldata = $this->importer->sort_items($internaldata);
                 $this->importer->do_imports($sortedinternaldata);
             } catch (Exception $e) {
-                print "\r\n" . $e->getMessage();
-                $this->importer->exception_log("data_fetcher", $e, "");
+                print $e->getMessage();
+                local_data_importer_error_handler::log($e, $this->pathitem->id);
             }
         }
+        $duration = time() - $starttime;
+        $this->pathitem->set_duration_time($duration);
+
+        return $this->importer->summary;
     }
 
     /**
@@ -263,6 +269,7 @@ class local_data_importer_data_fetcher {
      * The transformed data is then in a format that can be excepted by the sub plugin.
      *
      * @param array $externaldata
+     * @throws Exception from get_lookups_for_pathitem
      * @return array $internaldata ready to be consumed by the sub plugin
      */
     private function transform_response($externaldata) {

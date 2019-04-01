@@ -34,6 +34,7 @@ global $CFG;
  */
 class local_data_importer_global_parameters_testcase extends advanced_testcase {
 
+    const DB_PERIOD_DATES = 'local_data_importer_dates';
     /**
      * Test for method local_data_importer_global_parameters::current_academic_year().
      */
@@ -65,7 +66,7 @@ class local_data_importer_global_parameters_testcase extends advanced_testcase {
         $this->resetAfterTest();
 
         // Set up test data.
-        $DB->insert_records("local_data_importer_dates", array(
+        $DB->insert_records(self::DB_PERIOD_DATES, array(
                         ['period_code' => 'AY',
                                 'acyear' => '2018/9',
                                 'start_date' => '2018-09-10 00:00:00',
@@ -82,7 +83,7 @@ class local_data_importer_global_parameters_testcase extends advanced_testcase {
         );
 
         // Configure settings to use sits_period table used by sits plugin.
-        set_config('date_interval_table', 'local_data_importer_dates', 'local_data_importer');
+        set_config('date_interval_table', self::DB_PERIOD_DATES, 'local_data_importer');
         set_config('date_interval_code_field', 'period_code', 'local_data_importer');
         set_config('date_interval_start_date_field', 'start_date', 'local_data_importer');
         set_config('date_interval_end_date_field', 'end_date', 'local_data_importer');

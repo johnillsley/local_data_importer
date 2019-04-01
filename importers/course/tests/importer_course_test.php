@@ -33,6 +33,10 @@ require_once($CFG->dirroot . '/course/lib.php'); // Course lib functions.
 
 class local_data_importer_importers_course_test extends advanced_testcase {
 
+    const DB_CONNECTOR = 'local_data_importer_connect';
+    const DB_PATHITEM = 'local_data_importer_path';
+    const DB_SETTINGS = 'local_data_importer_setting';
+    const DB_LOCAL_LOG = 'importers_course';
     /**
      * @var array
      */
@@ -48,10 +52,24 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         require_once(__DIR__.'/fixtures/course_data.php');
         $this->courses = $courses;
 
-        $this->pathitemid = $DB->insert_record("connector_pathitem",
+        // TODO - CREATE A CONNECTOR HERE AND REF IN PATHITEM BELOW. FIXES UNIT TEST ERRORS!!!!!!
+        $connectorid = $DB->insert_record(self::DB_CONNECTOR,
+                array(
+                        "name"                  => "Connector",
+                        "description"           => "Test",
+                        "openapidefinitionurl"  => "https://api.swaggerhub.com/",
+                        "openapikey"            => "ABC",
+                        "server"                => "samis-dev-stutalk.bath.ac.uk",
+                        "serverapikey"          => "XYZ",
+                        "timemodified"          => 12345,
+                        "timecreated"           => 12345
+                )
+        );
+
+        $this->pathitemid = $DB->insert_record(self::DB_PATHITEM,
                 array(
                         "name"              => "Test pathitem",
-                        "connectorid"       => 1,
+                        "connectorid"       => $connectorid,
                         "pathitem"          => "ABC",
                         "httpmethod"        => "get",
                         "plugincomponent"   => "importers_course",
@@ -60,10 +78,10 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                         "timecreated"       => 12345
                 )
         );
-        $DB->insert_records("local_data_importer_settings", array(
+        $DB->insert_records(self::DB_SETTINGS, array(
                 array(
                         "pathitemid"        => $this->pathitemid,
-                        "name"              => 'delete_courses',
+                        "name"              => 'course_delete',
                         "value"             => get_string('deletecourse', 'importers_course') // Do course deletes for this test.
                 ),
                 array(
@@ -129,7 +147,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         global $DB;
 
         $courseimporter = data_importer_entity_importer::get_importer($this->pathitemid);
-        $courseimporter->do_imports($this->courses);
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses);
 
         foreach ($this->courses as $c) {
 
@@ -151,10 +170,10 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         }
 
         // Update visible default and test that the course is hidden.
-        $visibledefault = $DB->get_record("local_data_importer_settings",
+        $visibledefault = $DB->get_record(self::DB_SETTINGS,
                 array("pathitemid" => $this->pathitemid, "name" => 'course_visible'));
         $visibledefault->value = get_string('hide');
-        $DB->update_record("local_data_importer_settings", $visibledefault);
+        $DB->update_record(self::DB_SETTINGS, $visibledefault);
         // Create another course with new setting.
         $anothercourse = array();
         $anothercourse[] = array(
@@ -167,7 +186,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                         'name' => 'XYZ cat'
                 )
         );
-        $courseimporter->do_imports($anothercourse);
+        $sortedcourses = $courseimporter->sort_items($anothercourse);
+        $courseimporter->do_imports($sortedcourses);
 
         $importedcourse = $DB->get_record("course", array("idnumber" => 'XYZ idnumber'));
         $this->assertEquals($importedcourse->visible, 0);
@@ -177,7 +197,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         global $DB;
 
         $courseimporter = data_importer_entity_importer::get_importer($this->pathitemid);
-        $courseimporter->do_imports($this->courses); // Create the initial courses.
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses); // Create the initial courses.
 
         // Create some updates for the existing courses.
         $this->courses[0]["course"]["fullname"] = "Updated course fullname";
@@ -185,7 +206,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         $this->courses[2]["course_categories"]["name"] = "Updated course category";
         $this->courses[2]["course"]["fullname"] = "Another updated fullname";
 
-        $courseimporter->do_imports($this->courses); // Import the updates onto existing courses.
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses); // Import the updates onto existing courses.
 
         foreach ($this->courses as $c) {
 
@@ -197,7 +219,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
             $this->assertEquals($category->name, $c["course_categories"]["name"]);
 
             // Check that the log has been updated.
-            $logitem = $DB->get_record("local_data_importer_course",
+            $logitem = $DB->get_record(self::DB_LOCAL_LOG,
                     array("course_idnumber" => $c["course"]["idnumber"], "pathitemid" => $this->pathitemid));
             $this->assertEquals($logitem->course_fullname, $c["course"]["fullname"]);
             $this->assertEquals($logitem->course_shortname, $c["course"]["shortname"]);
@@ -211,7 +233,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         // This test produced output when a course is deleted so will be classed as 'risky'.
 
         $courseimporter = data_importer_entity_importer::get_importer($this->pathitemid);
-        $courseimporter->do_imports($this->courses); // Create the initial courses.
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses); // Create the initial courses.
 
         $coursecountstart = $DB->count_records("course");
 
@@ -220,23 +243,25 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         unset($deleting[0]);
         unset($deleting[2]);
 
-        $courseimporter->do_imports($deleting); // Import the data to delete two existing courses.
+        $sortedcourses = $courseimporter->sort_items($deleting);
+        $courseimporter->do_imports($sortedcourses); // Import the data to delete two existing courses.
 
         $coursecountend = $DB->count_records("course");
         $this->assertEquals(($coursecountstart - $coursecountend), 2);
 
-        $deletedinlog = $DB->count_records("local_data_importer_course", array("deleted" => 1, "pathitemid" => $this->pathitemid));
+        $deletedinlog = $DB->count_records(self::DB_LOCAL_LOG, array("deleted" => 1, "pathitemid" => $this->pathitemid));
         $this->assertEquals($deletedinlog, 2);
 
         // Try recreating the two courses.
-        $courseimporter->do_imports($this->courses); // Restore back to original three course.
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses); // Restore back to original three course.
         $coursecountend = $DB->count_records("course");
         $this->assertEquals(($coursecountstart - $coursecountend), 0);
 
-        $deletedinlog = $DB->count_records("local_data_importer_course", array("deleted" => 1, "pathitemid" => $this->pathitemid));
+        $deletedinlog = $DB->count_records(self::DB_LOCAL_LOG, array("deleted" => 1, "pathitemid" => $this->pathitemid));
         $this->assertEquals($deletedinlog, 0);
 
-        $totalinlog = $DB->count_records("local_data_importer_course", array("pathitemid" => $this->pathitemid));
+        $totalinlog = $DB->count_records(self::DB_LOCAL_LOG, array("pathitemid" => $this->pathitemid));
         $this->assertEquals($totalinlog, 3);
     }
 
@@ -248,7 +273,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
         $this->courses[0]["course"]["fullname"] = null;
 
         $courseimporter = data_importer_entity_importer::get_importer($this->pathitemid);
-        $courseimporter->do_imports($this->courses);
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses);
 
         $exceptions = $DB->get_records("local_data_importer_errors");
         $this->assertEquals(count($exceptions), 3);
@@ -268,7 +294,8 @@ class local_data_importer_importers_course_test extends advanced_testcase {
                 ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         $courseimporter = data_importer_entity_importer::get_importer($this->pathitemid);
-        $courseimporter->do_imports($this->courses);
+        $sortedcourses = $courseimporter->sort_items($this->courses);
+        $courseimporter->do_imports($sortedcourses);
 
         $exceptions = $DB->get_records("local_data_importer_errors");
         $this->assertEquals(count($exceptions), 3);
