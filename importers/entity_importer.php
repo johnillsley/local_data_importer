@@ -19,7 +19,7 @@
  *
  * @package    local_data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -63,6 +63,16 @@ abstract class data_importer_entity_importer {
     public $parameters = array();
 
     /**
+     * @var array
+     */
+    private $parameterfilter = array();
+
+    /**
+     * @var string
+     */
+    protected $parentimporter;
+    
+    /**
      * @var object
      */
     public $summary;
@@ -72,9 +82,15 @@ abstract class data_importer_entity_importer {
      */
     protected $databaseproperties = array();
 
+    /**
+     * @var array
+     */
+    protected $mapped_unique_fields = array();
+    
     protected function __construct($pathitemid) {
 
         $this->pathitemid   = $pathitemid;
+        $this->mapped_unique_fields = $this->get_mapped_unique_fields(); // TODO - this not working??
 
         $this->summary = new stdClass();
         $this->summary->new         = 0;
@@ -107,11 +123,11 @@ abstract class data_importer_entity_importer {
     /**
      * Function to delete an entity in Moodle
      *
-     * @param array $item contains the unique identifier(s) needed to delete the entity
+     * @param object $item contains the unique identifier(s) needed to delete the entity
      * @throws Exception if deleting the entity fails.
      * @return void
      */
-    abstract protected function delete_entity($item = array());
+    abstract protected function delete_entity($item);
 
     /**
      * Provides the parameters that can be used to map to web service parameters. These should have keys determined by the
@@ -214,6 +230,7 @@ abstract class data_importer_entity_importer {
      * either create, update or delete arrays.
      *
      * @param array of $items that have been extracted from the external web service
+     * @throws exception if a unique field is empty.
      * @return object holding separate arrays for create, update and delete items
      */
     public function sort_items($items = array()) {
@@ -223,42 +240,54 @@ abstract class data_importer_entity_importer {
         $action->create = array();
         $action->update = array();
         $action->delete = array();
-
-        // Get unique key(s) for sub plugin.
-        $uniquefields = $this->get_unique_fields();
-        $currentlog = $DB->get_records($this->logtable, array("deleted" => 0, "pathitemid" => $this->pathitemid));
+        $uniquefields = $this->get_mapped_unique_fields(); // Combination of all unique fields that were mapped.
+        
+        $conditions = array();
+        $conditions["deleted"] = 0;
+        $conditions["pathitemid"] = $this->pathitemid;
+        $currentlog = $DB->get_records($this->logtable, $conditions);
 
         foreach ($items as $item) {
 
-            // Check if unique key values from $item already exist in log table.
-            $conditions = array("deleted" => 0, "pathitemid" => $this->pathitemid);
-            foreach ($uniquefields as $uniquefield) {
-                $logtablefield = $this->get_log_field($uniquefield->table, $uniquefield->field);
-                $conditions[$logtablefield] = $item[$uniquefield->table][$uniquefield->field];
-            }
-            $record = $DB->get_record($this->logtable, $conditions);
+            try {
+                // Check if unique key values from $item already exist in log table.
+                $conditions = array("deleted" => 0, "pathitemid" => $this->pathitemid);
+                foreach ($uniquefields as $uniquefield) {
+                    if (empty($item[$uniquefield->table][$uniquefield->field])) {
+                        // TODO - CHECK IF THIS WORKS - NOT SEEN WORKING YET.
+                        throw new Exception("A unique field is empty - " .
+                                serialize($item[$uniquefield->table][$uniquefield->field]));
+                    }
+                    $logtablefield = $this->get_log_field($uniquefield->table, $uniquefield->field);
+                    $conditions[$logtablefield] = $item[$uniquefield->table][$uniquefield->field];
+                }
+                $record = $DB->get_record($this->logtable, $conditions);
 
-            if ($record) {
-                // Item has already been imported so check all fields for updates.
-                foreach ($this->responses as $table => $field) {
-                    foreach ($field as $fieldname => $fieldoptions) {
-                        $logtablefield = $this->get_log_field($table, $fieldname);
-                        if ($item[$table][$fieldname] != $record->{$logtablefield}) {
-                            // A field has been updated so add to update list and get out of loop.
-                            $action->update[] = $item;
-                            $this->summary->changed++;
-                            unset($currentlog[$record->id]); // Remove item from check list.
-                            break 2; // Move onto next item.
+                if ($record) {
+                    // Item has already been imported so check all fields for updates.
+                    foreach ($item as $table => $field) {
+                        foreach ($field as $fieldname => $value) {
+                            $logtablefield = $this->get_log_field($table, $fieldname);
+                            if ($value != $record->{$logtablefield}) {
+                                // A field has been updated so add to update list and get out of loop.
+                                $action->update[] = $item;
+                                $this->summary->changed++;
+                                unset($currentlog[$record->id]); // Remove item from check list.
+                                break 2; // Move onto next item.
+                            }
                         }
                     }
-                }
-                $this->summary->unchanged++;
-                unset($currentlog[$record->id]); // Remove item from check list.
+                    $this->summary->unchanged++;
+                    unset($currentlog[$record->id]); // Remove item from check list.
 
-            } else {
-                // Item needs adding.
-                $action->create[] = $item;
-                $this->summary->new++;
+                } else {
+                    // Item needs adding.
+                    $action->create[] = $item;
+                    $this->summary->new++;
+                }
+            } catch (\Throwable $e) {
+                print($e->getMessage()); exit;
+                local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }
         // What is left in $current need to be deleted. Note format of $currentlog is different to $item.
@@ -267,12 +296,13 @@ abstract class data_importer_entity_importer {
 
         return $action;
     }
-
+    
     /**
      * From the sub plugin responses definition identify the unique key fields and create references to the plugin log table fields.
      * @return $array of unique fields in the log table.
      */
     private function get_unique_fields() {
+        // TODO - Call this function in the mapping admin process and indicate unique fields on the form. Throw exception if there aren't any unique fields.
         $uniquefields = array();
         foreach ($this->responses as $table => $field) {
             foreach ($field as $fieldname => $fieldproperties) {
@@ -288,6 +318,30 @@ abstract class data_importer_entity_importer {
     }
 
     /**
+     * From the unique fields list remove the itemms that weren't mapped when the importer was configured.
+     * @return $array of mapped unique fields in the log table.
+     */
+    private function get_mapped_unique_fields() {
+
+        $pathitemresponse = new local_data_importer_pathitem_response();
+        $responsemappings = $pathitemresponse->get_by_pathitem_id($this->pathitemid);
+
+        $uniquefields = $this->get_unique_fields();
+        $mappeduniquefields = array();
+        foreach ($responsemappings as $responsemapping) {
+            $mappedtable = $responsemapping->get_pluginresponse_table();
+            $mappedfield = $responsemapping->get_pluginresponse_field();
+            foreach ($uniquefields as $uniquefield) {
+                if ($uniquefield->table == $mappedtable && $uniquefield->field == $mappedfield) {
+                    $mappeduniquefields[] = $uniquefield;
+                    break;
+                }
+            }
+        }
+        return $mappeduniquefields;
+    }
+
+    /**
      * Interigates database properties so that data validation can be done.
      * Adds database info to databaseproperties class property
      * @return void
@@ -299,10 +353,12 @@ abstract class data_importer_entity_importer {
         $params[0] = $CFG->dbname;
 
         foreach ($this->responses as $table => $fields) {
-            $params[1] = $CFG->prefix . $table;
-            foreach ($fields as $field => $options) {
-                $params[2] = $field;
-                $fielddetails = $DB->get_record_sql("
+            if ($table != 'other') {
+                // Other is not a table - just used to store extra responses in the local log.
+                $params[1] = $CFG->prefix . $table;
+                foreach ($fields as $field => $options) {
+                    $params[2] = $field;
+                    $fielddetails = $DB->get_record_sql("
                         SELECT
                           data_type
                         , column_type
@@ -317,7 +373,8 @@ abstract class data_importer_entity_importer {
                         AND COLUMN_NAME = ?
                         ", $params);
 
-                $this->databaseproperties[$table][$field] = $fielddetails;
+                    $this->databaseproperties[$table][$field] = $fielddetails;
+                }
             }
         }
     }
@@ -332,13 +389,16 @@ abstract class data_importer_entity_importer {
 
         // TODO - check if primary key is not null.
         foreach ($item as $table => $fields) {
-            foreach ($fields as $field => $value) {
-                if (!isset($this->databaseproperties[$table][$field])) {
-                    throw new \Exception("SUBPLUGIN ERROR: a table/field combination defined in the subplugin does not exist in Moodle");
-                } else {
-                    $fieldmetadata = $this->databaseproperties[$table][$field];
+            if ($table != 'other') {
+                // Other is not a table - just used to store extra responses in the local log.
+                foreach ($fields as $field => $value) {
+                    if (!isset($this->databaseproperties[$table][$field])) {
+                        throw new \Exception("SUBPLUGIN ERROR: a table/field combination ($table/$field) defined in the subplugin does not exist in Moodle");
+                    } else {
+                        $fieldmetadata = $this->databaseproperties[$table][$field];
+                    }
+                    $item[$table][$field] = $this->validate_field($fieldmetadata, $value);
                 }
-                $item[$table][$field] = $this->validate_field($fieldmetadata, $value);
             }
         }
         return $item;
@@ -479,7 +539,7 @@ abstract class data_importer_entity_importer {
 
         if ($action == 'deleted') {
             // Parameter $item is already in logitem format.
-            $logitem = $item;
+            $logitem = (object)$item;
             $logitem->deleted = 1;
         } else {
             $logitem = new stdClass();
@@ -496,8 +556,7 @@ abstract class data_importer_entity_importer {
         $logitem->timemodified = $time;
 
         $logtable = $this->logtable;
-        $uniquefields = $this->get_unique_fields();
-
+        $uniquefields = $this->get_mapped_unique_fields();
         $conditions = array();
         foreach ($uniquefields as $uniquefield) {
             $logitemfield = $this->get_log_field($uniquefield->table, $uniquefield->field);
@@ -572,27 +631,43 @@ abstract class data_importer_entity_importer {
     }
 
     /**
-     * Writes a single entry to the exception log
+     * Stores parameter filters after checking if they are valid.
      *
-     * @param string $action the type of activity that caused the exception
-     * @param Exception object $e
-     * @param object $data with additional information retrieved from the exception
-     * @return boolean indication if logging the exception was successful
+     * @param array $filters
+     * @throws Exception if the key of a filter does not exist as defined sub-plugin parameter.
+     * @return void
      */
-    public function exception_log($action, $e, $data) {
-        global $DB;
+    public function set_parameter_filter($filters = array()) {
 
-        $exceptionlog = new stdClass();
-        $exceptionlog->pathitemid   = $this->pathitemid;
-        $exceptionlog->action       = $action;
-        $exceptionlog->data         = serialize($data);
-        $exceptionlog->exception    = $e->getMessage();
-        $exceptionlog->time         = time();
-
-        if ($DB->insert_record("local_data_importer_errors", $exceptionlog)) {
-            return true;
-        } else {
-            return false;
+        unset($this->parameterfilter);
+        foreach ($filters as $key => $value) {
+            // Check if the filter key is one of the defined parameters.
+            $check = false;
+            foreach($this->parameters as $parameter) {
+                if ($key == $parameter) {
+                    $check = true;
+                    break;
+                }
+            }
+            if (!$check) {
+                throw new \Exception("Parameter filter is not valid for this importer instance.");
+            }
+            $this->parameterfilter[$key] = $value;
         }
+    }
+
+    /**
+     * Creates the additional SQL for the parameter filter(s).
+     *
+     * @return string $filtersql
+     */
+    protected function get_parameter_filter_sql() {
+
+        $filtersql = "";
+        if (count($this->parameterfilter) > 0) {
+            foreach ($this->parameterfilter as $field => $value)
+                $filtersql .= " AND " . $field . " = '" . $value . "'";
+        }
+        return $filtersql;
     }
 }

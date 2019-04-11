@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -68,12 +68,12 @@ class local_data_importer_pathitem_parameter_testcase extends advanced_testcase 
         $id = $pathitemparameter->save(true);
 
         $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
-        $this->assertEquals(count($parameterrecords), 1);
+        $this->assertEquals(1, count($parameterrecords));
 
         $parameterrecord = array_pop($parameterrecords);
-        $this->assertEquals($parameterrecord->pathitemparameter, 'PRS_EMAD.PRS.CAMS');
-        $this->assertEquals($parameterrecord->subpluginparameter, 'user');
-        $this->assertEquals($parameterrecord->id, $id);
+        $this->assertEquals('PRS_EMAD.PRS.CAMS', $parameterrecord->pathitemparameter);
+        $this->assertEquals('user', $parameterrecord->subpluginparameter);
+        $this->assertEquals($id, $parameterrecord->id);
 
         // Now try an update.
         $pathitemparameter->set_pathitem_parameter('coursecode');
@@ -81,11 +81,11 @@ class local_data_importer_pathitem_parameter_testcase extends advanced_testcase 
         $id = $pathitemparameter->save(true);
 
         $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
-        $this->assertEquals(count($parameterrecords), 1);
+        $this->assertEquals(1, count($parameterrecords));
 
         $parameterrecord = array_pop($parameterrecords);
-        $this->assertEquals($parameterrecord->pathitemparameter, 'coursecode');
-        $this->assertEquals($parameterrecord->subpluginparameter, 'course');
+        $this->assertEquals('coursecode', $parameterrecord->pathitemparameter);
+        $this->assertEquals('course', $parameterrecord->subpluginparameter);
     }
 
     /**
@@ -113,7 +113,7 @@ class local_data_importer_pathitem_parameter_testcase extends advanced_testcase 
         $parameter->delete();
 
         $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
-        $this->assertEquals(count($parameterrecords), 1);
+        $this->assertEquals(1, count($parameterrecords));
 
         // Delete second parameter mapping.
         $pathitemparameter = new local_data_importer_pathitem_parameter();
@@ -121,7 +121,7 @@ class local_data_importer_pathitem_parameter_testcase extends advanced_testcase 
         $parameter->delete();
 
         $parameterrecords = $DB->get_records($pathitemparameter->get_dbtable());
-        $this->assertEquals(count($parameterrecords), 0);
+        $this->assertEquals(0, count($parameterrecords));
     }
 
     /**
@@ -138,9 +138,9 @@ class local_data_importer_pathitem_parameter_testcase extends advanced_testcase 
         $pathitemparameter = new local_data_importer_pathitem_parameter();
         $parameter = $pathitemparameter->get_by_id($id);
         $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $parameter);
-        $this->assertEquals($parameter->get_pathitem_parameter(), 'PRS_EMAD.PRS.CAMS');
-        $this->assertEquals($parameter->get_subplugin_parameter(), 'user');
-        $this->assertEquals($parameter->get_pathitemid(), $this->pathitemid);
+        $this->assertEquals('PRS_EMAD.PRS.CAMS', $parameter->get_pathitem_parameter());
+        $this->assertEquals('user', $parameter->get_subplugin_parameter());
+        $this->assertEquals($this->pathitemid, $parameter->get_pathitemid());
     }
 
     /**
@@ -163,7 +163,7 @@ class local_data_importer_pathitem_parameter_testcase extends advanced_testcase 
 
         $pathitemparameter = new local_data_importer_pathitem_parameter();
         $parameters = $pathitemparameter->get_by_pathitem_id($this->pathitemid);
-        $this->assertEquals(count($parameters), 2);
+        $this->assertEquals(2, count($parameters));
 
         foreach ($parameters as $parameter) {
             $this->assertInstanceOf(\local_data_importer_pathitem_parameter::class, $parameter);

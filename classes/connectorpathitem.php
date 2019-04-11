@@ -277,7 +277,7 @@ class local_data_importer_connectorpathitem {
         global $DB;
         $pathitems = array();
         try {
-            $records = $DB->get_records($this->dbtable, ['plugincomponent' => $subplugin], 'importorder ASC');
+            $records = $DB->get_records($this->dbtable, array('plugincomponent' => $subplugin), 'importorder ASC');
             if (is_array($records)) {
                 foreach ($records as $recordobject) {
                     $pathitem = new self();
@@ -336,6 +336,7 @@ class local_data_importer_connectorpathitem {
     /**
      * Save a new connector path item instance
      * @param bool $returnid
+     * @throws Exception if db insert/update fails.
      * @return mixed
      */
     public function save($returnid = false) {

@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,6 +36,7 @@ require_once($CFG->dirroot.'/local/data_importer/tests/fixtures/importer_test.ph
 class local_data_importer_entity_importer_testcase extends advanced_testcase {
 
     const DB_SETTINGS = 'local_data_importer_setting';
+    const DB_RESPONSE_MAPPING = 'local_data_importer_resp';
 
     /**
      * @var string
@@ -86,6 +87,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $this->xmldbtable->add_field('course_shortname', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, null);
         $this->xmldbtable->add_field('course_idnumber', XMLDB_TYPE_CHAR, 100, null, XMLDB_NOTNULL, null, null);
         $this->xmldbtable->add_field('course_categories_name', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, null);
+        $this->xmldbtable->add_field('other_another', XMLDB_TYPE_CHAR, 255, null, null, null, null);
         $this->xmldbtable->add_field('timecreated', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, null);
         $this->xmldbtable->add_field('timemodified', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, null);
         $this->xmldbtable->add_field('deleted', XMLDB_TYPE_INTEGER, 3, null, XMLDB_NOTNULL, null, '0');
@@ -136,7 +138,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
                 array("subplugin_param1" => "", "subplugin_param2" => "value7", "subplugin_param3" => "value8"),
                 array("subplugin_param1" => "value9", "subplugin_param2" => "value3")
         );
-        $this->assertSame($subpluginparams, $expected);
+        $this->assertSame($expected, $subpluginparams);
     }
 
     /**
@@ -144,7 +146,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
      */
     public function test_do_imports() {
         global $DB;
-
+        
         $item1 = array(
                 'course' => array('fullname' => 'Course1', 'shortname' => 'CS1', 'idnumber' => 'C1'),
                 'course_categories' => array('name' => 'Dept1')
@@ -160,6 +162,17 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
 
         $importer = new \importers_test_importer($this->pathitemid);
 
+        // Need to create a response mapping for the unique field (course_idnumber).
+        // Normally all response fields would be mapped but only unique fields need to be mapped to pass test. 
+        $DB->insert_record(self::DB_RESPONSE_MAPPING, array(
+                'pathitemid'            => $this->pathitemid,
+                'pluginresponsetable'   => 'course',
+                'pluginresponsefield'   => 'idnumber',
+                'pathitemresponse'      => 'test',
+                'timecreated'           => 1234,
+                'timemodified'          => 1234
+        ));
+
         // All courses are to be added.
         $sorted = $importer->sort_items(array($item1, $item2, $item3));
         $expected = (object)array(
@@ -167,10 +180,10 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
                 'update' => array(),
                 'delete' => array()
         );
-        $this->assertEquals($sorted, $expected);
+        $this->assertEquals($expected, $sorted);
         $importer->do_imports($sorted);
         $records = $DB->get_records($this->dbtablename, array("deleted" => 0));
-        $this->assertEquals(count($records), 3);
+        $this->assertEquals(3, count($records));
 
         // One course to be updated.
         $item3 = array(
@@ -183,10 +196,10 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
                 'update' => array($item3),
                 'delete' => array()
         );
-        $this->assertEquals($sorted, $expected);
+        $this->assertEquals($expected, $sorted);
         $importer->do_imports($sorted);
         $records = $DB->get_records($this->dbtablename, array("deleted" => 0));
-        $this->assertEquals(count($records), 3);
+        $this->assertEquals(3, count($records));
 
         // Delete two items.
         $sorted = $importer->sort_items(array($item3));
@@ -197,7 +210,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         );
         $importer->do_imports($sorted);
         $records = $DB->get_records($this->dbtablename, array("deleted" => 1));
-        $this->assertEquals(count($records), 2);
+        $this->assertEquals(2, count($records));
 
         // Bring one of the deleted items back.
         $sorted = $importer->sort_items(array($item1, $item3));
@@ -206,10 +219,10 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
                 'update' => array(),
                 'delete' => array()
         );
-        $this->assertEquals($sorted, $expected);
+        $this->assertEquals($expected, $sorted);
         $importer->do_imports($sorted);
         $records = $DB->get_records($this->dbtablename, array("deleted" => 0));
-        $this->assertEquals(count($records), 2);
+        $this->assertEquals(2, count($records));
     }
 
     /**
@@ -233,9 +246,46 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $uiquefields = $method->invoke($importer);
         $expected = array(
                 (object)["table" => "course", "field" => "idnumber"],
-                (object)["table" => "course_categories", "field" => "name"]
+                (object)["table" => "course_categories", "field" => "name"],
+                (object)["table" => "other", "field" => "another"]
         );
-        $this->assertEquals($uiquefields, $expected);
+        $this->assertEquals($expected, $uiquefields);
+    }
+
+    /**
+     * Test for method local_data_importer_entity_importer->get_mapped_unique_fields().
+     */
+    public function test_get_mapped_unique_fields() {
+        global $DB;
+
+        $DB->insert_record(self::DB_RESPONSE_MAPPING, array(
+                'pathitemid'            => $this->pathitemid,
+                'pluginresponsetable'   => 'course',
+                'pluginresponsefield'   => 'idnumber',
+                'pathitemresponse'      => 'test1',
+                'timecreated'           => 1234,
+                'timemodified'          => 1234
+        ));
+        $DB->insert_record(self::DB_RESPONSE_MAPPING, array(
+                'pathitemid'            => $this->pathitemid,
+                'pluginresponsetable'   => 'course_categories',
+                'pluginresponsefield'   => 'name',
+                'pathitemresponse'      => 'test2',
+                'timecreated'           => 1234,
+                'timemodified'          => 1234
+        ));
+
+        // Private method - get_unique_fields().
+        $reflector = new ReflectionClass("importers_test_importer");
+        $method = $reflector->getMethod("get_mapped_unique_fields");
+        $method->setAccessible(true);
+        $importer = new \importers_test_importer($this->pathitemid);
+        $uiquefields = $method->invoke($importer);
+        $expected = array(
+                (object)["table" => "course", "field" => "idnumber"],
+                (object)["table" => "course_categories", "field" => "name"],
+        );
+        $this->assertEquals($expected, $uiquefields);
     }
 
     /**
@@ -298,7 +348,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
                         )
                 )
         );
-        $this->assertEquals($dbproperties, $expected);
+        $this->assertEquals($expected, $dbproperties);
     }
 
     /**
@@ -370,7 +420,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $importer = new \importers_test_importer($this->pathitemid);
         $response = $method->invoke($importer, $fieldmetadata, $value, $required, $truncatestrings);
 
-        $this->assertSame($response, $expected);
+        $this->assertSame($expected, $response);
     }
 
     /**
@@ -489,11 +539,11 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $importer->save_setting($settingname, $settingvalue);
 
         $records = $DB->get_records(self::DB_SETTINGS);
-        $this->assertEquals(count($records), 1);
+        $this->assertEquals(1, count($records));
         $saved = array_pop($records);
-        $this->assertEquals($saved->pathitemid, $this->pathitemid);
-        $this->assertEquals($saved->name, $settingname);
-        $this->assertEquals($saved->value, $settingvalue);
+        $this->assertEquals($this->pathitemid, $saved->pathitemid);
+        $this->assertEquals($settingname, $saved->name);
+        $this->assertEquals($settingvalue, $saved->value);
     }
 
     /**
@@ -524,12 +574,42 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $table = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         $field = "1234567890";
         $logfield = $method->invoke($importer, $table, $field);
-        $this->assertEquals($logfield, "ABCDEFGHIJKLMNOPQRSTUVWXYZ_123");
+        $this->assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ_123", $logfield);
     }
 
-    public function test_exception_log() {
+    /**
+     * Test for method local_data_importer_entity_importer->set_parameter_filter().
+     */
+    public function test_set_parameter_filter() {
 
-        // TODO - this function should be in a different class?
+        // Also a test for get_parameter_filter_sql.
+
+        // Protected method - get_parameter_filter_sql().
+        $reflector = new ReflectionClass("importers_test_importer");
+        $method = $reflector->getMethod("get_parameter_filter_sql");
+        $method->setAccessible(true);
+
+        $importer = new \importers_test_importer($this->pathitemid);
+        $importer->set_parameter_filter(array($importer->parameters[0] => "ABC"));
+        $sql = $method->invoke($importer);
+        $this->assertEquals(" AND subplugin_param1 = 'ABC'", $sql);
+
+        // Test that an invalid paremeter filter is rejected.
+        try {
+            $importer->set_parameter_filter(array("This does not exist as a parameter" => "ABC"));
+        } catch (Exception $e) {
+            // Put the assertion under 'finally' so that it will force an error if no exception is thrown.
+        } finally {
+            $this->assertEquals("Parameter filter is not valid for this importer instance.", $e->getMessage());
+        }
+    }
+
+    /**
+     * Test for method local_data_importer_entity_importer->get_parameter_filter_sql().
+     */
+    public function test_get_parameter_filter_sql() {
+
+        // This is tested as part of public function test_set_parameter_filter().
     }
 
     /**

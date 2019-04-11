@@ -19,7 +19,7 @@
  *
  * @package    local/data_importer/importers/course
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,12 +29,18 @@ global $CFG;
 require_once($CFG->dirroot . '/local/data_importer/importers/entity_importer.php'); // Parent class definition.
 require_once($CFG->libdir . '/coursecatlib.php'); // Course category class.
 require_once($CFG->dirroot . '/course/lib.php'); // Course lib functions.
+require_once($CFG->dirroot . '/enrol/dataimporter/lib.php'); // Enrolment plugin for dataimporter.
 
 /**
  * Class representing an entity importer to handle courses.
  */
 class importers_course_importer extends data_importer_entity_importer {
 
+    /**
+     * @const string enrolment plugin.
+     */
+    const ENROLMENT_METHOD = 'dataimporter';
+    
     public function __construct($pathitemid) {
 
         parent::__construct($pathitemid);
@@ -50,13 +56,19 @@ class importers_course_importer extends data_importer_entity_importer {
                 ),
                 'course_categories' => array(
                         'name'      => array()
+                ),
+                'other' => array(
+                        'academic_year' => array("optional", "unique"),
+                        'timeslot'      => array("optional", "unique"),
+                        'occurence'     => array("optional", "unique")
                 )
         );
         // TODO - $this->parameters = null; for this sub plugin.
         $this->parameters = array(
-                'some_parameter',
-                'another_parameter',
-                'and_yet_another_one');
+                'course_idnumber',
+                'course_shortname',
+                'course_categories_name');
+        $this->parentimporter = null;
     }
 
     /**
@@ -65,7 +77,7 @@ class importers_course_importer extends data_importer_entity_importer {
      * Creates a record of the course creation locally so that it will not be created again.
      *
      * @param array $item contains all the data required to create a course
-     * @throws Exception if the course could not be created
+     * @throws Exception from create_course if the course could not be created
      * @return void
      */
     protected function create_entity($item = array()) {
@@ -75,6 +87,9 @@ class importers_course_importer extends data_importer_entity_importer {
         $coursevisible = $this->get_setting('course_visible');
         $courseconfig->visible = ($coursevisible == get_string('show')) ? 1 : 0;
 
+        // TODO - Course naming options - introducing other fields! fullname (acyear - PSL).
+        // TODO - removing optional fields and check if course already exists (course shares PSL variations)
+        // TODO - option to add options to fullname / shortname / idnumber 
         // Create course.
         $course = new stdClass();
         $course->fullname           = $item['course']['fullname'];
@@ -96,7 +111,9 @@ class importers_course_importer extends data_importer_entity_importer {
         $course->numsections        = $courseconfig->numsections;
         $course->startdate          = usergetmidnight(time());
 
-        if (create_course($course)) {
+        if ($course = create_course($course)) {
+            $enrol = new enrol_dataimporter_plugin();
+            $enrol->add_instance($course);
             $this->local_log($item, $course->timecreated, 'created');
         }
     }
@@ -106,7 +123,7 @@ class importers_course_importer extends data_importer_entity_importer {
      * Updates the local log so that the updated import is recorded.
      *
      * @param array $item contains all the data required to update the course
-     * @throws Exception if the course could not be updated
+     * @throws Exception from update_course if the course could not be updated
      * @return void
      */
     protected function update_entity($item = array()) {
@@ -134,25 +151,30 @@ class importers_course_importer extends data_importer_entity_importer {
      * Deletes a single course on condition that the additional setting delete_courses has been set to 1 for the pathitem.
      * Updates the local log to indicate that the course has been updated
      *
-     * @param array $item contains all the data required to delete the course
-     * @throws Exception if the course could not be deleted
+     * @param object $item contains all the data required to delete the course
+     * @throws Exception from delete_course if the course could not be deleted
      * @return void
      */
-    protected function delete_entity($item = array()) {
+    protected function delete_entity($item) {
         global $DB;
 
         if ($this->get_setting('course_delete') == get_string('deletecourse', 'importers_course')) {
             $courseid = $DB->get_field("course", "id", array("idnumber" => $item->course_idnumber));
             ob_start();
             if (delete_course($courseid)) {
-                $this->local_log($item, time(), 'deleted');
+                $this->local_log((array)$item, time(), 'deleted');
             }
             ob_end_clean();
         }
     }
 
+    /**
+     * For this sub-plugin there are no parameters.
+     *
+     * @return array empty
+     */
     public function get_parameters() {
-
+        
         $parameters = array();
         // TODO - Remove settings below they are for testing only - should return array().
         $parameters = array(
@@ -171,7 +193,6 @@ class importers_course_importer extends data_importer_entity_importer {
      * additional field type
      * additional field name
      * additional options
-     * additional required or not
      * additional label
      * @return array of html form elements to be added to the form when an instance of this plugin is created
      */

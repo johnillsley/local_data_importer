@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -48,14 +48,16 @@ class local_data_importer_global_parameters_testcase extends advanced_testcase {
         set_config('academic_year_format', 'YYYY/Y', 'local_data_importer');
         set_config('academic_year_first_day', $testfirstday, 'local_data_importer');
         $currentacadyear = local_data_importer_global_parameters::current_academic_year();
-        $this->assertEquals(array_pop($currentacadyear), $currentyear . '/' . substr(($currentyear + 1), -1));
+        $expected = $currentyear . '/' . substr(($currentyear + 1), -1);
+        $this->assertEquals($expected, array_pop($currentacadyear));
 
         // Different deliminator and format.
         $testfirstday = date('m/d', time() + 60 * 60 * 24); // Set first day of academic year to tomorrow.
         set_config('academic_year_format', 'yyyy-yy', 'local_data_importer');
         set_config('academic_year_first_day', $testfirstday, 'local_data_importer');
         $currentacadyear = local_data_importer_global_parameters::current_academic_year();
-        $this->assertEquals(array_pop($currentacadyear), ($currentyear - 1) . '-' . substr($currentyear, -2));
+        $expected = ($currentyear - 1) . '-' . substr($currentyear, -2);
+        $this->assertEquals($expected, array_pop($currentacadyear));
     }
 
     /**
@@ -89,16 +91,16 @@ class local_data_importer_global_parameters_testcase extends advanced_testcase {
         set_config('date_interval_end_date_field', 'end_date', 'local_data_importer');
 
         $dateintervals = local_data_importer_global_parameters::date_interval_codes(1549591200); // This is 2019-02-08.
-        $this->assertEquals(count($dateintervals), 3);
+        $this->assertEquals(3, count($dateintervals));
 
         $dateintervals = local_data_importer_global_parameters::date_interval_codes(1569808800); // This is 2019-09-30.
-        $this->assertEquals(count($dateintervals), 2);
+        $this->assertEquals(2, count($dateintervals));
 
         $dateintervals = local_data_importer_global_parameters::date_interval_codes(1536544800); // This is 2018-09-10.
-        $this->assertEquals(count($dateintervals), 1);
+        $this->assertEquals(1, count($dateintervals));
 
         set_config('date_interval_academic_year_field', 'acyear', 'local_data_importer');
         $dateintervals = local_data_importer_global_parameters::date_interval_codes(1549591200); // This is 2019-02-08.
-        $this->assertEquals(count($dateintervals), 3);
+        $this->assertEquals(3, count($dateintervals));
     }
 }

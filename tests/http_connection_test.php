@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -184,7 +184,7 @@ class local_data_importer_http_connection_testcase extends advanced_testcase {
         }
 
         $logentries = $DB->get_records(self::DB_HTTP_LOG);
-        $this->assertEquals(count($logentries), 8);
+        $this->assertEquals(8, count($logentries));
     }
 
     public function test_test_connection() {

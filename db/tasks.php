@@ -20,7 +20,7 @@
  * @package   local_data_importer
  * @category  task
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

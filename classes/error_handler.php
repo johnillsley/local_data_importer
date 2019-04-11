@@ -19,7 +19,7 @@
  *
  * @package    local_data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class local_data_importer_error_handler {
 
+    const DISPLAY_ERRORS = false;
+    
     const DB_ERROR_LOG = 'local_data_importer_errors';
 
     static public function log(\throwable $e, $pathitemid = null) {
@@ -42,5 +44,9 @@ class local_data_importer_error_handler {
         $log->time          = time();
 
         $DB->insert_record(self::DB_ERROR_LOG, $log);
+        
+        if (self::DISPLAY_ERRORS) {
+            print $e->getMessage();
+        }
     }
 }

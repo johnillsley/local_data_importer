@@ -17,11 +17,14 @@
  * contains the version information for Data Importer Plugin
  *
  * @package local_moodle_data_importer
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2019032900;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires = 2015111600;        // Requires this Moodle version
+$plugin->requires = 2017111300;        // Requires this Moodle version
 $plugin->component = 'local_data_importer'; // Full name of the plugin (used for diagnostics).
+$plugin->dependencies = array(
+        'enrol_dataimporter' => ANY_VERSION
+);

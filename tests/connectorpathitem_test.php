@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -71,22 +71,22 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
         $this->assertEquals(count($pathitemrecords), 1);
 
         $pathitemrecord = array_pop($pathitemrecords);
-        $this->assertEquals($pathitemrecord->name, 'Get Assessments');
-        $this->assertEquals($pathitemrecord->connectorid, 22);
-        $this->assertEquals($pathitemrecord->pathitem, '/MABS/MOD_CODE/{modcode}');
-        $this->assertEquals($pathitemrecord->httpmethod, 'GET');
-        $this->assertEquals($pathitemrecord->plugincomponent, 'local_create_course');
-        $this->assertEquals($pathitemrecord->active, 1);
+        $this->assertEquals('Get Assessments', $pathitemrecord->name);
+        $this->assertEquals(22, $pathitemrecord->connectorid);
+        $this->assertEquals('/MABS/MOD_CODE/{modcode}', $pathitemrecord->pathitem);
+        $this->assertEquals('GET', $pathitemrecord->httpmethod);
+        $this->assertEquals('local_create_course', $pathitemrecord->plugincomponent);
+        $this->assertEquals(1, $pathitemrecord->active);
 
         // Now do an update and test.
         $this->pathiteminstance->set_name('ABCD');
         $this->pathiteminstance->save(true);
 
         $connectorrecords = $DB->get_records($this->pathiteminstance->get_dbtable());
-        $this->assertEquals(count($connectorrecords), 1);
+        $this->assertEquals(1, count($connectorrecords));
 
         $connectorrecord = array_pop($connectorrecords);
-        $this->assertEquals($connectorrecord->name, 'ABCD');
+        $this->assertEquals('ABCD', $connectorrecord->name);
     }
 
     /**
@@ -96,12 +96,12 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
 
         $pathitem = $this->pathiteminstance->get_by_id($this->pathitemid);
         $this->assertInstanceOf(\local_data_importer_connectorpathitem::class, $pathitem);
-        $this->assertEquals($pathitem->get_name(), 'Get Assessments');
-        $this->assertEquals($pathitem->get_connector_id(), 22);
-        $this->assertEquals($pathitem->get_path_item(), '/MABS/MOD_CODE/{modcode}');
-        $this->assertEquals($pathitem->get_active(), true);
-        $this->assertEquals($pathitem->get_http_method(), 'GET');
-        $this->assertEquals($pathitem->get_plugin_component(), 'local_create_course');
+        $this->assertEquals('Get Assessments', $pathitem->get_name());
+        $this->assertEquals(22, $pathitem->get_connector_id());
+        $this->assertEquals('/MABS/MOD_CODE/{modcode}', $pathitem->get_path_item());
+        $this->assertEquals(true, $pathitem->get_active());
+        $this->assertEquals('GET', $pathitem->get_http_method());
+        $this->assertEquals('local_create_course', $pathitem->get_plugin_component());
     }
 
     /**
@@ -121,7 +121,7 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
 
         $pathitems = $pathiteminstance->get_all();
 
-        $this->assertEquals(count($pathitems), 2);
+        $this->assertEquals(2, count($pathitems));
         foreach ($pathitems as $pathitem) {
             $this->assertInstanceOf(\local_data_importer_connectorpathitem::class, $pathitem);
         }
@@ -144,7 +144,7 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
 
         $pathitems = $pathiteminstance->get_by_subplugin('local_create_course');
 
-        $this->assertEquals(count($pathitems), 2);
+        $this->assertEquals(2, count($pathitems));
         foreach ($pathitems as $pathitem) {
             $this->assertInstanceOf(\local_data_importer_connectorpathitem::class, $pathitem);
         }
@@ -164,7 +164,7 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
         $parameter->save();
 
         $parameters = $parameter->get_by_pathitem_id($this->pathitemid);
-        $this->assertEquals(count($parameters), 1);
+        $this->assertEquals(1, count($parameters));
 
         // Create a response mapping for this pathitem.
         $response = new local_data_importer_pathitem_response();
@@ -185,27 +185,27 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
         $setting2->value        = 'value2';
         $DB->insert_records(self::DB_SETTINGS, array($setting1, $setting2));
         $records = $DB->get_records(self::DB_SETTINGS, array('pathitemid' => $this->pathitemid));
-        $this->assertEquals(count($records), 2);
+        $this->assertEquals(2, count($records));
 
         $responses = $response->get_by_pathitem_id($this->pathitemid);
-        $this->assertEquals(count($responses), 1);
+        $this->assertEquals(1, count($responses));
 
         $pathitem = $this->pathiteminstance->get_by_id($this->pathitemid);
         $pathitem->delete();
         $pathitems = $this->pathiteminstance->get_all();
-        $this->assertEquals(count($pathitems), 0);
+        $this->assertEquals(0, count($pathitems));
 
         // Check parameter mapping have also been deleted.
         $parameters = $parameter->get_by_pathitem_id($this->pathitemid);
-        $this->assertEquals(count($parameters), 0);
+        $this->assertEquals(0, count($parameters));
 
         // Check response mapping has been deleted.
         $responses = $response->get_by_pathitem_id($this->pathitemid);
-        $this->assertEquals(count($responses), 0);
+        $this->assertEquals(0, count($responses));
 
         // Check additional settings have been deleted.
         $records = $DB->get_records(self::DB_SETTINGS, array('pathitemid' => $this->pathitemid));
-        $this->assertEquals(count($records), 0);
+        $this->assertEquals(0, count($records));
     }
 
     /**
@@ -249,25 +249,25 @@ class local_data_importer_connectorpathitem_testcase extends advanced_testcase {
 
         $connectorpathitem = new local_data_importer_connectorpathitem();
         $pathitemconnector = $connectorpathitem->get_by_id($pathitemtest[1]);
-        $this->assertSame($pathitemconnector->get_import_order(), 3);
+        $this->assertSame(3, $pathitemconnector->get_import_order());
 
         $return = $pathitemconnector->reorder_import('up');
         $pathitemconnector = $connectorpathitem->get_by_id($pathitemtest[1]);
-        $this->assertSame($pathitemconnector->get_import_order(), 2);
-        $this->assertSame($return, true);
+        $this->assertSame(2, $pathitemconnector->get_import_order());
+        $this->assertSame(true, $return);
 
         $pathitemconnector = $connectorpathitem->get_by_id($pathitemtest[0]); // Now move to position 2.
-        $this->assertSame($pathitemconnector->get_import_order(), 3);
+        $this->assertSame(3, $pathitemconnector->get_import_order());
 
         $return = $pathitemconnector->reorder_import('down');
         $pathitemconnector = $connectorpathitem->get_by_id($pathitemtest[0]);
-        $this->assertSame($pathitemconnector->get_import_order(), 4);
-        $this->assertSame($return, true);
+        $this->assertSame(4, $pathitemconnector->get_import_order());
+        $this->assertSame(true, $return);
 
         $return = $pathitemconnector->reorder_import('down'); // Already last in list so can't move down.
         $pathitemconnector = $connectorpathitem->get_by_id($pathitemtest[0]);
-        $this->assertSame($pathitemconnector->get_import_order(), 4);
-        $this->assertSame($return, false); // No change made so checking for false.
+        $this->assertSame(4, $pathitemconnector->get_import_order());
+        $this->assertSame(false, $return); // No change made so checking for false.
     }
 
     /**

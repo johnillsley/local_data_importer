@@ -15,19 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for local_data_importer_importers_course.
+ * Privacy Subsystem implementation for local_data_importer_importers_enrolment.
  *
- * @package    local/data_importer/importers/course
+ * @package    local/data_importer/importers/enrolment
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
  * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace local_data_importer_importers_course\privacy;
+namespace local_data_importer_importers_enrolment\privacy;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The plugin local_data_importer_importers_course does not store any user data.
+ * The plugin local_data_importer_importers_enrolment does not store any user data.
  */
 class provider implements \core_privacy\local\metadata\null_provider {
     /**

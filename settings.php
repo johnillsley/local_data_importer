@@ -29,7 +29,7 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_table',
             get_string('dateintervaltable', 'local_data_importer'),
-            get_string('dateintervaltable_desc', 'local_data_importer'), 'data_importer_dates'));
+            get_string('dateintervaltable_desc', 'local_data_importer'), 'local_data_importer_dates'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/date_interval_code_field',
             get_string('dateintervalcodefield', 'local_data_importer'),

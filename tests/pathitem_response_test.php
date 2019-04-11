@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -69,13 +69,13 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
         $id = $pathitemresponse->save(true);
 
         $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
-        $this->assertEquals(count($responserecords), 1);
+        $this->assertEquals(1, count($responserecords));
 
         $responserecord = array_pop($responserecords);
-        $this->assertEquals($responserecord->pathitemresponse, 'PRS_EMAD.PRS.CAMS');
-        $this->assertEquals($responserecord->pluginresponsetable, 'user');
-        $this->assertEquals($responserecord->pluginresponsefield, 'username');
-        $this->assertEquals($responserecord->id, $id);
+        $this->assertEquals('PRS_EMAD.PRS.CAMS', $responserecord->pathitemresponse);
+        $this->assertEquals('user', $responserecord->pluginresponsetable);
+        $this->assertEquals('username', $responserecord->pluginresponsefield);
+        $this->assertEquals($id, $responserecord->id);
 
         // Now try an update.
         $pathitemresponse->set_pathitem_response('coursecode');
@@ -84,12 +84,12 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
         $id = $pathitemresponse->save(true);
 
         $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
-        $this->assertEquals(count($responserecords), 1);
+        $this->assertEquals(1, count($responserecords));
 
         $responserecord = array_pop($responserecords);
-        $this->assertEquals($responserecord->pathitemresponse, 'coursecode');
-        $this->assertEquals($responserecord->pluginresponsetable, 'course');
-        $this->assertEquals($responserecord->pluginresponsefield, 'idnumber');
+        $this->assertEquals('coursecode', $responserecord->pathitemresponse);
+        $this->assertEquals('course', $responserecord->pluginresponsetable);
+        $this->assertEquals('idnumber', $responserecord->pluginresponsefield);
     }
 
     /**
@@ -107,10 +107,10 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
         $pathitemresponse = new local_data_importer_pathitem_response();
         $response = $pathitemresponse->get_by_id($id);
         $this->assertInstanceOf(\local_data_importer_pathitem_response::class, $response);
-        $this->assertEquals($response->get_pathitem_response(), 'PRS_EMAD.PRS.CAMS');
-        $this->assertEquals($response->get_pluginresponse_table(), 'user');
-        $this->assertEquals($response->get_pluginresponse_field(), 'username');
-        $this->assertEquals($response->get_pathitemid(), $this->pathitemid);
+        $this->assertEquals('PRS_EMAD.PRS.CAMS', $response->get_pathitem_response());
+        $this->assertEquals('user', $response->get_pluginresponse_table());
+        $this->assertEquals('username', $response->get_pluginresponse_field());
+        $this->assertEquals($this->pathitemid, $response->get_pathitemid());
     }
 
     /**
@@ -135,7 +135,7 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
 
         $pathitemresponse = new local_data_importer_pathitem_response();
         $responses = $pathitemresponse->get_by_pathitem_id($this->pathitemid);
-        $this->assertEquals(count($responses), 2);
+        $this->assertEquals(2, count($responses));
 
         foreach ($responses as $response) {
             $this->assertInstanceOf(\local_data_importer_pathitem_response::class, $response);
@@ -176,7 +176,7 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
                         ),
         );
 
-        $this->assertEquals($lookups, $expected);
+        $this->assertEquals($expected, $lookups);
     }
 
     /**
@@ -206,7 +206,7 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
         $response->delete();
 
         $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
-        $this->assertEquals(count($responserecords), 1);
+        $this->assertEquals(1, count($responserecords));
 
         // Delete second response mapping.
         $pathitemresponse = new local_data_importer_pathitem_response();
@@ -214,6 +214,6 @@ class local_data_importer_pathitem_response_testcase extends advanced_testcase {
         $response->delete();
 
         $responserecords = $DB->get_records($pathitemresponse->get_dbtable());
-        $this->assertEquals(count($responserecords), 0);
+        $this->assertEquals(0, count($responserecords));
     }
 }

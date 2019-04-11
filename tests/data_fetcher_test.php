@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -127,7 +127,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 array("webservice_param1" => "value9", "webservice_param2" => "value3"),
         );
         // With two mappings check the array of parameters are transformed and unique.
-        $this->assertEquals($externalparameters, $expected);
+        $this->assertEquals($expected, $externalparameters);
 
         // Now add a third mapping.
         $transform = new stdClass();
@@ -146,7 +146,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 array("webservice_param1" => "value9", "webservice_param2" => "value3")
         );
         // With three mappings check the array of parameters are transformed and unique.
-        $this->assertEquals($externalparameters, $expected);
+        $this->assertEquals($expected, $externalparameters);
 
         // Now add a global parameter.
         $transform = new stdClass();
@@ -168,7 +168,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 array("webservice_param1" => "value9", "webservice_param2" => "value3", "webservice_param3" => "ABC"),
                 array("webservice_param1" => "value9", "webservice_param2" => "value3", "webservice_param3" => "DEF"),
         );
-        $this->assertEquals($externalparameters, $expected);
+        $this->assertEquals($expected, $externalparameters);
     }
 
     /**
@@ -210,7 +210,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 array("year" => "A3", "psl" => "B3", "other" => "C1"),
                 array("year" => "A3", "psl" => "B3", "other" => "C2"),
         );
-        $this->assertEquals($combined, $expected);
+        $this->assertEquals($expected, $combined);
     }
 
     /**
@@ -234,7 +234,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 "value3" => "GHI"
         );
         $url = $method->invoke($datafetcher, $uritemplate, $params);
-        $this->assertEquals($url, "/FUNCTION/PARAM1/ABC/PARAM2/DEF/PARAM3/GHI");
+        $this->assertEquals("/FUNCTION/PARAM1/ABC/PARAM2/DEF/PARAM3/GHI", $url);
 
         // Test the exceptions.
         $params = array(
@@ -244,7 +244,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         try {
             $url = $method->invoke($datafetcher, $uritemplate, $params);
         } catch (Exception $e) {
-            $this->assertEquals($e->getMessage(), "The relative URI has missing values.");
+            $this->assertEquals("The relative URI has missing values.", $e->getMessage());
         }
 
         $params = array(
@@ -255,7 +255,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         try {
             $url = $method->invoke($datafetcher, $uritemplate, $params);
         } catch (Exception $e) {
-            $this->assertEquals($e->getMessage(), "URL parameter (value2) is empty string.");
+            $this->assertEquals("URL parameter (value2) is empty string.", $e->getMessage());
         }
     }
 
@@ -342,7 +342,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                 array("webservice_param3" => $acadyear, "webservice_param4" => "S2"),
                 array("webservice_param3" => $acadyear, "webservice_param4" => "M08"),
         );
-        $this->assertEquals($mappings, $expected);
+        $this->assertEquals($expected, $mappings);
     }
 
     /**
@@ -431,7 +431,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         $datafetcher = new local_data_importer_data_fetcher($this->pathitemid);
         $interanldata = $method->invoke($datafetcher, $externaldata);
 
-        $this->assertEquals($interanldata, $expected);
+        $this->assertEquals($expected, $interanldata);
     }
 
     /**
@@ -472,6 +472,6 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
                         "UNITCODE" => "5678"
                 )
         );
-        $this->assertEquals($flattened, $expected);
+        $this->assertEquals($expected, $flattened);
     }
 }

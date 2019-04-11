@@ -13,30 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Unit tests for the local/data_importer/classes/scheduler.php.
- *
- * @group      local_data_importer
- * @group      bath
- * @package    local/data_importer
- * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2019 University of Bath
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
-
-/**
- * Class local_data_importer_scheduler_testcase
- */
-class local_data_importer_scheduler_testcase extends advanced_testcase {
-
-    /**
-     * Test for method local_data_importer_scheduler->start_data_imports().
-     */
-    public function test_start_data_imports() {
-
-        // TODO - What is best approach here?
-    }
-}
+$plugin->version = 2019020700;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires = 2017111300;        // Requires this Moodle version
+$plugin->component = 'importers_user'; // Full name of the plugin (used for diagnostics).
+$plugin->dependencies = array(
+        'local_data_importer' => ANY_VERSION
+);

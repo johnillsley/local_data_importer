@@ -21,7 +21,7 @@
  * @group      bath
  * @package    local/data_importer
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
- * @copyright  2018 University of Bath
+ * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -54,25 +54,25 @@ class local_data_importer_connectorinstance_testcase extends advanced_testcase {
         $id = $connectorinstance->save(true);
 
         $connectorrecords = $DB->get_records($connectorinstance->get_dbtable());
-        $this->assertEquals(count($connectorrecords), 1);
+        $this->assertEquals(1, count($connectorrecords));
 
         $connectorrecord = array_pop($connectorrecords);
-        $this->assertEquals($connectorrecord->name, 'Connector Instance Name');
-        $this->assertEquals($connectorrecord->description, 'Connector Instance Description');
-        $this->assertEquals($connectorrecord->openapikey, 'openapikey');
-        $this->assertEquals($connectorrecord->server, 'virtserver.swaggerhub.com');
-        $this->assertEquals($connectorrecord->serverapikey, 'serverapikey');
-        $this->assertEquals($connectorrecord->openapidefinitionurl, $openapidefinitionurl);
+        $this->assertEquals('Connector Instance Name', $connectorrecord->name);
+        $this->assertEquals('Connector Instance Description', $connectorrecord->description);
+        $this->assertEquals('openapikey', $connectorrecord->openapikey);
+        $this->assertEquals('virtserver.swaggerhub.com', $connectorrecord->server);
+        $this->assertEquals('serverapikey', $connectorrecord->serverapikey);
+        $this->assertEquals($openapidefinitionurl, $connectorrecord->openapidefinitionurl);
 
         // Now do an update and test.
         $connectorinstance->set_description('ABCD');
         $connectorinstance->save(true);
 
         $connectorrecords = $DB->get_records($connectorinstance->get_dbtable());
-        $this->assertEquals(count($connectorrecords), 1);
+        $this->assertEquals(1, count($connectorrecords));
 
         $connectorrecord = array_pop($connectorrecords);
-        $this->assertEquals($connectorrecord->description, 'ABCD');
+        $this->assertEquals('ABCD', $connectorrecord->description);
     }
 
     /**
@@ -92,12 +92,12 @@ class local_data_importer_connectorinstance_testcase extends advanced_testcase {
 
         $connector = $connectorinstance->get_by_id($id);
         $this->assertInstanceOf(\local_data_importer_connectorinstance::class, $connector);
-        $this->assertEquals($connector->get_description(), 'Connector Instance Description');
-        $this->assertEquals($connector->get_name(), 'Connector Instance Name');
-        $this->assertEquals($connector->get_server_apikey(), 'serverapikey');
-        $this->assertEquals($connector->get_openapi_key(), 'openapikey');
-        $this->assertEquals($connector->get_server(), 'virtserver.swaggerhub.com');
-        $this->assertEquals($connector->get_openapidefinitionurl(), $openapidefinitionurl);
+        $this->assertEquals('Connector Instance Description', $connector->get_description());
+        $this->assertEquals('Connector Instance Name', $connector->get_name());
+        $this->assertEquals('serverapikey', $connector->get_server_apikey());
+        $this->assertEquals('openapikey', $connector->get_openapi_key());
+        $this->assertEquals('virtserver.swaggerhub.com', $connector->get_server());
+        $this->assertEquals($openapidefinitionurl, $connector->get_openapidefinitionurl());
     }
 
     /**
@@ -127,7 +127,7 @@ class local_data_importer_connectorinstance_testcase extends advanced_testcase {
 
         $connectors = $connectorinstance->get_all();
 
-        $this->assertEquals(count($connectors), 2);
+        $this->assertEquals(2, count($connectors));
         foreach ($connectors as $connector) {
             $this->assertInstanceOf(\local_data_importer_connectorinstance::class, $connector);
         }
@@ -172,7 +172,7 @@ class local_data_importer_connectorinstance_testcase extends advanced_testcase {
         $connector = $connectorinstance->get_by_id($id1);
         $connector->delete();
         $connectors = $connectorinstance->get_all();
-        $this->assertEquals(count($connectors), 1);
+        $this->assertEquals(1, count($connectors));
 
         // Second delete should throw an exception as has a pathitem attached.
         $connector = $connectorinstance->get_by_id($id2);
@@ -182,12 +182,12 @@ class local_data_importer_connectorinstance_testcase extends advanced_testcase {
             $this->assertEquals('Cannot delete connector as it has Pathitems using it', $e->getMessage());
         }
         $connectors = $connectorinstance->get_all();
-        $this->assertEquals(count($connectors), 1);
+        $this->assertEquals(1, count($connectors));
 
         // Now delete the pathitem and try again.
         $pathitem->delete();
         $connector->delete();
         $connectors = $connectorinstance->get_all();
-        $this->assertEquals(count($connectors), 0);
+        $this->assertEquals(0, count($connectors));
     }
 }
