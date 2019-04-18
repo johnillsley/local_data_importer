@@ -40,7 +40,7 @@ class importers_course_importer extends data_importer_entity_importer {
      * @const string enrolment plugin.
      */
     const ENROLMENT_METHOD = 'dataimporter';
-    
+
     public function __construct($pathitemid) {
 
         parent::__construct($pathitemid);
@@ -63,12 +63,10 @@ class importers_course_importer extends data_importer_entity_importer {
                         'occurence'     => array("optional", "unique")
                 )
         );
-        // TODO - $this->parameters = null; for this sub plugin.
         $this->parameters = array(
-                'course_idnumber',
-                'course_shortname',
-                'course_categories_name');
-        $this->parentimporter = null;
+                'other_academic_year',
+                'other_timeslot'
+        );
     }
 
     /**
@@ -89,7 +87,7 @@ class importers_course_importer extends data_importer_entity_importer {
 
         // TODO - Course naming options - introducing other fields! fullname (acyear - PSL).
         // TODO - removing optional fields and check if course already exists (course shares PSL variations)
-        // TODO - option to add options to fullname / shortname / idnumber 
+        // TODO - option to add options to fullname / shortname / idnumber
         // Create course.
         $course = new stdClass();
         $course->fullname           = $item['course']['fullname'];
@@ -164,26 +162,23 @@ class importers_course_importer extends data_importer_entity_importer {
             if (delete_course($courseid)) {
                 $this->local_log((array)$item, time(), 'deleted');
             }
-            ob_end_clean();
+            ob_end_clean(); // Disable output that comes from the delete_course function.
         }
     }
 
     /**
-     * For this sub-plugin there are no parameters.
+     * For this sub-plugin just return academic year and time interval codes.
      *
-     * @return array empty
+     * @throws Exception from local_data_importer_global_parameters::current_academic_year if can't return academic year
+     * @return array
      */
     public function get_parameters() {
-        
-        $parameters = array();
-        // TODO - Remove settings below they are for testing only - should return array().
-        $parameters = array(
-                array('some_parameter' => 'X1', 'another_parameter' => 'Y1'),
-                array('some_parameter' => 'X1', 'another_parameter' => 'Y2'),
-                array('some_parameter' => 'X2', 'another_parameter' => 'Y1'),
-                array('some_parameter' => 'X2', 'another_parameter' => 'Y2'),
-        );
 
+        // TODO - combine return with time interval codes (other_timeslot).
+        $acadyear = local_data_importer_global_parameters::current_academic_year();
+        $parameters = array(
+                array('other_academic_year' => $acadyear)
+        );
         return $parameters;
     }
 

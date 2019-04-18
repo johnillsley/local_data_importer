@@ -49,7 +49,7 @@ class local_data_importer_global_parameters_testcase extends advanced_testcase {
         set_config('academic_year_first_day', $testfirstday, 'local_data_importer');
         $currentacadyear = local_data_importer_global_parameters::current_academic_year();
         $expected = $currentyear . '/' . substr(($currentyear + 1), -1);
-        $this->assertEquals($expected, array_pop($currentacadyear));
+        $this->assertEquals($expected, $currentacadyear);
 
         // Different deliminator and format.
         $testfirstday = date('m/d', time() + 60 * 60 * 24); // Set first day of academic year to tomorrow.
@@ -57,7 +57,7 @@ class local_data_importer_global_parameters_testcase extends advanced_testcase {
         set_config('academic_year_first_day', $testfirstday, 'local_data_importer');
         $currentacadyear = local_data_importer_global_parameters::current_academic_year();
         $expected = ($currentyear - 1) . '-' . substr($currentyear, -2);
-        $this->assertEquals($expected, array_pop($currentacadyear));
+        $this->assertEquals($expected, $currentacadyear);
     }
 
     /**

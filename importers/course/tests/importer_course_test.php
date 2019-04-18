@@ -27,7 +27,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_data_importer_importers_course_test extends advanced_testcase {
+class local_data_importer_importers_course_testcase extends advanced_testcase {
 
     const DB_CONNECTOR = 'local_data_importer_connect';
     const DB_PATHITEM = 'local_data_importer_path';
@@ -48,7 +48,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
 
         require_once(__DIR__.'/fixtures/course_data.php');
         $this->courses = $courses;
-        
+
         $connectorid = $DB->insert_record(self::DB_CONNECTOR,
                 array(
                         "name"                  => "Connector",
@@ -88,7 +88,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
             )
         );
         // Need to create a response mapping for the unique field (course_idnumber).
-        // Normally all response fields would be mapped but only unique fields need to be mapped to pass test. 
+        // Normally all response fields would be mapped but only unique fields need to be mapped to pass test.
         $DB->insert_record(self::DB_RESPONSE, array(
                 'pathitemid'            => $this->pathitemid,
                 'pluginresponsetable'   => 'course',
@@ -164,7 +164,7 @@ class local_data_importer_importers_course_test extends advanced_testcase {
             $this->assertEquals($importedcourse->shortname, $c["course"]["shortname"]);
             $this->assertEquals($importedcourse->visible, 1);
             $this->assertEquals($category->name, $c["course_categories"]["name"]);
-            
+
             // Check that course creation was logged.
             $logitem = $DB->get_record($courseimporter->logtable,
                     array("course_idnumber" => $c["course"]["idnumber"], "pathitemid" => $this->pathitemid));

@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 class local_data_importer_error_handler {
 
     const DISPLAY_ERRORS = false;
-    
+
     const DB_ERROR_LOG = 'local_data_importer_errors';
 
     static public function log(\throwable $e, $pathitemid = null) {
@@ -44,7 +44,7 @@ class local_data_importer_error_handler {
         $log->time          = time();
 
         $DB->insert_record(self::DB_ERROR_LOG, $log);
-        
+
         if (self::DISPLAY_ERRORS) {
             print $e->getMessage();
         }

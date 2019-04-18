@@ -49,7 +49,7 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configtext('local_data_importer/academic_year_format',
             get_string('academicyearformat', 'local_data_importer'),
-            get_string('academicyearformat_desc', 'local_data_importer'), 'YYYY-Y'));
+            get_string('academicyearformat_desc', 'local_data_importer'), 'YYYY/Y'));
 
     $settings->add(new admin_setting_configtext('local_data_importer/academic_year_first_day',
             get_string('academicyearfirstday', 'local_data_importer'),

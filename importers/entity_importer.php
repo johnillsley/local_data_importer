@@ -68,11 +68,6 @@ abstract class data_importer_entity_importer {
     private $parameterfilter = array();
 
     /**
-     * @var string
-     */
-    protected $parentimporter;
-    
-    /**
      * @var object
      */
     public $summary;
@@ -85,8 +80,8 @@ abstract class data_importer_entity_importer {
     /**
      * @var array
      */
-    protected $mapped_unique_fields = array();
-    
+    protected $mappeduniquefields = array();
+
     protected function __construct($pathitemid) {
 
         $this->pathitemid   = $pathitemid;
@@ -172,6 +167,7 @@ abstract class data_importer_entity_importer {
      *
      * @return array of parameter names that can be mapped
      */
+    /*
     public function get_parameter_options() {
 
         $parameters = $this->parameters;
@@ -183,7 +179,7 @@ abstract class data_importer_entity_importer {
 
         return $parameters;
     }
-
+    */
     /**
      * This is the top level function which accepts raw data used to create and update entities in Moodle
      * Firstly the raw data is sorted into create, update and delete lists.
@@ -233,7 +229,7 @@ abstract class data_importer_entity_importer {
      * @throws exception if a unique field is empty.
      * @return object holding separate arrays for create, update and delete items
      */
-    public function sort_items($items = array()) {
+    public function sort_items($internalresponse = array(), $internalparams = array()) {
         global $DB;
 
         $action = new stdClass();
@@ -241,13 +237,17 @@ abstract class data_importer_entity_importer {
         $action->update = array();
         $action->delete = array();
         $uniquefields = $this->get_mapped_unique_fields(); // Combination of all unique fields that were mapped.
-        
+
         $conditions = array();
         $conditions["deleted"] = 0;
         $conditions["pathitemid"] = $this->pathitemid;
+        foreach ($internalparams as $internalparam => $value) {
+            $conditions[$internalparam] = $value;
+        }
+
         $currentlog = $DB->get_records($this->logtable, $conditions);
 
-        foreach ($items as $item) {
+        foreach ($internalresponse as $item) {
 
             try {
                 // Check if unique key values from $item already exist in log table.
@@ -296,7 +296,7 @@ abstract class data_importer_entity_importer {
 
         return $action;
     }
-    
+
     /**
      * From the sub plugin responses definition identify the unique key fields and create references to the plugin log table fields.
      * @return $array of unique fields in the log table.
@@ -318,7 +318,7 @@ abstract class data_importer_entity_importer {
     }
 
     /**
-     * From the unique fields list remove the itemms that weren't mapped when the importer was configured.
+     * From the unique fields list remove the items that weren't mapped when the importer was configured.
      * @return $array of mapped unique fields in the log table.
      */
     private function get_mapped_unique_fields() {
@@ -643,7 +643,7 @@ abstract class data_importer_entity_importer {
         foreach ($filters as $key => $value) {
             // Check if the filter key is one of the defined parameters.
             $check = false;
-            foreach($this->parameters as $parameter) {
+            foreach ($this->parameters as $parameter) {
                 if ($key == $parameter) {
                     $check = true;
                     break;
@@ -665,8 +665,9 @@ abstract class data_importer_entity_importer {
 
         $filtersql = "";
         if (count($this->parameterfilter) > 0) {
-            foreach ($this->parameterfilter as $field => $value)
+            foreach ($this->parameterfilter as $field => $value) {
                 $filtersql .= " AND " . $field . " = '" . $value . "'";
+            }
         }
         return $filtersql;
     }

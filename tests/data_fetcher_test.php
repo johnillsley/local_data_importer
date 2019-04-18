@@ -90,6 +90,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
     /**
      * Test for method local_data_importer_data_fetcher->transform_parameters().
      */
+    /*
     public function test_transform_parameters() {
 
         // See test importer.... data_importer/tests/fixtures/importer_test.php.
@@ -170,10 +171,12 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         );
         $this->assertEquals($expected, $externalparameters);
     }
+    */
 
     /**
      * Test for method local_data_importer_data_fetcher->get_global_param_combinations().
      */
+    /*
     public function test_get_global_param_combinations() {
 
         // Private method - get_global_param_combinations().
@@ -212,6 +215,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         );
         $this->assertEquals($expected, $combined);
     }
+    */
 
     /**
      * Test for method local_data_importer_data_fetcher->build_relativeuri().
@@ -262,6 +266,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
     /**
      * Test for method local_data_importer_data_fetcher->get_parameter_mappings().
      */
+    /*
     public function test_get_parameter_mappings() {
         global $DB;
 
@@ -344,6 +349,7 @@ class local_data_importer_data_fetcher_testcase extends advanced_testcase {
         );
         $this->assertEquals($expected, $mappings);
     }
+    */
 
     /**
      * Test for method local_data_importer_data_fetcher->check_uri().

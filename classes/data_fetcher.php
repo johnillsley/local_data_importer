@@ -95,9 +95,28 @@ class local_data_importer_data_fetcher {
 
         $starttime = time();
         $this->pathitem->set_start_time($starttime);
+
+        // TODO - what happens if $intparamslist is empty? - ONE ELEMENT EQUAL TO NULL!!!
+        $intparamslist = $this->importer->get_parameters();
+        $intparamslist = $this->clean_parameters($intparamslist);
+        foreach ($intparamslist as $internalparams) {
+            try {
+                $externalparams = $this->transform_parameters2($internalparams);
+                $relativeuri = $this->build_relativeuri($this->uritemplate, $externalparams);
+                $externalresponse = $this->httpclient->get_response($relativeuri);
+                $internalresponse = $this->transform_response($externalresponse);
+                $sortedinternalresponse = $this->importer->sort_items($internalresponse, $internalparams);
+                $this->importer->do_imports($sortedinternalresponse);
+            } catch (Exception $e) {
+                    print $e->getMessage();
+                    local_data_importer_error_handler::log($e, $this->pathitem->id);
+            }
+        }
+
+        /* START OF OLD CODE
         $transform = $this->get_parameter_mappings();
         $parameterslist = $this->transform_parameters($transform);
-        // TODO - what happens if paramterlist is an empty array?
+
         foreach ($parameterslist as $parameters) {
             try {
                 $relativeuri = $this->build_relativeuri($this->uritemplate, $parameters);
@@ -110,6 +129,7 @@ class local_data_importer_data_fetcher {
                 local_data_importer_error_handler::log($e, $this->pathitem->id);
             }
         }
+        */
         $duration = time() - $starttime;
         $this->pathitem->set_duration_time($duration);
 
@@ -122,6 +142,7 @@ class local_data_importer_data_fetcher {
      *
      * @return array of parameter records to be used to populate web service URL requests.
      */
+    /*
     public function transform_parameters($transform) {
 
         $internalparameters = $this->importer->get_parameters();
@@ -159,6 +180,49 @@ class local_data_importer_data_fetcher {
 
         return $externalparameters;
     }
+    */
+
+    /**
+     * Takes the raw parameters data received from a sub-plugin and removes the id field from each record and
+     * any other fields that haven't been mapped for the importer. It then removes any duplicate records before
+     * returning the cleaned parameter list.
+     *
+     * @param array $parameters
+     * @return array $cleanparams
+     */
+    private function clean_parameters($parameterslist) {
+
+        $pathitemparam = new local_data_importer_pathitem_parameter();
+        $parametermappings = $pathitemparam->get_by_pathitem_id($this->pathitem->id);
+        $cleanparams = array();
+
+        foreach ($parameterslist as $parameters) {
+            $cleaned = array();
+            foreach ($parametermappings as $parametermapping) {
+                $mappedsubpluginparam = $parametermapping->get_subplugin_parameter();
+                $cleaned[$mappedsubpluginparam] = $parameters->$mappedsubpluginparam;
+            }
+            $cleanparams[] = $cleaned;
+        }
+        // Make final array elements unique.
+        $cleanparams = array_map("unserialize", array_unique(array_map("serialize", $cleanparams)));
+
+        return $cleanparams;
+    }
+
+    public function transform_parameters2($intparams) {
+
+        $pathitemparam = new local_data_importer_pathitem_parameter();
+        $parametermappings = $pathitemparam->get_by_pathitem_id($this->pathitem->id);
+
+        $extparams = array();
+        foreach ($parametermappings as $parametermapping) {
+            $subpluginparam = $parametermapping->get_subplugin_parameter();
+            $pathitemparam = $parametermapping->get_pathitem_parameter();
+            $extparams[$pathitemparam] = $intparams[$subpluginparam];
+        }
+        return $extparams;
+    }
 
     /**
      * Takes one or more global parameter option arrays and combines all the combinations from each array.
@@ -168,6 +232,7 @@ class local_data_importer_data_fetcher {
      * @param array of global parameter option arrays
      * @return array of combinations
      */
+    /*
     private function get_global_param_combinations($arrays) {
 
         // TODO - Need to remove any second level empty arrays - causes divided by zero error.
@@ -190,6 +255,7 @@ class local_data_importer_data_fetcher {
         }
         return $result;
     }
+    */
 
     /**
      * Produces a relative uri from the parameters that originated in the sub plugin.
@@ -204,6 +270,8 @@ class local_data_importer_data_fetcher {
                 if ($value == "") {
                     throw new Exception('URL parameter (' . $name . ') is empty string.');
                 }
+                // TODO - Following line better as urlencode but will this work in stutalk
+                $value = str_replace('/', '-', $value); // Better without this line.
                 $relativeuri = str_replace( '{' . $name . '}', urlencode($value), $relativeuri);
             }
         }
@@ -219,6 +287,7 @@ class local_data_importer_data_fetcher {
      * @throws Exception if the relative uri has not had all values substituted
      * @return object $transform containing two arrays one for sub plugin parameters the other for global parameters
      */
+    /*
     private function get_parameter_mappings() {
 
         $parammapper = new local_data_importer_pathitem_parameter();
@@ -246,6 +315,7 @@ class local_data_importer_data_fetcher {
         }
         return $transform;
     }
+    */
 
     /**
      * Checks a relative url to make sure it has no un-substituted values

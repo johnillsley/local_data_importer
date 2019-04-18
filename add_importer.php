@@ -113,7 +113,7 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                             $class = $subplugin . "_importer";
                             $object = new $class($pathitem);
                             $subpluginresponses = $object->responses;
-                            $subpluginparams = $object->get_parameter_options();
+                            $subpluginparams = $object->parameters;
                             $pathitemparams = $openapiinspector->get_pathitem_parameters($pathitem);
                             $pathitemresponses = $openapiinspector->get_pathitem_responses_selectable($pathitem);
                             // For the selected subplugin , get the additional form elements (if available).
@@ -173,13 +173,15 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                     // 4. PATH ITEM RESPONSE.
                     if (isset($pathitemresponse) && is_array($pathitemresponse)) {
                         foreach ($pathitemresponse as $pir => $pcr) {
-                            $pir = explode("-", $pir);
-                            $objpathitemresponse = new local_data_importer_pathitem_response();
-                            $objpathitemresponse->set_pathitemid($pathitemid);
-                            $objpathitemresponse->set_pathitem_response($pcr);
-                            $objpathitemresponse->set_pluginresponse_table($pir[0]);
-                            $objpathitemresponse->set_pluginresponse_field($pir[1]);
-                            $objpathitemresponse->save();
+                            if (!empty($pcr)) {
+                                $pir = explode("-", $pir);
+                                $objpathitemresponse = new local_data_importer_pathitem_response();
+                                $objpathitemresponse->set_pathitemid($pathitemid);
+                                $objpathitemresponse->set_pathitem_response($pcr);
+                                $objpathitemresponse->set_pluginresponse_table($pir[0]);
+                                $objpathitemresponse->set_pluginresponse_field($pir[1]);
+                                $objpathitemresponse->save();
+                            }
                         }
                         // All Saved OK.
                         redirect($returnurl);
@@ -187,7 +189,6 @@ if (!$selectconnectorform->is_cancelled() && $selectconnectorform->is_submitted(
                 } catch (\Exception $e) {
                     var_dump($e->getMessage());
                 }
-
                 break;
         }
     }

@@ -28,7 +28,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class local_data_importer_importers_enrolment_test extends advanced_testcase {
+class local_data_importer_importers_enrolment_testcase extends advanced_testcase {
 
     const DB_CONNECTOR = 'local_data_importer_connect';
     const DB_PATHITEM = 'local_data_importer_path';
@@ -37,7 +37,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
     const DB_INTERVALCODES = 'local_data_importer_dates';
     const DB_LOCAL_LOG = 'importers_enrolment';
     const DB_COURSE_LOG = 'importers_course';
-    
+
     /**
      * @var integer
      */
@@ -57,12 +57,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
      * @var array of enrolment importer data.
      */
     private $enrolments;
-    
-    /**
-     * @object importers_enrolment_importer
-     */
-    private $enrolmentimporter;
-    
+
     protected function setup() {
         global $DB;
 
@@ -85,24 +80,19 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
                         "connectorid"       => $connectorid,
                         "pathitem"          => "ABC",
                         "httpmethod"        => "get",
-                        "plugincomponent"   => "enrolment",
+                        "plugincomponent"   => "importers_enrolment",
                         "active"            => 1,
                         "importorder"       => 1,
                         "timecreated"       => 12345
                 )
         );
 
-        // Create enrolment importer
-        
-        // Test courses. 3 course in 2 course categories.
-        
-        // Test course importer.
         $DB->insert_record(self::DB_PATHITEM, array(
                         'name'              => 'test course importer 1',
                         'connectorid'       => $connectorid,
                         'pathitem'          => '/something/{acyear}',
                         'httpmethod'        => 'GET',
-                        'plugincomponent'   => 'course',
+                        'plugincomponent'   => 'importers_course',
                         'active'            => 1,
                         'importorder'       => 1,
                         'timecreated'       => 1234,
@@ -110,7 +100,6 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
                 )
         );
 
-        
         // Enabling enrol plugin.
         $enrolname = 'dataimporter';
         $enabled = enrol_get_plugins(true);
@@ -121,9 +110,8 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
             $enabled[] = $enrolname;
             set_config('enrol_plugins_enabled', implode(',', $enabled));
             core_plugin_manager::reset_caches();
-            $syscontext->mark_dirty(); // resets all enrol caches
+            $syscontext->mark_dirty(); // Resets all enrol caches.
         }
-        
         $this->resetAfterTest();
     }
 
@@ -159,7 +147,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
                         'connectorid'       => 1,
                         'pathitem'          => '/something/{acyear}',
                         'httpmethod'        => 'GET',
-                        'plugincomponent'   => 'course',
+                        'plugincomponent'   => 'importers_course',
                         'active'            => 1,
                         'importorder'       => 4,
                         'timecreated'       => 1234,
@@ -170,7 +158,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
                         'connectorid'       => 1,
                         'pathitem'          => '/something2/{acyear}',
                         'httpmethod'        => 'GET',
-                        'plugincomponent'   => 'course',
+                        'plugincomponent'   => 'importers_course',
                         'active'            => 0,
                         'importorder'       => 5,
                         'timecreated'       => 1234,
@@ -211,7 +199,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
 
     public function test_create_enrolments() {
         global $DB;
-        
+
         $this->prepare_for_enrolments();
         $enrolmentimporter = new importers_enrolment_importer($this->pathitemid);
         $sortedenrols = $enrolmentimporter->sort_items($this->enrolments);
@@ -220,19 +208,19 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
         // Check enrolments.
         $enrols = $DB->get_records('user_enrolments');
         $this->assertEquals(3, count($enrols));
-        
+
         // Check roles.
         $roles = $DB->get_records('role_assignments');
         $this->assertEquals(3, count($roles));
-        foreach ($roles AS $role) {
+        foreach ($roles as $role) {
             $this->assertEquals(3, $role->roleid); // Student role.
             $this->assertEquals('enrol_dataimporter', $role->component);
         }
-        
+
         // Check local log.
         $logs = $DB->get_records($enrolmentimporter->logtable);
         $this->assertEquals(3, count($logs));
-        foreach ($logs AS $log) {
+        foreach ($logs as $log) {
             $this->assertEquals($this->pathitemid, $log->pathitemid); // Student role.
             $this->assertEquals('idtest', $log->course_idnumber);
             $this->assertEquals(0, $log->deleted);
@@ -251,7 +239,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
         $enrolmentimporter = new importers_enrolment_importer($this->pathitemid);
         $sortedenrols = $enrolmentimporter->sort_items($this->enrolments);
         $enrolmentimporter->do_imports($sortedenrols);
-        
+
         // Remove two students from incoming enrolments then run again so that they are removed from Moodle.
         array_pop($this->enrolments);
         array_pop($this->enrolments);
@@ -270,14 +258,14 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
         $logs = $DB->get_records($enrolmentimporter->logtable);
         $this->assertEquals(3, count($logs));
     }
-    
+
     public function test_get_parameters() {
         global $DB;
 
         $enrolmentimporter = new importers_enrolment_importer($this->pathitemid);
         $coursepathitemid = $this->pathitemid + 1; // Use the second pathitemid.
         $enrolmentimporter->save_setting('course_pathitem_id', $coursepathitemid); // Connection to course importer.
-        
+
         // Create a couple of current interval codes.
         $yesterday = date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") - 1, date("Y")));
         $tomorrow = date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") + 1, date("Y")));
@@ -303,7 +291,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
                 "course_idnumber"        => 'C001',
                 "course_categories_name" => 'Cat1',
                 "other_academic_year"    => '2018-9',
-                "other_timeslot"         => 'S1', 
+                "other_timeslot"         => 'S1',
                 "other_occurence"        => 'A',
                 "timecreated"            => 1234,
                 "timemodified"           => 1234
@@ -373,7 +361,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
         $parameters = $enrolmentimporter->get_parameters();
         $this->assertEquals($expected, $parameters);
 
-        // Test for parameter filter set to a department/course category
+        // Test for parameter filter set to a department/course category.
         $enrolmentimporter->set_parameter_filter(array("course_categories_name" => "Cat2"));
         $expected = array(
                 $id2 => (object)array(
@@ -396,7 +384,7 @@ class local_data_importer_importers_enrolment_test extends advanced_testcase {
         $parameters = $enrolmentimporter->get_parameters();
         $this->assertEquals($expected, $parameters);
 
-        // Test for parameter filter set to a a single unit/course
+        // Test for parameter filter set to a a single unit/course.
         $enrolmentimporter->set_parameter_filter(array("course_idnumber" => "C001"));
         $expected = array(
                 $id1 => (object)array(

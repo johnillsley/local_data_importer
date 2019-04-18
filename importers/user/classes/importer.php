@@ -50,13 +50,15 @@ class importers_user_importer extends data_importer_entity_importer {
                         'email'     => array()
                 )
         );
-        $this->parameters = array();
-        $this->parentimporter = null;
+        $this->parameters = array(
+                'global_current_academic_year',
+                'global_date_interval_codes'
+        );
     }
 
     protected function create_entity($item = array()) {
         global $DB;
-        
+
         $user = new stdClass();
         $user->username     = $item['user']['username'];
         $user->idnumber     = $item['user']['idnumber'];
@@ -72,7 +74,7 @@ class importers_user_importer extends data_importer_entity_importer {
 
     protected function update_entity($item = array()) {
         global $DB;
-        
+
         $userid = $DB->get_field('user', 'id', array('idnumber' => $item['user']['idnumber']));
 
         $user = new stdClass();
@@ -91,11 +93,10 @@ class importers_user_importer extends data_importer_entity_importer {
     protected function delete_entity($item = array()) {
         global $DB;
 
-
         $userid = $DB->get_field('user', 'id', array('idnumber' => $item['user']['idnumber']));
         $user = new stdClass();
         $user->id = $userid;
-        
+
         if (user_delete_user($user)) {
             $this->local_log($item, time(), 'deleted');
         }
@@ -109,13 +110,13 @@ class importers_user_importer extends data_importer_entity_importer {
     }
 
     public function get_additional_form_elements() {
-        
+
         $additionalsettings = array();
 
         // Authentication selector for users created with this importer.
         $auths = core_component::get_plugin_list('auth');
         $authoptions = array();
-        foreach($auths as $auth => $plugin) {
+        foreach ($auths as $auth => $plugin) {
             if (is_enabled_auth($auth)) {
                 $authoptions[$auth] = get_string('pluginname', "auth_{$auth}");
             }

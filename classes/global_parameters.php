@@ -34,7 +34,7 @@ class local_data_importer_global_parameters {
      * Uses plugin admin settings for academic_year_format & academic_year_first_day
      *
      * @throws Exception if admin settings are missing so academic year cannot be derived.
-     * @return array of one string containing current academic year
+     * @return string containing current academic year
      */
     public static function current_academic_year() {
 
@@ -65,7 +65,7 @@ class local_data_importer_global_parameters {
             // Last year is first part of academic year.
             $acadyear = substr(($currentyear - 1), -1 * $year1length) . $delimiter . substr($currentyear, -1 * $year2length);
         }
-        return array($acadyear);
+        return $acadyear;
     }
 
     /**

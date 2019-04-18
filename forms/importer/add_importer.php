@@ -114,7 +114,7 @@ class local_data_importer_add_importer_form extends moodleform {
                 }
             }
 
-            $options = null;
+            $options = array();
             $mform->addElement('header', 'general', 'Path Item Response');
 
             if (isset($this->_customdata['subpluginresponses'])) {
@@ -122,14 +122,16 @@ class local_data_importer_add_importer_form extends moodleform {
                 foreach ($subpluginresponses as $table => $field) {
                     foreach ($field as $fieldname => $properties) {
                         $plugincomponentidentifier = $table . self::TABLE_FIELD_SEPERATOR . $fieldname;
+                        $compulsary = (in_array('unique', $properties)) ? '(must be mapped)' : '(optional)';
                         $mform->addElement(
                                 'static',
                                 'subpluginparams',
                                 "Sub plugin response",
-                                "<strong>" . $plugincomponentidentifier . "</strong>");
+                                "<strong>" . $plugincomponentidentifier . "</strong> " . $compulsary);
                         $mform->addElement('hidden', 'plugincomponentresponse', $plugincomponentidentifier);
                         $mform->setType('plugincomponentresponse', PARAM_TEXT);
 
+                        $options[null] = 'Nothing selected';
                         if (is_array($this->_customdata['pathitemresponses'])) {
                             foreach ($this->_customdata['pathitemresponses'] as $key => $response) {
                                 $options[$key] = $key;

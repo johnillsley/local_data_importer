@@ -128,6 +128,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
     /**
      * Test for method local_data_importer_entity_importer->get_parameter_options().
      */
+    /*
     public function test_get_parameter_options() {
 
         $importer = new \importers_test_importer($this->pathitemid);
@@ -140,13 +141,14 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         );
         $this->assertSame($expected, $subpluginparams);
     }
+    */
 
     /**
      * Test for method local_data_importer_entity_importer->do_imports().
      */
     public function test_do_imports() {
         global $DB;
-        
+
         $item1 = array(
                 'course' => array('fullname' => 'Course1', 'shortname' => 'CS1', 'idnumber' => 'C1'),
                 'course_categories' => array('name' => 'Dept1')
@@ -163,7 +165,7 @@ class local_data_importer_entity_importer_testcase extends advanced_testcase {
         $importer = new \importers_test_importer($this->pathitemid);
 
         // Need to create a response mapping for the unique field (course_idnumber).
-        // Normally all response fields would be mapped but only unique fields need to be mapped to pass test. 
+        // Normally all response fields would be mapped but only unique fields need to be mapped to pass test.
         $DB->insert_record(self::DB_RESPONSE_MAPPING, array(
                 'pathitemid'            => $this->pathitemid,
                 'pluginresponsetable'   => 'course',

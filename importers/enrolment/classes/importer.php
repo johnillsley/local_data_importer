@@ -43,7 +43,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
      * @const string enrolment plugin.
      */
     const ENROLMENT_METHOD = 'dataimporter';
-    
+
     /**
      * @var integer
      */
@@ -53,7 +53,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
      * @var object enrol_dataimporter
      */
     private $enrol;
-    
+
     public function __construct($pathitemid) {
 
         parent::__construct($pathitemid);
@@ -75,17 +75,19 @@ class importers_enrolment_importer extends data_importer_entity_importer {
                         'occurance'     => array("optional")
                 )
         );
-
         $this->parameters = array(
                 'course_idnumber',
-                'course_academic_year',
-                'course_timeslot',
-                'course_occurance',
-                'course_categories_name');
-
+                'course_categories_name',
+                'other_academic_year',
+                'other_timeslot',
+                'other_occurance'
+        );
         $this->roleid = $this->get_setting('enrolment_roleid');
+        $this->enrol = new enrol_dataimporter_plugin(); // This extends the Moodle enrolment API.
 
-        $this->enrol = new enrol_dataimporter_plugin();
+        // TODO - NEXT LINE FOR TESTING ONLY.
+        //$this->set_parameter_filter(array('course_categories_name' => 'BB')); // Should have 10 students.
+        // TODO - WHAT ABOUT ENROLS FOR ONE STUDENT? IS THIS REASONABLE?
     }
 
     /**
@@ -103,8 +105,9 @@ class importers_enrolment_importer extends data_importer_entity_importer {
         $userid         = $this->get_userid($item['user']['username']);
         $courseid       = $this->get_courseid($item['course']['idnumber']);
         $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $courseid));
-        
+
         $this->enrol->enrol_user($enrolinstance, $userid, $this->roleid, time());
+
         // Does not return true if successful so need to test.
         if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $userid))) {
             $this->local_log($item, $userenrol->timecreated, 'created');
@@ -121,11 +124,11 @@ class importers_enrolment_importer extends data_importer_entity_importer {
      */
     protected function update_entity($item = array()) {
         global $DB;
-        
+
         $userid         = $this->get_userid($item['user']['username']);
         $courseid       = $this->get_courseid($item['course']['idnumber']);
         $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $courseid));
-        
+
         // Not of use unless updating status, timestart or timeend.
         // Update_user_enrol(stdClass $instance, $userid, $status = NULL, $timestart = NULL, $timeend = NULL).
         $this->enrol->update_user_enrol($enrolinstance, $userid);
@@ -141,7 +144,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
      *
      * @param object $item contains all the data required to delete the enrolment
      * @throws Exception from $this->enrol->unenrol_user if the enrolment could not be deleted
-     * @return array of 
+     * @return void
      */
     protected function delete_entity($item) {
         global $DB;
@@ -149,7 +152,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
         $userid         = $this->get_userid($item->user_username);
         $courseid       = $this->get_courseid($item->course_idnumber);
         $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $courseid));
-        
+
         $this->enrol->unenrol_user($enrolinstance, $userid);
         // Does not return true if successful so need to test.
         if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $userid))) {
@@ -174,28 +177,20 @@ class importers_enrolment_importer extends data_importer_entity_importer {
         if (!$courseimporter = new importers_course_importer($coursepathemid)) {
             throw new Exception('The pathitemid was not associated with a course importer.');
         }
-
-        $config = get_config('local_data_importer'); // Needed to get time interval database table/fields. 
-
-        // Only use timeslots that are current.
-        $timeslots = $DB->get_records_sql("
-                SELECT id, $config->date_interval_code_field code, $config->date_interval_academic_year_field year
-                FROM {" . $config->date_interval_table . "}
-                WHERE STR_TO_DATE($config->date_interval_start_date_field, '%Y-%m-%d') <= NOW()
-                AND STR_TO_DATE($config->date_interval_end_date_field, '%Y-%m-%d') >= NOW()
-         ");
-        
+        $timeslots = local_data_importer_global_parameters::date_interval_codes();
         $filtersql = $this->get_parameter_filter_sql();
 
+        // TODO - Make output from SQL unique based on only parameters that are mapped!!!
         if (count($timeslots) > 0) {
-            // Make a csv string of current timeslot codes to use in following SQL. 
+            // Make a csv string of current timeslot codes to use in following SQL.
             $timeslotarray = array();
             foreach ($timeslots as $timeslot) {
-                $timeslotarray[] = $timeslot->code;
+                $timeslotarray[] = $timeslot;
             }
             list($insql, $inparams) = $DB->get_in_or_equal($timeslotarray);
+
             $parameters = $DB->get_records_sql("
-                    SELECT DISTINCT 
+                    SELECT DISTINCT
                       c.id
                     , c.course_idnumber
                     , c.other_academic_year
@@ -209,7 +204,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
                     , $inparams);
         } else {
             $parameters = $DB->get_records_sql("
-                    SELECT DISTINCT 
+                    SELECT DISTINCT
                       c.id
                     , c.course_idnumber
                     , c.other_academic_year
@@ -238,7 +233,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
         // Role selector to use for enrolment importer.
         $roles = $DB->get_records('role');
         $roleoptions = array();
-        foreach($roles as $role) {
+        foreach ($roles as $role) {
             if (!in_array($role->shortname, self::SKIP_ROLES)) {
                 $roleoptions[$role->id] = $role->shortname;
             }
@@ -251,7 +246,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
 
         // Select the course importer that the enrolment importer will work with.
         $connectorpathitems = new local_data_importer_connectorpathitem();
-        $pathitems = $connectorpathitems->get_by_subplugin('course');
+        $pathitems = $connectorpathitems->get_by_subplugin('importers_course');
         $courseimporters = array();
         foreach ($pathitems as $pathitem) {
             $courseimporters[$pathitem->get_id()] = $pathitem->get_name();
@@ -275,11 +270,13 @@ class importers_enrolment_importer extends data_importer_entity_importer {
         global $DB;
 
         if (!$userid = $DB->get_field('user', 'id', array('username' => $username))) {
+
             // TODO - TEMP CODE FOR TESTING.
-            // Create user
+            // Create user.
             $user = create_user_record($username, 'abcdefg');
             return $user->id;
             // TODO - END OF TEMP CODE.
+
             throw new Exception("The user with username " . $username . " could not be found");
         }
         // TODO - could check idnumber too? What happens if idnumber and user name go out of sync in external data?
