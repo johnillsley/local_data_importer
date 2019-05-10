@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/local/data_importer/importers/entity_importer.php'); // Parent class definition.
 require_once($CFG->dirroot . '/enrol/dataimporter/lib.php'); // Enrolment plugin for data_importer.
+require_once($CFG->dirroot . '/group/lib.php'); // Group library.
 
 /**
  * Class representing an entity importer to handle courses.
@@ -50,9 +51,24 @@ class importers_enrolment_importer extends data_importer_entity_importer {
     private $roleid;
 
     /**
+     * @var integer
+     */
+    private $unenrolroleid;
+    
+    /**
+     * @var string
+     */
+    private $groupnameformat;
+
+    /**
      * @var object enrol_dataimporter
      */
     private $enrol;
+    
+    /**
+     * @var null|object enrol_manual
+     */
+    private $enrolmanual = null;
 
     public function __construct($pathitemid) {
 
@@ -83,17 +99,30 @@ class importers_enrolment_importer extends data_importer_entity_importer {
                 'other_occurance'
         );
         $this->roleid = $this->get_setting('enrolment_roleid');
+        $this->unenrolroleid = $this->get_setting('unenrolment_roleid');
+        // $this->groupnameformat = str_replace('-', '_', $this->get_setting('group_name_format'));
+        $this->groupnameformat = $this->get_setting('group_name_format');
         $this->enrol = new enrol_dataimporter_plugin(); // This extends the Moodle enrolment API.
-
-        // TODO - NEXT LINE FOR TESTING ONLY.
-        //$this->set_parameter_filter(array('course_categories_name' => 'BB')); // Should have 10 students.
-        // TODO - WHAT ABOUT ENROLS FOR ONE STUDENT? IS THIS REASONABLE?
+        if ($this->unenrolroleid > 0) {
+            // We need the manual enrol plugin for any unenrols.
+            if (!$this->enrolmanual = enrol_get_plugin('manual')) {
+                throw new Exception('Can not instantiate enrol_manual');
+            }
+        }
+        
+        // TODO - NEXT LINES FOR TESTING ONLY.
+        global $CFG;
+        if ($CFG->prefix == "mdl_") { // Don't want this for unit testing.
+            $this->set_parameter_filter(array('course_categories_name' => 'HL')); // Should have 10 students.
+        }
+        // TODO - WHAT ABOUT ENROLS FOR ONE STUDENT? IS THIS REASONABLE to USE SAME METHOD?
     }
 
     /**
      * Creates a single enrolment using data that has already been validated.
      * Uses the importer setting to determine the role associated with the enrolment.
      * Creates a record of the enrolment creation locally so that it will not be created again.
+     * Adds the user to a group if the group name format setting has been set.
      *
      * @param array $item contains all the data required to create an enrolment
      * @throws Exception from $this->enrol->enrol_user if the enrolment could not be created
@@ -102,14 +131,23 @@ class importers_enrolment_importer extends data_importer_entity_importer {
     protected function create_entity($item = array()) {
         global $DB;
 
-        $userid         = $this->get_userid($item['user']['username']);
-        $courseid       = $this->get_courseid($item['course']['idnumber']);
-        $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $courseid));
+        $user           = $this->get_user($item['user']['username']);
+        $course         = $this->get_course($item['course']['idnumber']);
+        $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $course->id));
+        // TODO - What if enrol instance doesn't exist?
+        // $enrol = new enrol_dataimporter_plugin();
+        // $enrolinstance = $enrol->add_instance($course); // Need to pass course object not courseid
 
-        $this->enrol->enrol_user($enrolinstance, $userid, $this->roleid, time());
+        $this->enrol->enrol_user($enrolinstance, $user->id, $this->roleid, time());
 
+        if (!empty($this->groupnameformat)) {
+            // Need to add to group.
+            $this->add_to_group($item, $course->id, $user->id, $enrolinstance);
+        }
+        // TODO - Put group inside grouping?
+        // TODO - Think about exception handling if enrolment created but group fails.
         // Does not return true if successful so need to test.
-        if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $userid))) {
+        if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $user->id))) {
             $this->local_log($item, $userenrol->timecreated, 'created');
         }
     }
@@ -125,15 +163,15 @@ class importers_enrolment_importer extends data_importer_entity_importer {
     protected function update_entity($item = array()) {
         global $DB;
 
-        $userid         = $this->get_userid($item['user']['username']);
-        $courseid       = $this->get_courseid($item['course']['idnumber']);
-        $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $courseid));
+        $user           = $this->get_user($item['user']['username']);
+        $course         = $this->get_course($item['course']['idnumber']);
+        $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $course->id));
 
         // Not of use unless updating status, timestart or timeend.
         // Update_user_enrol(stdClass $instance, $userid, $status = NULL, $timestart = NULL, $timeend = NULL).
-        $this->enrol->update_user_enrol($enrolinstance, $userid);
+        $this->enrol->update_user_enrol($enrolinstance, $user->id);
         // Does not return true if successful so need to test.
-        if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $userid))) {
+        if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $user->id))) {
             $this->local_log($item, $userenrol->timemodified, 'updated');
         }
     }
@@ -141,6 +179,7 @@ class importers_enrolment_importer extends data_importer_entity_importer {
     /**
      * Deletes a single enrolment.
      * Updates the local log to indicate that the enrolment has been deleted
+     * Removes the user from the group if the group name format has been set.
      *
      * @param object $item contains all the data required to delete the enrolment
      * @throws Exception from $this->enrol->unenrol_user if the enrolment could not be deleted
@@ -149,13 +188,28 @@ class importers_enrolment_importer extends data_importer_entity_importer {
     protected function delete_entity($item) {
         global $DB;
 
-        $userid         = $this->get_userid($item->user_username);
-        $courseid       = $this->get_courseid($item->course_idnumber);
-        $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $courseid));
+        $user           = $this->get_user($item->user_username);
+        $course         = $this->get_course($item->course_idnumber);
+        $enrolinstance  = $DB->get_record('enrol', array("enrol" => self::ENROLMENT_METHOD, "courseid" => $course->id));
 
-        $this->enrol->unenrol_user($enrolinstance, $userid);
+        if (!empty($this->groupnameformat)) {
+            $this->remove_from_group($item, $course->id, $user->id);
+        }
+
+        // Does a new role need to replace the role being removed?
+        if ($this->unenrolroleid > 0) {
+            $manualenrolinstance = $DB->get_record('enrol', array('courseid'=>$course->id, 'enrol'=>'manual'));
+            if (!$manualenrolinstance) {
+                $manualenrolinstance = $this->enrolmanual->add_instance($course);
+            }
+            // Create the MANUAL enrolment with role determined by pathitem setting.
+            $this->enrolmanual->enrol_user($manualenrolinstance, $user->id, $this->unenrolroleid, time());
+        }
+
+        $this->enrol->unenrol_user($enrolinstance, $user->id);
+        // This only removes user from groups if it is the only enrol left for the user on the course.
         // Does not return true if successful so need to test.
-        if ($userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $userid))) {
+        if (!$userenrol = $DB->get_record('user_enrolments', array("enrolid" => $enrolinstance->id, "userid" => $user->id))) {
             $this->local_log((array)$item, time(), 'deleted');
         }
     }
@@ -256,48 +310,131 @@ class importers_enrolment_importer extends data_importer_entity_importer {
                 'field_type' => 'select',
                 'options' => $courseimporters
         );
+
+        // Input for format of group name.
+        $additionalsettings['group_name_format'] = array(
+                'field_label' => get_string('groupnameformat', 'importers_enrolment'),
+                'field_type' => 'text'
+        );
+
+        // Role selector for new role
+        array_unshift($roleoptions, get_string('unenrolmentdonothing', 'importers_enrolment'));
+        $additionalsettings['unenrolment_roleid'] = array(
+                'field_label' => get_string('unenrolmentrole', 'importers_enrolment'),
+                'field_type' => 'select',
+                'options' => $roleoptions
+        );
         return $additionalsettings;
     }
 
     /**
-     * Returns a userid from a username.
+     * Returns a user from a username.
      *
      * @param string $username
      * @throws Exception if user cannot be found
-     * @return integer userid
+     * @return object user
      */
-    private function get_userid($username) {
+    private function get_user($username) {
         global $DB;
 
-        if (!$userid = $DB->get_field('user', 'id', array('username' => $username))) {
+        if (!$user = $DB->get_record('user', array('username' => $username))) {
 
             // TODO - TEMP CODE FOR TESTING.
             // Create user.
             $user = create_user_record($username, 'abcdefg');
-            return $user->id;
+            return $user;
             // TODO - END OF TEMP CODE.
 
             throw new Exception("The user with username " . $username . " could not be found");
         }
         // TODO - could check idnumber too? What happens if idnumber and user name go out of sync in external data?
 
-        return $userid;
+        return $user;
     }
 
     /**
-     * Returns a courseid from a course idnumber.
+     * Returns a course from a course idnumber.
      *
      * @param string $idnumber
      * @throws Exception if course cannot be found
-     * @return integer courseid
+     * @return object course
      */
-    private function get_courseid($idnumber) {
+    private function get_course($idnumber) {
         global $DB;
 
-        if (!$courseid = $DB->get_field('course', 'id', array('idnumber' => $idnumber))) {
+        if (!$course = $DB->get_record('course', array('idnumber' => $idnumber))) {
             throw new Exception("The course with idnumber " . $idnumber . " could not be found");
         }
 
-        return $courseid;
+        return $course;
+    }
+
+    /**
+     * Adds a user to an enrolment group.
+     *
+     * @param array $item
+     * @param integer $courseid
+     * @param integer $userid
+     * @throws Exception if there is no setting for group name format.
+     * @return integer group id
+     */
+    private function add_to_group($item, $courseid, $userid, $enrolinstance) {
+
+        // Get group name format setting.
+        if (empty($this->groupnameformat)) {
+            throw new Exception('There is no setting for group name format.');
+        }
+        $groupname = $this->groupnameformat;
+
+        // Put values into placeholders to construct group name.
+        foreach ($item as $table => $field) {
+            foreach ($field as $fieldname => $value) {
+                $groupname = str_replace("{" . $table . "_" . $fieldname . "}", $value, $groupname);
+            }
+        }
+
+        // Check if there any placeholders left.
+        if (strpos($groupname, '{') || strpos($groupname, '}')) {
+            throw new Exception('Could not construct the group name.');
+        }
+
+        // Check if group already exists.
+        if (!$groupid = groups_get_group_by_name($courseid, $groupname)) {
+            // Group doesn't exist yet so create it.
+            $data = new stdClass();
+            $data->courseid    = $courseid;
+            $data->name        = $groupname;
+            $data->description = get_string('groupcreatedbyplugin', 'importers_enrolment');
+            $groupid = groups_create_group($data);
+        }
+        groups_add_member($groupid, $userid, "enrol_" . self::ENROLMENT_METHOD, $enrolinstance->id);
+    }
+
+    private function remove_from_group($item, $courseid, $userid) {
+
+        // Get group name format setting.
+        if (empty($this->groupnameformat)) {
+            throw new Exception('There is no setting for group name format2.');
+        }
+        $groupname = $this->groupnameformat;
+
+        // Put values into placeholders to construct group name.
+        foreach ($item as $key => $value) {
+            $groupname = str_replace("{" . $key . "}", $value, $groupname);
+        }
+        // Check if there any placeholders left.
+        if (strpos($groupname, '{') || strpos($groupname, '}')) {
+            throw new Exception('Could not construct the group name2.');
+        }
+        if (!$groupid = groups_get_group_by_name($courseid, $groupname)) {
+            throw new Exception('Could not get group by group name.');
+        }
+
+        groups_remove_member($groupid, $userid);
+
+        // If the group is now empty remove the group itself.
+        if (count(groups_get_members($groupid)) == 0) {
+            groups_delete_group($groupid);
+        }
     }
 }

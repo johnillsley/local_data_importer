@@ -174,9 +174,34 @@ $html .= html_writer::empty_tag('input', array(
 );
 $html .= html_writer::end_tag('form');
 
-// The form for the next type of sub plugin goes here....
+// The form for testing enrolments.
+$html .= html_writer::tag('h4', 'Enrolments');
+$attributes = array('method' => 'POST', 'action' => $url);
+$html .= html_writer::start_tag('form', $attributes);
 
+$html .= "Select importer: ";
+$html .= html_writer::start_tag('select', array("id" => "pathitemid", "name" => "pathitemid"));
+$importers = $DB->get_records(DB_PATH_ITEMS, array("plugincomponent" => "importers_enrolment"));
 
+foreach ($importers as $importer) {
+    $html .= html_writer::tag('option', $importer->name, array('value' => $importer->id));
+}
+$html .= html_writer::end_tag('select');
+
+$html .= "<br/>Number of enrolments to delete: ";
+$html .= html_writer::empty_tag('input', array('type' => 'text', 'name' => 'enrolmentdelete'));
+$html .= "<br/>Number of enrolments to update: ";
+$html .= html_writer::empty_tag('input', array('type' => 'text', 'name' => 'enrolmentupdate'));
+$html .= "<br/>Number of enrolments to create: ";
+$html .= html_writer::empty_tag('input', array('type' => 'text', 'name' => 'enrolmentcreate'));
+$html .= "<br/>";
+$html .= html_writer::empty_tag('input', array(
+                'type' => 'submit',
+                'name' => 'action',
+                'value' => 'Setup enrolments',
+                'class' => 'btn btn-primary')
+);
+$html .= html_writer::end_tag('form');
 
 echo $html;
 echo $OUTPUT->footer();

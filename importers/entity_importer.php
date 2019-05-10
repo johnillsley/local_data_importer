@@ -190,6 +190,7 @@ abstract class data_importer_entity_importer {
      * @return void
      */
     public function do_imports($sorteddata) {
+        global $CFG;
 
         $this->get_database_properties(); // For validation of data.
 
@@ -198,6 +199,9 @@ abstract class data_importer_entity_importer {
                 $create = $this->validate_item($create);
                 $this->create_entity($create);
             } catch (\Throwable $e) {
+                if ($CFG->prefix != 'phpu_') {
+                    print "\n" . $e->getMessage();
+                }
                 local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }
@@ -207,6 +211,9 @@ abstract class data_importer_entity_importer {
                 $update = $this->validate_item($update);
                 $this->update_entity($update);
             } catch (\Throwable $e) {
+                if ($CFG->prefix != 'phpu_') {
+                    print "\n" . $e->getMessage();
+                }
                 local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }
@@ -215,6 +222,9 @@ abstract class data_importer_entity_importer {
             try {
                 $this->delete_entity($delete);
             } catch (\Throwable $e) {
+                if ($CFG->prefix != 'phpu_') {
+                    print "\n" . $e->getMessage();
+                }
                 local_data_importer_error_handler::log($e, $this->pathitemid);
             }
         }

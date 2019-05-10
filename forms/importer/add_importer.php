@@ -185,16 +185,17 @@ class local_data_importer_add_importer_form extends moodleform {
             // Display header.
             $mform->addElement('header', 'general', 'Additional Plugin Fields');
             foreach ($additionalfields as $subpluginsettingname => $subpluginsetting) {
+                $elementname = "subpluginadditionalfields[$subpluginsettingname]";
                 switch ($subpluginsetting['field_type']) {
                     case 'select':
                         // Get the options.
                         $options = $subpluginsetting['options'];
-                        $mform->addElement('select', "subpluginadditionalfields[$subpluginsettingname]",
-                            $subpluginsetting['field_label'], $options, []);
+                        $mform->addElement('select', $elementname, $subpluginsetting['field_label'], $options, []);
+                        $mform->setType($elementname, PARAM_TEXT);
                         break;
                     case 'text':
-                        $mform->addElement('text', "subpluginadditionalfields[$subpluginsettingname]",
-                            $subpluginsetting['field_label'], []);
+                        $mform->addElement('text', $elementname, $subpluginsetting['field_label'], []);
+                        $mform->setType($elementname, PARAM_TEXT);
                         break;
                 }
             }

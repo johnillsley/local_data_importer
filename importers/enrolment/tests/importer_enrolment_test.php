@@ -18,9 +18,9 @@
  * Unit tests for the local_data_importer_importers_enrolment plugin.
  * There is a dependency on the importers_course sub-plugin.
  *
- * @group      local_data_importer_importers_course
+ * @group      local_data_importer
  * @group      bath
- * @package    local/data_importer/importers/course
+ * @package    local/data_importer/importers/enrolment
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
  * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -175,6 +175,8 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
         foreach ($rolerecords as $rolerecord) {
             $roles[$rolerecord->id] = $rolerecord->shortname;
         }
+        $roles2 = $roles; // Extra option needed for $roles2.
+        array_unshift($roles2, get_string('unenrolmentdonothing', 'importers_enrolment'));
 
         $courseimporters = array(
                 ($this->pathitemid + 1) => 'test course importer 1',
@@ -192,6 +194,15 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
                         'field_label'   => get_string('courseimporter', 'importers_enrolment'),
                         'field_type'    => 'select',
                         'options'       => $courseimporters
+                ),
+                'group_name_format' => Array(
+                        'field_label'   => get_string('groupnameformat', 'importers_enrolment'),
+                        'field_type'    => 'text'
+                ),
+                'unenrolment_roleid' => Array(
+                        'field_label'   => get_string('unenrolmentrole', 'importers_enrolment'),
+                        'field_type'    => 'select',
+                        'options'       => $roles2
                 )
         );
         $this->assertEquals($expected, $formdata);
@@ -208,6 +219,14 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
         // Check enrolments.
         $enrols = $DB->get_records('user_enrolments');
         $this->assertEquals(3, count($enrols));
+
+        // Check groups.
+        $groups = $DB->get_records('groups');
+        $this->assertEquals(2, count($groups));
+
+        // Check groups membership.
+        $groupmembers = $DB->get_records('groups_members');
+        $this->assertEquals(3, count($groupmembers));
 
         // Check roles.
         $roles = $DB->get_records('role_assignments');
@@ -243,20 +262,54 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
         // Remove two students from incoming enrolments then run again so that they are removed from Moodle.
         array_pop($this->enrolments);
         array_pop($this->enrolments);
+        $sortedenrols = $enrolmentimporter->sort_items($this->enrolments);;
+        $enrolmentimporter->do_imports($sortedenrols);
+
+        // Check enrolments.
+        $enrols = $DB->get_records('user_enrolments');
+        $this->assertEquals(1, count($enrols));
+        $enrol = array_pop($enrols);
+        $enrolinstance = $DB->get_record('enrol', array('id' => $enrol->enrolid));
+        $this->assertEquals('dataimporter', $enrolinstance->enrol);
+
+        // Check roles.
+        $roles = $DB->get_records('role_assignments');
+        $this->assertEquals(1, count($roles));
+        $role = array_pop($roles);
+        $this->assertEquals(3, $role->roleid);
+
+        // Check groups.
+        $groups = $DB->get_records('groups');
+        $this->assertEquals(1, count($groups));
+
+        // Check groups members.
+        $groupmembers = $DB->get_records('groups_members');
+        $this->assertEquals(1, count($groupmembers));
+
+        // Check local log.
+        $logs = $DB->get_records($enrolmentimporter->logtable);
+        $this->assertEquals(3, count($logs));
+
+        // Delete the last enrolment using the create new role setting.
+        $enrolmentimporter->save_setting("unenrolment_roleid", 5);
+        $enrolmentimporter = new importers_enrolment_importer($this->pathitemid); // Pick up new setting above.
+
+        array_pop($this->enrolments);
         $sortedenrols = $enrolmentimporter->sort_items($this->enrolments);
         $enrolmentimporter->do_imports($sortedenrols);
 
         // Check enrolments.
         $enrols = $DB->get_records('user_enrolments');
         $this->assertEquals(1, count($enrols));
+        $enrol = array_pop($enrols);
+        $enrolinstance = $DB->get_record('enrol', array('id' => $enrol->enrolid));
+        $this->assertEquals('manual', $enrolinstance->enrol);
 
         // Check roles.
         $roles = $DB->get_records('role_assignments');
         $this->assertEquals(1, count($roles));
-
-        // Check local log.
-        $logs = $DB->get_records($enrolmentimporter->logtable);
-        $this->assertEquals(3, count($logs));
+        $role = array_pop($roles);
+        $this->assertEquals(5, $role->roleid);
     }
 
     public function test_get_parameters() {
@@ -265,6 +318,7 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
         $enrolmentimporter = new importers_enrolment_importer($this->pathitemid);
         $coursepathitemid = $this->pathitemid + 1; // Use the second pathitemid.
         $enrolmentimporter->save_setting('course_pathitem_id', $coursepathitemid); // Connection to course importer.
+        $enrolmentimporter->save_setting('course_pathitem_id', $coursepathitemid); // Group name format setting.
 
         // Create a couple of current interval codes.
         $yesterday = date("Y-m-d", mktime(0, 0, 0, date("m")  , date("d") - 1, date("Y")));
@@ -440,7 +494,11 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
                         ),
                         'course' => array(
                                 'idnumber' => $this->course->idnumber
-                        )
+                        ),
+                        'other' => array(
+                                'academic_year' => '2018/9',
+                                'timeslot' => 'S1'
+                        ),
                 ),
                 array(
                         'user' => array(
@@ -449,7 +507,11 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
                         ),
                         'course' => array(
                                 'idnumber' => $this->course->idnumber
-                        )
+                        ),
+                        'other' => array(
+                                'academic_year' => '2018/9',
+                                'timeslot' => 'S1'
+                        ),
                 ),
                 array(
                         'user' => array(
@@ -458,11 +520,17 @@ class local_data_importer_importers_enrolment_testcase extends advanced_testcase
                         ),
                         'course' => array(
                                 'idnumber' => $this->course->idnumber
-                        )
+                        ),
+                        'other' => array(
+                                'academic_year' => '2018/9',
+                                'timeslot' => 'S2'
+                        ),
                 ),
         );
-        // Create setting to define the user role for these enrolments.
         $enrolmentimporter = new importers_enrolment_importer($this->pathitemid);
+        // Create setting to define the user role for these enrolments.
         $enrolmentimporter->save_setting("enrolment_roleid", 3);
+        // Create setting to define the group name format.
+        $enrolmentimporter->save_setting("group_name_format", 'Test group {other_academic_year} - {other_timeslot}');
     }
 }

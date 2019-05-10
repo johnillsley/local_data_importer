@@ -96,20 +96,21 @@ class local_data_importer_data_fetcher {
         $starttime = time();
         $this->pathitem->set_start_time($starttime);
 
-        // TODO - what happens if $intparamslist is empty? - ONE ELEMENT EQUAL TO NULL!!!
+        // TODO - check what happens if $intparamslist is empty? - ONE ELEMENT EQUAL TO NULL!!!
         $intparamslist = $this->importer->get_parameters();
         $intparamslist = $this->clean_parameters($intparamslist);
         foreach ($intparamslist as $internalparams) {
             try {
+                // Allows values to be picked up inside sub plugins for additional functionality i.e. add enrols to groups.
                 $externalparams = $this->transform_parameters2($internalparams);
                 $relativeuri = $this->build_relativeuri($this->uritemplate, $externalparams);
                 $externalresponse = $this->httpclient->get_response($relativeuri);
                 $internalresponse = $this->transform_response($externalresponse);
                 $sortedinternalresponse = $this->importer->sort_items($internalresponse, $internalparams);
                 $this->importer->do_imports($sortedinternalresponse);
-            } catch (Exception $e) {
-                    print $e->getMessage();
-                    local_data_importer_error_handler::log($e, $this->pathitem->id);
+            } catch (\Throwable $e) {
+                print $e->getMessage();
+                local_data_importer_error_handler::log($e, $this->pathitem->id);
             }
         }
 

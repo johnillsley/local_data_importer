@@ -15,9 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 $string['courseimporter'] = 'Apply enrolments to course import';
+$string['groupcreatedbyplugin'] = 'This group was automatically created by the data importer plugin (importers_enrolment)';
+$string['groupnameformat'] = 'Group name format (leave blank if not using groups) e.g. "Group {response-parameter}"';
 $string['pluginname'] = 'Enrolment importer';
 $string['privacy:metadata'] = 'The local_data_importer_importers_course plugin does not store any personal data.';
 $string['role'] = 'Assign role';
-
-
+$string['unenrolmentdonothing'] = 'Do not create new role';
+$string['unenrolmentrole'] = 'Create new role after unenrol';
 

@@ -17,7 +17,7 @@
 /**
  * Unit tests for the local_data_importer_importers_course plugin.
  *
- * @group      local_data_importer_importers_course
+ * @group      local_data_importer
  * @group      bath
  * @package    local/data_importer/importers/course
  * @author     John Illsley <j.s.illsley@bath.ac.uk>

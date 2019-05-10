@@ -18,9 +18,9 @@
  * Unit tests for the local_data_importer_importers_user plugin.
  * There is a dependency on the importers_course sub-plugin.
  *
- * @group      local_data_importer_importers_course
+ * @group      local_data_importer
  * @group      bath
- * @package    local/data_importer/importers/course
+ * @package    local/data_importer/importers/user
  * @author     John Illsley <j.s.illsley@bath.ac.uk>
  * @copyright  2019 University of Bath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,4 +30,35 @@ defined('MOODLE_INTERNAL') || die();
 
 class local_data_importer_importers_user_testcase extends advanced_testcase {
 
+    protected function setup() {
+
+    }
+
+    public function test_get_database_properties() {
+
+    }
+
+    public function test_get_plugin_name() {
+
+    }
+
+    public function test_get_additional_form_elements() {
+
+    }
+
+    public function test_create_users() {
+
+    }
+
+    public function test_update_enrolments() {
+
+    }
+
+    public function test_delete_enrolments() {
+
+    }
+
+    public function test_get_parameters() {
+
+    }
 }
